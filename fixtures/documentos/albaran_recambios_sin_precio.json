@@ -1,0 +1,15 @@
+{
+  "tipo": "ALBARAN",
+  "proveedor_texto": "RECAMBIOS EJEMPLO S.A.",
+  "cif": "A00000002",
+  "numero": "5526/2.063",
+  "fecha": "2026-09-15",
+  "nuestro_pedido": null,
+  "lineas": [
+    {"codigo_proveedor": "MO01001", "descripcion": "SERVICIO TURISMO (CONTRATOS)", "cantidad": "1", "unidad": "UD", "precio_bruto": null, "descuento_pct": null, "importe": null},
+    {"codigo_proveedor": "FL-2240", "descripcion": "FILTRO ACEITE 2240", "cantidad": "2", "unidad": "UD", "precio_bruto": null, "descuento_pct": null, "importe": null}
+  ],
+  "base": null,
+  "iva": null,
+  "total": null
+}

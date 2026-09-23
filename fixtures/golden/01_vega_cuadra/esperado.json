@@ -1,0 +1,16 @@
+{
+  "cotejo": {
+    "semaforo": "VERDE",
+    "relacion": "CON_PEDIDO",
+    "entrega": "COMPLETA",
+    "precio": "CONOCIDO",
+    "total_albaran": "73.64",
+    "total_cotejado_pedido": "73.64",
+    "lineas": [
+      {"semaforo": "VERDE", "entrega": "COMPLETA", "avisos": []},
+      {"semaforo": "VERDE", "entrega": "COMPLETA", "avisos": []},
+      {"semaforo": "VERDE", "entrega": "COMPLETA", "avisos": []}
+    ],
+    "avisos": []
+  }
+}

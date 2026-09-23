@@ -1,0 +1,17 @@
+{
+  "tipo": "ALBARAN",
+  "proveedor_texto": "ELECTRO FICTICIO S.L.",
+  "cif": "B00000003",
+  "numero": "ALB. 2026/1.234",
+  "fecha": "2026-09-16",
+  "nuestro_pedido": "20261061",
+  "lineas": [
+    {"codigo_proveedor": "EL-CABLE-25", "descripcion": "CABLE 2,5MM NEGRO", "cantidad": "100", "unidad": "M", "precio_bruto": "0.42", "descuento_pct": "10", "importe": "37.80"},
+    {"codigo_proveedor": "EL-REL-24", "descripcion": "RELE 24V 40A", "cantidad": "12", "unidad": "UD", "precio_bruto": "3.10", "descuento_pct": "10", "importe": "33.48"},
+    {"codigo_proveedor": "EL-FUS-10", "descripcion": "FUSIBLE 10A BOLSA 50", "cantidad": "1", "unidad": "UD", "precio_bruto": "4.00", "descuento_pct": "0", "importe": "4.00"},
+    {"codigo_proveedor": null, "descripcion": "PORTES", "cantidad": "1", "unidad": "UD", "precio_bruto": "9.00", "descuento_pct": "0", "importe": "9.00", "es_portes": true}
+  ],
+  "base": "84.28",
+  "iva": "17.70",
+  "total": "101.98"
+}

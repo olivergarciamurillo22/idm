@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block titulo %}Encargos{% endblock %}
+{% block contenido %}
+<h2>Registrar encargo</h2>
+{% if ok %}<p class="ok">Registrado ({{ ok }}).</p>{% endif %}
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+<div class="dos">
+  <form method="post" action="/encargos">
+    <label>Proveedor <input name="proveedor" placeholder="La Cepa" required autofocus></label>
+    <label>Artículo (código IDM o texto) <input name="articulo" placeholder="I33.000.786 o 'rodamiento 6205'" required></label>
+    <label>Cantidad <input name="cantidad" inputmode="decimal" placeholder="5" required></label>
+    <label>Unidad <input name="unidad" value="UD"></label>
+    <label>Quién <input name="quien" placeholder="Fernandillo"></label>
+    <button type="submit">Registrar</button>
+  </form>
+  <form method="post" action="/encargos">
+    <p>O pega un mensaje entero (una línea por encargo):<br><small>{{ formato }}</small></p>
+    <textarea name="texto" rows="8" placeholder="La Cepa ; I33.000.786 ; 5&#10;Meyras ; rele 24v ; 12 ; UD"></textarea>
+    <label>Quién <input name="quien"></label>
+    <button type="submit" class="gris">Registrar todas</button>
+  </form>
+</div>
+<h3>Pendientes de pedido ({{ pendientes|length }})</h3>
+<table>
+  <tr><th>Fecha</th><th>Proveedor</th><th>Artículo</th><th class="num">Cantidad</th><th>Quién</th><th>Origen</th><th></th></tr>
+  {% for e in pendientes %}
+  <tr>
+    <td>{{ e.fecha.strftime("%d/%m %H:%M") }}</td><td>{{ e.proveedor }}</td><td>{{ e.articulo }} {{ e.descripcion }}</td>
+    <td class="num">{{ e.cantidad }} {{ e.unidad }}</td><td>{{ e.quien }}</td><td>{{ e.origen }}</td>
+    <td><form class="inline" method="post" action="/encargos/{{ e.id }}/anular"><button class="rojo">Anular</button></form></td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

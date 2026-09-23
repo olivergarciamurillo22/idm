@@ -47,3 +47,11 @@ Solo está verificado el escandallo (BIFF2, columnas 0/4/5/11/12/15/16/17). Para
 
 ## 2026-09-23 · Longitud de línea 120 en ruff
 Con nombres en español y docstrings de tres líneas, 100 quedaba corto. 120 mantiene el código legible en pantalla partida y evita partir docstrings.
+
+## 2026-09-23 · Formato fijo para encargos por mensaje
+`proveedor ; artículo ; cantidad [; unidad]`, una línea por encargo. Sin modelo que interprete texto libre: el formato es
+deliberadamente rígido para que el registro sea inequívoco y quepa en un WhatsApp. El formulario web acepta lo mismo pegado.
+
+## 2026-09-23 · Numeración provisional de pedidos
+`P-AAAAMMDD-NN` hasta que el pedido se graba en Siddex; entonces se guarda `numero_siddex`. El PDF y el correo llevan el
+provisional; en la hoja para Siddex aparece también para que Fernandillo lo relacione.

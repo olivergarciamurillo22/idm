@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block titulo %}IDM compras{% endblock %}</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; background: #f4f4f4; color: #222; }
+  header { background: #1f3a5f; color: #fff; padding: 10px 16px; display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
+  header a { color: #fff; text-decoration: none; font-weight: 600; }
+  main { padding: 16px; max-width: 1400px; margin: 0 auto; }
+  table { border-collapse: collapse; width: 100%; background: #fff; }
+  th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: left; font-size: 14px; vertical-align: top; }
+  th { background: #e9eef5; }
+  .num { text-align: right; white-space: nowrap; }
+  .VERDE { background: #d8f5d8; } .AMBAR { background: #fff1c2; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; background: #ddd; }
+  .pill.VERDE { background: #8fd68f; } .pill.AMBAR { background: #f7d774; }
+  .pill.APROBADO { background: #8fd68f; } .pill.RECHAZADO { background: #f0a0a0; } .pill.EN_REVISION { background: #f7d774; }
+  form.inline { display: inline; }
+  button { padding: 8px 14px; border: 0; border-radius: 6px; background: #1f3a5f; color: #fff; font-size: 15px; cursor: pointer; }
+  button.rojo { background: #a33; } button.gris { background: #777; }
+  input, select, textarea { padding: 8px; font-size: 16px; width: 100%; box-sizing: border-box; margin-bottom: 8px; }
+  .dos { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 900px) { .dos { grid-template-columns: 1fr; } }
+  .aviso { color: #7a5200; font-size: 13px; }
+  .ok { background: #d8f5d8; padding: 8px; border-radius: 6px; }
+  .error { background: #f8d7d7; padding: 8px; border-radius: 6px; }
+  iframe { width: 100%; height: 80vh; border: 1px solid #ccc; background: #fff; }
+  .filtros a { margin-right: 10px; }
+</style>
+</head>
+<body>
+<header>
+  <a href="/">Bandeja</a>
+  <a href="/encargos">Encargos</a>
+  <a href="/pedidos">Pedidos propuestos</a>
+  <span style="margin-left:auto;font-size:12px">{{ "SIMULACIÓN" if simulacion else "" }}</span>
+</header>
+<main>{% block contenido %}{% endblock %}</main>
+</body>
+</html>

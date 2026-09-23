@@ -45,5 +45,5 @@ No tenemos todavía un PDF real de `H:\0_PEDIDOS_TRANSMITIDOS`. `pedidos/pdf.py`
 ## 2026-09-23 · Columnas de los exports de Siddex son provisionales
 Solo está verificado el escandallo (BIFF2, columnas 0/4/5/11/12/15/16/17). Para Maestro de Artículos, Proveedores, Fabricantes, Pedidos y Stock, `siddex/desde_excel.py` lee por nombre de cabecera con una tabla al principio del fichero que hay que ajustar cuando lleguen los exports reales.
 
-## 2026-09-23 · Longitud de línea 110 en ruff
-Con nombres en español y docstrings de tres líneas, 100 quedaba corto. 110 mantiene el código legible en pantalla partida.
+## 2026-09-23 · Longitud de línea 120 en ruff
+Con nombres en español y docstrings de tres líneas, 100 quedaba corto. 120 mantiene el código legible en pantalla partida y evita partir docstrings.

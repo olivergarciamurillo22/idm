@@ -1,0 +1,3 @@
+"""Scripts de línea de comandos: calcular_mes, generar_pedidos, procesar_buzon, ejecutar_golden, servir_bandeja…
+Se lanzan con ejecutar.bat / ejecutar.sh <tarea> y desde las Tareas programadas de Windows.
+Solo orquestan: la lógica vive en los otros paquetes."""

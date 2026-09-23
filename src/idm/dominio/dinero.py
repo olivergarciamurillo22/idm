@@ -24,7 +24,8 @@ def a_decimal(texto: str | int | float | Decimal | None) -> Decimal | None:
         return Decimal(texto)
     if isinstance(texto, float):
         # Solo para valores que vienen de librerías (xlrd, openpyxl); nunca de cálculos propios.
-        return Decimal(repr(texto))
+        valor = Decimal(repr(texto))
+        return valor.quantize(Decimal(1)) if valor == valor.to_integral_value() else valor
     limpio = texto.strip().replace("€", "").replace(" ", "")
     if not limpio:
         return None

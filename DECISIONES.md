@@ -78,3 +78,16 @@ y se usa en los siguientes documentos (método "aprendida"). El Maestro de Fabri
 
 ## 2026-09-23 · ruff format como formato único
 El código se formatea con `ruff format` (estilo black, 120 columnas) para que Pedro y Oliver no discutan estilo.
+
+## 2026-09-23 · Base de datos: columnas indexadas + JSON con el detalle
+`documentos`, `eventos`, `encargos` y `pedidos` en SQLAlchemy 2. Las columnas por las que se filtra (sha256, proveedor,
+tipo, número, estado, semáforo) son columnas reales con índices y restricciones únicas (idempotencia la garantiza la BD);
+el detalle (líneas, cotejo, lectura) va en una columna JSON con el volcado del modelo Pydantic. Sencillo de leer con
+"DB Browser for SQLite" y portable a PostgreSQL sin cambiar código.
+
+## 2026-09-23 · Alembic gestiona el esquema; 'ejecutar.bat migrar' lo aplica
+Sin `create_all` en producción. La migración inicial es `migrations/versions/0001_esquema_inicial.py`. La URL sale de
+`.env` (DATABASE_URL); en tests se pasa una URL temporal.
+
+## 2026-09-23 · Los eventos de negocio tienen un catálogo cerrado
+`almacen/eventos.TIPOS`. Un tipo nuevo se añade ahí y en la ARQUITECTURA; así la trazabilidad no se llena de nombres sueltos.

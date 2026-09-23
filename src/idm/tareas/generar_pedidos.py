@@ -8,6 +8,8 @@ from datetime import date
 from pathlib import Path
 
 from idm import config
+from idm.almacen.documentos import Evento, Repositorio
+from idm.almacen.sesion import abrir
 from idm.dominio.estados import EstadoEncargo
 from idm.encargos.registro import EncargosJSONL, RepositorioEncargos
 from idm.necesidades import mapa as mapa_mod
@@ -26,6 +28,7 @@ def ejecutar(
     hoja: str | None,
     fecha: date | None = None,
     mapa: Path = mapa_mod.RUTA_MAPA_POR_DEFECTO,
+    almacen: Repositorio | None = None,
 ) -> list[str]:
     fecha = fecha or date.today()
     informe: list[str] = []
@@ -55,6 +58,26 @@ def ejecutar(
         else:
             linea += " · SIN CORREO del proveedor (no se envía)"
         informe.append(linea)
+        if almacen is not None:
+            almacen.guardar_pedido(pedido)
+            almacen.registrar_evento(
+                Evento(
+                    tipo="pedido.generado",
+                    datos={
+                        "pedido": pedido.numero,
+                        "proveedor": pedido.proveedor,
+                        "lineas": len(pedido.lineas),
+                        "pdf": str(ruta_pdf),
+                    },
+                )
+            )
+            if prov and prov.email:
+                almacen.registrar_evento(
+                    Evento(
+                        tipo="correo.enviado",
+                        datos={"pedido": pedido.numero, "destino": destino, "simulado": cfg.modo_simulacion},
+                    )
+                )
         ids = r.encargos_por_pedido.get(pedido.numero, [])
         if ids:
             repositorio.marcar(ids, EstadoEncargo.EN_PEDIDO, pedido.numero)
@@ -72,17 +95,24 @@ def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description="Genera pedidos por proveedor a partir de encargos y necesidades.")
     p.add_argument("--hoja", help="hoja del planning para incluir las necesidades del mes")
     p.add_argument("--enviar", action="store_true", help="envía por SMTP de verdad (si no, .eml simulado)")
+    p.add_argument(
+        "--jsonl", action="store_true", help="encargos desde datos/encargos.jsonl en vez de la base de datos"
+    )
     args = p.parse_args(argv)
     cfg.crear_carpetas()
     gateway = SiddexDesdeExcel(cfg.ruta_siddex)
-    repositorio = EncargosJSONL(cfg.ruta_datos / "encargos.jsonl")
+    almacen = None
+    if args.jsonl:
+        repositorio: RepositorioEncargos = EncargosJSONL(cfg.ruta_datos / "encargos.jsonl")
+    else:
+        _, almacen, repositorio = abrir(cfg)
     if args.enviar and not cfg.modo_simulacion:
         correo: enviar.Correo = enviar.CorreoSMTP(
             cfg.smtp_host, cfg.smtp_puerto, cfg.smtp_usuario, cfg.smtp_clave, cfg.smtp_remitente
         )
     else:
         correo = enviar.CorreoSimulado(cfg.ruta_salida / "correo", cfg.smtp_remitente or "pedidos@simulado.local")
-    for linea in ejecutar(cfg, gateway, repositorio, correo, args.hoja):
+    for linea in ejecutar(cfg, gateway, repositorio, correo, args.hoja, almacen=almacen):
         print(linea)
     return 0
 

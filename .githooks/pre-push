@@ -1,0 +1,15 @@
+#!/bin/sh
+# Norma del proyecto: este repositorio no se sube a ninguna cuenta ni remoto de Nuray.
+# Solo se permite empujar a github.com/olivergarciamurillo22/...
+remote_url="$2"
+case "$remote_url" in
+  *[Nn]uray*)
+    echo "BLOQUEADO: el remoto '$remote_url' pertenece a Nuray. Este proyecto no tiene nada que ver con Nuray." >&2
+    exit 1 ;;
+esac
+case "$remote_url" in
+  *github.com[:/]olivergarciamurillo22/*) exit 0 ;;
+  *)
+    echo "BLOQUEADO: solo se permite empujar a github.com/olivergarciamurillo22/. Remoto: $remote_url" >&2
+    exit 1 ;;
+esac

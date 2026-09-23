@@ -1,0 +1,32 @@
+# Datos de IDM: NUNCA entran en el repositorio
+datos/*
+!datos/README.md
+
+# Secretos y entorno
+.env
+.venv/
+venv/
+
+# Bases de datos locales
+*.db
+*.sqlite
+*.sqlite3
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# Salidas locales
+salida/
+*.log
+
+# IDE / sistema
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

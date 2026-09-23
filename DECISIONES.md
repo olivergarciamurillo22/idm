@@ -1,0 +1,46 @@
+# Decisiones
+
+Una entrada fechada por decisión importante. Lo que no está aquí ni en `docs/` no se asume: se pregunta.
+
+## 2026-09-23 · Arquitectura sencilla en el servidor de IDM
+Python 3.12, SQLite + SQLAlchemy 2 (portable a PostgreSQL por URL), FastAPI + Jinja2 en red local, tareas programadas de Windows.
+Sin Docker obligatorio ni infraestructura cloud. Motivo: IDM pidió sencillez; dos desarrolladores; debe correr en su PC/servidor.
+
+## 2026-09-23 · El modelo lee, no escribe
+Los modelos de IA solo extraen datos de documentos entrantes. Toda decisión es código determinista. Ningún texto que salga de IDM lo redacta un modelo. Motivo: confianza de Ángel padre y trazabilidad.
+
+## 2026-09-23 · Ningún dato de IDM en git
+`datos/` ignorada desde el primer commit; tests con documentos ficticios en `fixtures/`. Códigos de artículo de ejemplo en fixtures son inventados.
+
+## 2026-09-23 · Este repositorio no tiene relación con Nuray
+Cuenta de GitHub: `olivergarciamurillo22`. Se prohíbe empujar a remotos de Nuray o usar su sesión de `gh`; lo bloquea `.githooks/pre-push` y lo fija `CLAUDE.md`.
+
+## 2026-09-23 · pyproject.toml solo con configuración
+Sin `[project]` ni build backend, por petición expresa. El paquete se ejecuta con `PYTHONPATH=src` mediante `ejecutar.bat` / `ejecutar.sh`; pytest lo resuelve con `pythonpath = ["src"]`.
+
+## 2026-09-23 · Tolerancia cero en el cotejo de precio
+Fernando: "tiene que cuadrar al céntimo". Bruto y descuento se comparan por separado; el importe de línea se redondea a dos decimales con ROUND_HALF_UP en `dominio/dinero.py` (5 × 9,14 × 0,55 = 25,135 → 25,14, como hace Siddex).
+
+## 2026-09-23 · Exceso de cantidad y portes: ámbar, nunca verde
+Fernando avisa cuando llega más de lo pedido. Portes solo verdes si están pactados para ese proveedor en las reglas.
+
+## 2026-09-23 · Albarán sin precio no es error: es PENDIENTE_FACTURA
+RECACOR y otros no ponen precio. La línea queda ámbar con motivo PRECIO_PENDIENTE y el precio se completa cuando llega la factura.
+
+## 2026-09-23 · La función `cotejar` vive en `dominio/cotejar.py`
+`cotejo/cotejar.py` (Oliver) solo orquesta: resuelve proveedor, artículos y pedido, y llama a la función pura. Así la función se prueba sin nada alrededor (principio 4).
+
+## 2026-09-23 · Encargos en JSONL hasta que exista `almacen/`
+`encargos/registro.py` define la interfaz `RepositorioEncargos` con una implementación en fichero (`datos/encargos.jsonl`) para que el hito 2 no dependa de la base de datos. En la Fase 6 se añade la implementación SQL sin cambiar a quien la usa.
+
+## 2026-09-23 · Formato del PDF de pedido
+No tenemos todavía un PDF real de `H:\0_PEDIDOS_TRANSMITIDOS`. `pedidos/pdf.py` genera un formato limpio con cabecera desde `.env`; se ajustará al formato de IDM cuando tengamos una muestra. PENDIENTE.
+
+## 2026-09-23 · Correo de pedidos: primero simulado, luego borrador, luego automático
+`MODO_SIMULACION=true` deja el correo como `.eml` en `datos/salida/correo/` con el PDF adjunto; Fernandillo lo abre y lo envía. Solo cuando lleve semanas sin fallos se pasa a envío automático.
+
+## 2026-09-23 · Lector de imagen mínimo
+`LectorImagenNulo` devuelve un documento sin líneas y con aviso "requiere lectura de imagen". Elegir OCR local o servicio externo depende de que IDM conteste si los documentos pueden salir de la empresa. La interfaz `leer(ruta)` no cambia.
+
+## 2026-09-23 · Columnas de los exports de Siddex son provisionales
+Solo está verificado el escandallo (BIFF2, columnas 0/4/5/11/12/15/16/17). Para Maestro de Artículos, Proveedores, Fabricantes, Pedidos y Stock, `siddex/desde_excel.py` lee por nombre de cabecera con una tabla al principio del fichero que hay que ajustar cuando lleguen los exports reales.

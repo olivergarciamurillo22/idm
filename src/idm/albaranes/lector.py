@@ -130,8 +130,13 @@ def _albaranes_referenciados(texto: str, plantilla: pl.Plantilla, lineas: list[L
 
 
 def _confianza(doc: DocumentoLeido) -> float:
-    puntos = [doc.tipo != TipoDocumento.DESCONOCIDO, bool(doc.numero), bool(doc.fecha), bool(doc.lineas),
-              doc.cif is not None or doc.proveedor_texto is not None]
+    puntos = [
+        doc.tipo != TipoDocumento.DESCONOCIDO,
+        bool(doc.numero),
+        bool(doc.fecha),
+        bool(doc.lineas),
+        doc.cif is not None or doc.proveedor_texto is not None,
+    ]
     base = sum(puntos) / len(puntos)
     if doc.lineas and doc.base is not None:
         suma = redondear(sum((li.importe or CERO for li in doc.lineas), CERO))
@@ -157,8 +162,11 @@ class LectorTextoPDF:
         plantilla = pl.plantilla_para(proveedor)
         lineas = _lineas_desde_tablas(ex.tablas, plantilla) or _lineas_desde_texto(texto, plantilla)
         doc = DocumentoLeido(
-            ruta=str(ruta), sha256=sha256_fichero(ruta), tipo=_tipo(texto),
-            proveedor_texto=texto.strip().split("\n", 1)[0].strip() if texto.strip() else None, cif=cif,
+            ruta=str(ruta),
+            sha256=sha256_fichero(ruta),
+            tipo=_tipo(texto),
+            proveedor_texto=texto.strip().split("\n", 1)[0].strip() if texto.strip() else None,
+            cif=cif,
             numero=_primero(plantilla.numero, texto, "numero"),
             fecha=_fecha(_primero(plantilla.fecha, texto, "fecha")),
             nuestro_pedido=_primero(plantilla.nuestro_pedido, texto, "pedido"),
@@ -166,7 +174,8 @@ class LectorTextoPDF:
             base=a_decimal(_primero(plantilla.base, texto, "importe")),
             iva=a_decimal(_primero(plantilla.iva, texto, "importe")),
             total=a_decimal(_primero(plantilla.total, texto, "importe")),
-            metodo="pdf_texto", texto=texto,
+            metodo="pdf_texto",
+            texto=texto,
         )
         if doc.tipo == TipoDocumento.FACTURA:
             doc.albaranes_referenciados = _albaranes_referenciados(texto, plantilla, lineas)
@@ -182,8 +191,9 @@ class LectorImagenNulo:
 
     def leer(self, ruta: Path) -> DocumentoLeido:
         aviso = "Documento sin capa de texto: requiere lectura de imagen (OCR/modelo) o tecleo manual"
-        return DocumentoLeido(ruta=str(ruta), sha256=sha256_fichero(ruta), metodo="imagen_nulo", confianza=0.0,
-                              avisos=[aviso])
+        return DocumentoLeido(
+            ruta=str(ruta), sha256=sha256_fichero(ruta), metodo="imagen_nulo", confianza=0.0, avisos=[aviso]
+        )
 
 
 class LectorAutomatico:

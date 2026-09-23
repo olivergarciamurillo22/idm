@@ -86,9 +86,11 @@ def leer_tabla(ruta: Path, columnas: dict[str, tuple[str, ...]]) -> list[dict[st
         }
         if indices.get("codigo") is not None or indices.get("numero") is not None:
             return [
-                {campo: (fila_datos[k] if k is not None and k < len(fila_datos) else None)
-                 for campo, k in indices.items()}
-                for fila_datos in filas[i + 1:]
+                {
+                    campo: (fila_datos[k] if k is not None and k < len(fila_datos) else None)
+                    for campo, k in indices.items()
+                }
+                for fila_datos in filas[i + 1 :]
                 if any(c not in (None, "") for c in fila_datos)
             ]
     raise ValueError(f"{ruta.name}: no se reconoce ninguna fila de cabeceras (ver COLUMNAS en desde_excel.py)")
@@ -111,9 +113,15 @@ class SiddexDesdeExcel:
         for f in leer_tabla(ruta, COLUMNAS["proveedores"]):
             codigo = str(f["codigo"]).strip() if f["codigo"] is not None else None
             nombre = str(f["nombre"] or "").strip()
-            resultado.append(Proveedor(clave=clave_para(codigo, nombre), codigo_siddex=codigo, nombre=nombre,
-                                       cif=str(f["cif"]).strip() if f["cif"] else None,
-                                       email=str(f["email"]).strip() if f["email"] else None))
+            resultado.append(
+                Proveedor(
+                    clave=clave_para(codigo, nombre),
+                    codigo_siddex=codigo,
+                    nombre=nombre,
+                    cif=str(f["cif"]).strip() if f["cif"] else None,
+                    email=str(f["email"]).strip() if f["email"] else None,
+                )
+            )
         return resultado
 
     def _clave_proveedor(self, valor) -> str | None:
@@ -153,9 +161,14 @@ class SiddexDesdeExcel:
             proveedor = self._clave_proveedor(f["proveedor"])
             if proveedor is None:
                 continue
-            resultado.append(Equivalencia(proveedor=proveedor, codigo_proveedor=str(f["codigo_proveedor"]).strip(),
-                                          codigo_idm=normalizar_codigo(str(f["codigo"])),
-                                          descripcion_proveedor=str(f["descripcion"] or "").strip()))
+            resultado.append(
+                Equivalencia(
+                    proveedor=proveedor,
+                    codigo_proveedor=str(f["codigo_proveedor"]).strip(),
+                    codigo_idm=normalizar_codigo(str(f["codigo"])),
+                    descripcion_proveedor=str(f["descripcion"] or "").strip(),
+                )
+            )
         return resultado
 
     def _pedidos(self) -> dict[str, Pedido]:
@@ -171,24 +184,33 @@ class SiddexDesdeExcel:
                 numero = numero[:-2]
             if numero not in pedidos:
                 fecha = f["fecha"]
-                pedidos[numero] = Pedido(numero=numero, proveedor=self._clave_proveedor(f["proveedor"]) or "",
-                                         fecha=fecha.date() if hasattr(fecha, "date") else None,
-                                         numero_siddex=numero, relacion=RelacionPedido.CON_PEDIDO)
-            pedidos[numero].lineas.append(LineaPedido(
-                codigo_idm=normalizar_codigo(str(f["codigo"])),
-                descripcion=str(f["descripcion"] or "").strip(),
-                cantidad=a_decimal(f["cantidad"]) or CERO,
-                unidad=str(f["unidad"] or "UD").strip(),
-                precio_bruto=a_decimal(f["precio"]) or CERO,
-                descuento_pct=a_decimal(f["descuento"]) or CERO,
-                cantidad_recibida=a_decimal(f["recibida"]) or CERO,
-                codigo_proveedor=str(f["codigo_proveedor"]).strip() if f["codigo_proveedor"] else None,
-            ))
+                pedidos[numero] = Pedido(
+                    numero=numero,
+                    proveedor=self._clave_proveedor(f["proveedor"]) or "",
+                    fecha=fecha.date() if hasattr(fecha, "date") else None,
+                    numero_siddex=numero,
+                    relacion=RelacionPedido.CON_PEDIDO,
+                )
+            pedidos[numero].lineas.append(
+                LineaPedido(
+                    codigo_idm=normalizar_codigo(str(f["codigo"])),
+                    descripcion=str(f["descripcion"] or "").strip(),
+                    cantidad=a_decimal(f["cantidad"]) or CERO,
+                    unidad=str(f["unidad"] or "UD").strip(),
+                    precio_bruto=a_decimal(f["precio"]) or CERO,
+                    descuento_pct=a_decimal(f["descuento"]) or CERO,
+                    cantidad_recibida=a_decimal(f["recibida"]) or CERO,
+                    codigo_proveedor=str(f["codigo_proveedor"]).strip() if f["codigo_proveedor"] else None,
+                )
+            )
         return pedidos
 
     def pedidos_abiertos(self, proveedor: str | None = None) -> list[Pedido]:
-        return [p for p in self._pedidos().values()
-                if (proveedor is None or p.proveedor == proveedor) and any(li.pendiente > CERO for li in p.lineas)]
+        return [
+            p
+            for p in self._pedidos().values()
+            if (proveedor is None or p.proveedor == proveedor) and any(li.pendiente > CERO for li in p.lineas)
+        ]
 
     def pedido(self, numero: str) -> Pedido | None:
         return self._pedidos().get(str(numero).strip())
@@ -197,8 +219,11 @@ class SiddexDesdeExcel:
         ruta = self._ruta("stock")
         if ruta is None:
             return {}
-        return {normalizar_codigo(str(f["codigo"])): a_decimal(f["stock"]) or CERO
-                for f in leer_tabla(ruta, COLUMNAS["stock"]) if f["codigo"] not in (None, "")}
+        return {
+            normalizar_codigo(str(f["codigo"])): a_decimal(f["stock"]) or CERO
+            for f in leer_tabla(ruta, COLUMNAS["stock"])
+            if f["codigo"] not in (None, "")
+        }
 
     def pendiente_recibir(self) -> dict[str, Decimal]:
         pendiente: dict[str, Decimal] = {}

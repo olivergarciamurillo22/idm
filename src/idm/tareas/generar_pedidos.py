@@ -18,8 +18,15 @@ from idm.siddex.desde_excel import SiddexDesdeExcel
 from idm.siddex.gateway import SiddexGateway
 
 
-def ejecutar(cfg: config.Config, gateway: SiddexGateway, repositorio: RepositorioEncargos, correo: enviar.Correo,
-             hoja: str | None, fecha: date | None = None, mapa: Path = mapa_mod.RUTA_MAPA_POR_DEFECTO) -> list[str]:
+def ejecutar(
+    cfg: config.Config,
+    gateway: SiddexGateway,
+    repositorio: RepositorioEncargos,
+    correo: enviar.Correo,
+    hoja: str | None,
+    fecha: date | None = None,
+    mapa: Path = mapa_mod.RUTA_MAPA_POR_DEFECTO,
+) -> list[str]:
     fecha = fecha or date.today()
     informe: list[str] = []
     necesidades = []
@@ -70,8 +77,9 @@ def main(argv: list[str] | None = None) -> int:
     gateway = SiddexDesdeExcel(cfg.ruta_siddex)
     repositorio = EncargosJSONL(cfg.ruta_datos / "encargos.jsonl")
     if args.enviar and not cfg.modo_simulacion:
-        correo: enviar.Correo = enviar.CorreoSMTP(cfg.smtp_host, cfg.smtp_puerto, cfg.smtp_usuario, cfg.smtp_clave,
-                                                  cfg.smtp_remitente)
+        correo: enviar.Correo = enviar.CorreoSMTP(
+            cfg.smtp_host, cfg.smtp_puerto, cfg.smtp_usuario, cfg.smtp_clave, cfg.smtp_remitente
+        )
     else:
         correo = enviar.CorreoSimulado(cfg.ruta_salida / "correo", cfg.smtp_remitente or "pedidos@simulado.local")
     for linea in ejecutar(cfg, gateway, repositorio, correo, args.hoja):

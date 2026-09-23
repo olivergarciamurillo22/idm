@@ -42,8 +42,14 @@ class Config:
     bandeja_puerto: int = 8000
 
     def crear_carpetas(self) -> None:
-        for ruta in (self.ruta_datos, self.ruta_entrada, self.ruta_procesados, self.ruta_siddex,
-                     self.ruta_pedidos_pdf, self.ruta_salida):
+        for ruta in (
+            self.ruta_datos,
+            self.ruta_entrada,
+            self.ruta_procesados,
+            self.ruta_siddex,
+            self.ruta_pedidos_pdf,
+            self.ruta_salida,
+        ):
             ruta.mkdir(parents=True, exist_ok=True)
 
 

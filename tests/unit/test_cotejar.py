@@ -54,8 +54,13 @@ def albaran_base(**cambios) -> Albaran:
             descuento_pct=Decimal("45"),
         ),
     ]
-    datos = dict(proveedor="FICT_VEGA", numero_original="AC B26 0100005283",
-                 numero="B26 0100005283", nuestro_pedido="20261060", lineas=lineas)
+    datos = dict(
+        proveedor="FICT_VEGA",
+        numero_original="AC B26 0100005283",
+        numero="B26 0100005283",
+        nuestro_pedido="20261060",
+        lineas=lineas,
+    )
     datos.update(cambios)
     return Albaran(**datos)
 
@@ -109,8 +114,9 @@ def test_descuento_distinto_es_ambar_aunque_el_bruto_cuadre():
 def test_linea_sin_pedido():
     albaran = albaran_base()
     albaran.lineas.append(
-        LineaAlbaran(codigo_proveedor="ZZZ-1", descripcion="TORNILLO M8", cantidad=Decimal("10"),
-                     precio_bruto=Decimal("0.10"))
+        LineaAlbaran(
+            codigo_proveedor="ZZZ-1", descripcion="TORNILLO M8", cantidad=Decimal("10"), precio_bruto=Decimal("0.10")
+        )
     )
     cotejo = cotejar(albaran, pedido_base())
     assert cotejo.semaforo == Semaforo.AMBAR
@@ -142,9 +148,7 @@ def test_entrega_parcial_deja_pendiente():
 
 def test_portes_ambar_salvo_pactados():
     albaran = albaran_base()
-    albaran.lineas.append(
-        LineaAlbaran(descripcion="PORTES", cantidad=Decimal("1"), precio_bruto=Decimal("12.50"))
-    )
+    albaran.lineas.append(LineaAlbaran(descripcion="PORTES", cantidad=Decimal("1"), precio_bruto=Decimal("12.50")))
     cotejo = cotejar(albaran, pedido_base())
     assert TipoAviso.PORTES_NO_PACTADOS in tipos(cotejo)
     reglas = ReglasCotejo(portes_pactados={"FICT_VEGA": Decimal("12.5")})

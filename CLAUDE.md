@@ -36,5 +36,6 @@ Leer `ARQUITECTURA.md` antes de tocar nada. Los principios de ahí no se negocia
 ```
 .venv/bin/python -m pytest          # tests (pyproject pone pythonpath=src)
 .venv/bin/ruff check src tests      # lint
+.venv/bin/ruff format src tests     # formato (antes de cada commit)
 ./ejecutar.sh calcular_mes --ayuda  # tareas (Windows: ejecutar.bat)
 ```

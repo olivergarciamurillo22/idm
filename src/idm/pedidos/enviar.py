@@ -38,8 +38,12 @@ class Correo(Protocol):
 def componer(pedido: Pedido, proveedor: Proveedor, empresa: dict[str, str], pdf: Path | None) -> Mensaje:
     if not proveedor.email:
         raise ValueError(f"El proveedor {proveedor.nombre} no tiene correo en el maestro")
-    datos = {"numero": pedido.numero, "empresa": empresa.get("nombre", "IDM"),
-             "fecha": f"{pedido.fecha:%d/%m/%Y}" if pedido.fecha else "", "telefono": empresa.get("telefono", "")}
+    datos = {
+        "numero": pedido.numero,
+        "empresa": empresa.get("nombre", "IDM"),
+        "fecha": f"{pedido.fecha:%d/%m/%Y}" if pedido.fecha else "",
+        "telefono": empresa.get("telefono", ""),
+    }
     return Mensaje(para=proveedor.email, asunto=ASUNTO.format(**datos), cuerpo=CUERPO.format(**datos), adjunto=pdf)
 
 
@@ -50,8 +54,9 @@ def _construir(mensaje: Mensaje, remitente: str) -> EmailMessage:
     em["Subject"] = mensaje.asunto
     em.set_content(mensaje.cuerpo)
     if mensaje.adjunto:
-        em.add_attachment(mensaje.adjunto.read_bytes(), maintype="application", subtype="pdf",
-                          filename=mensaje.adjunto.name)
+        em.add_attachment(
+            mensaje.adjunto.read_bytes(), maintype="application", subtype="pdf", filename=mensaje.adjunto.name
+        )
     return em
 
 

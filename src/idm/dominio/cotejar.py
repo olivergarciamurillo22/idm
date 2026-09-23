@@ -19,9 +19,7 @@ from idm.dominio.modelos import (
 from idm.dominio.reglas import REGLAS_POR_DEFECTO, ReglasCotejo, es_linea_portes
 
 
-def cotejar(
-    albaran: Albaran, pedido: Pedido | None, reglas: ReglasCotejo = REGLAS_POR_DEFECTO
-) -> Cotejo:
+def cotejar(albaran: Albaran, pedido: Pedido | None, reglas: ReglasCotejo = REGLAS_POR_DEFECTO) -> Cotejo:
     """Punto de entrada. Sin pedido → todo ámbar con aviso SIN_PEDIDO (el pedido se propondrá aparte)."""
     if pedido is None:
         return _cotejo_sin_pedido(albaran, reglas)
@@ -39,9 +37,7 @@ def cotejar(
             lineas_cotejo.append(_linea_sin_pedido(indice, linea))
             continue
         linea_pedido = pedido.lineas[indice_pedido]
-        lineas_cotejo.append(
-            _cotejar_linea(indice, linea, indice_pedido, linea_pedido, asignado, reglas)
-        )
+        lineas_cotejo.append(_cotejar_linea(indice, linea, indice_pedido, linea_pedido, asignado, reglas))
         asignado[indice_pedido] += linea.cantidad
 
     pendientes = _pendientes(pedido.lineas, asignado)
@@ -75,11 +71,7 @@ def _buscar_linea_pedido(
         i
         for i, lp in enumerate(lineas_pedido)
         if (linea.codigo_idm and lp.codigo_idm == linea.codigo_idm)
-        or (
-            linea.codigo_idm is None
-            and linea.codigo_proveedor
-            and lp.codigo_proveedor == linea.codigo_proveedor
-        )
+        or (linea.codigo_idm is None and linea.codigo_proveedor and lp.codigo_proveedor == linea.codigo_proveedor)
     ]
     if not candidatos:
         return None
@@ -142,9 +134,7 @@ def _cotejar_linea(
     )
 
 
-def _comparar_precio(
-    indice: int, linea: LineaAlbaran, linea_pedido: LineaPedido, reglas: ReglasCotejo
-) -> list[Aviso]:
+def _comparar_precio(indice: int, linea: LineaAlbaran, linea_pedido: LineaPedido, reglas: ReglasCotejo) -> list[Aviso]:
     """Bruto y descuento por separado, cada uno al céntimo (o a la tolerancia de las reglas)."""
     avisos: list[Aviso] = []
     assert linea.precio_bruto is not None
@@ -167,10 +157,7 @@ def _comparar_precio(
         avisos.append(
             Aviso(
                 tipo=TipoAviso.DESCUENTO_DISTINTO,
-                mensaje=(
-                    f"Descuento {linea.descuento_pct} % en albarán "
-                    f"y {linea_pedido.descuento_pct} % en pedido"
-                ),
+                mensaje=(f"Descuento {linea.descuento_pct} % en albarán y {linea_pedido.descuento_pct} % en pedido"),
                 linea=indice,
                 detalle={
                     "albaran": str(linea.descuento_pct),
@@ -220,9 +207,7 @@ def _linea_sin_pedido(indice: int, linea: LineaAlbaran) -> CotejoLinea:
     )
 
 
-def _cotejar_portes(
-    indice: int, linea: LineaAlbaran, proveedor: str, reglas: ReglasCotejo
-) -> CotejoLinea:
+def _cotejar_portes(indice: int, linea: LineaAlbaran, proveedor: str, reglas: ReglasCotejo) -> CotejoLinea:
     pactado = reglas.portes_pactados.get(proveedor)
     importe = linea.importe
     avisos: list[Aviso] = []
@@ -284,9 +269,7 @@ def _pendientes(lineas_pedido: list[LineaPedido], asignado: dict[int, Decimal]) 
     for i, lp in enumerate(lineas_pedido):
         resto = lp.pendiente - asignado[i]
         if resto > CERO:
-            resultado.append(
-                LineaPendiente(indice_pedido=i, codigo_idm=lp.codigo_idm, cantidad_pendiente=resto)
-            )
+            resultado.append(LineaPendiente(indice_pedido=i, codigo_idm=lp.codigo_idm, cantidad_pendiente=resto))
     return resultado
 
 

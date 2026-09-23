@@ -19,13 +19,26 @@ def crear_router(repositorio: RepositorioEncargos, plantillas) -> APIRouter:
     @router.get("/encargos", response_class=HTMLResponse)
     def formulario(request: Request, ok: str = "", error: str = ""):
         pendientes = repositorio.listar(EstadoEncargo.PENDIENTE)
-        return plantillas.TemplateResponse(request, "encargos.html", {
-            "pendientes": pendientes, "ok": ok, "error": error, "formato": mensaje.FORMATO,
-        })
+        return plantillas.TemplateResponse(
+            request,
+            "encargos.html",
+            {
+                "pendientes": pendientes,
+                "ok": ok,
+                "error": error,
+                "formato": mensaje.FORMATO,
+            },
+        )
 
     @router.post("/encargos")
-    def registrar(proveedor: str = Form(""), articulo: str = Form(""), cantidad: str = Form(""),
-                  unidad: str = Form("UD"), quien: str = Form(""), texto: str = Form("")):
+    def registrar(
+        proveedor: str = Form(""),
+        articulo: str = Form(""),
+        cantidad: str = Form(""),
+        unidad: str = Form("UD"),
+        quien: str = Form(""),
+        texto: str = Form(""),
+    ):
         if texto.strip():
             r = mensaje.interpretar(texto, quien=quien)
             for e in r.encargos:
@@ -35,8 +48,16 @@ def crear_router(repositorio: RepositorioEncargos, plantillas) -> APIRouter:
         cant = a_decimal(cantidad)
         if not proveedor.strip() or not articulo.strip() or cant is None or cant <= Decimal("0"):
             return RedirectResponse("/encargos?error=Faltan+proveedor,+artículo+o+cantidad", status_code=303)
-        repositorio.guardar(Encargo(proveedor=proveedor.strip(), articulo=articulo.strip(), cantidad=cant,
-                                    unidad=(unidad or "UD").upper(), quien=quien, origen=OrigenEncargo.WEB))
+        repositorio.guardar(
+            Encargo(
+                proveedor=proveedor.strip(),
+                articulo=articulo.strip(),
+                cantidad=cant,
+                unidad=(unidad or "UD").upper(),
+                quien=quien,
+                origen=OrigenEncargo.WEB,
+            )
+        )
         return RedirectResponse("/encargos?ok=1", status_code=303)
 
     @router.post("/encargos/{id_encargo}/anular")

@@ -16,6 +16,7 @@ def quitar_prefijo(prefijo: str) -> Regla:
     def regla(numero: str) -> str:
         patron = re.compile(r"^\s*" + re.escape(prefijo) + r"\s*", re.IGNORECASE)
         return patron.sub("", numero, count=1)
+
     return regla
 
 

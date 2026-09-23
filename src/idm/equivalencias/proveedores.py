@@ -31,12 +31,27 @@ CONOCIDOS: tuple[ProveedorConocido, ...] = (
     ProveedorConocido("HIERROS_TURIA", "Hierros Turia", patrones_nombre=(r"HIERROS TURIA",)),
     ProveedorConocido("ALSIMET", "Alsimet", patrones_nombre=(r"ALSIMET",)),
     ProveedorConocido("HIERROS_VELEZ", "Hierros Vélez", patrones_nombre=(r"HIERROS VELEZ",)),
-    ProveedorConocido("FICT_VEGA", "Suministros Ficticios La Vega S.L.", codigo_siddex="9001",
-                      cif="B00000001", patrones_nombre=(r"FICTICIOS LA VEGA",)),
-    ProveedorConocido("FICT_RECAMBIOS", "Recambios Ejemplo S.A.", codigo_siddex="9002",
-                      cif="A00000002", patrones_nombre=(r"RECAMBIOS EJEMPLO",)),
-    ProveedorConocido("FICT_ELECTRO", "Electro Ficticio S.L.", codigo_siddex="9003",
-                      cif="B00000003", patrones_nombre=(r"ELECTRO FICTICIO",)),
+    ProveedorConocido(
+        "FICT_VEGA",
+        "Suministros Ficticios La Vega S.L.",
+        codigo_siddex="9001",
+        cif="B00000001",
+        patrones_nombre=(r"FICTICIOS LA VEGA",),
+    ),
+    ProveedorConocido(
+        "FICT_RECAMBIOS",
+        "Recambios Ejemplo S.A.",
+        codigo_siddex="9002",
+        cif="A00000002",
+        patrones_nombre=(r"RECAMBIOS EJEMPLO",),
+    ),
+    ProveedorConocido(
+        "FICT_ELECTRO",
+        "Electro Ficticio S.L.",
+        codigo_siddex="9003",
+        cif="B00000003",
+        patrones_nombre=(r"ELECTRO FICTICIO",),
+    ),
 )
 
 
@@ -59,8 +74,9 @@ def clave_por_codigo_siddex(codigo: str) -> str | None:
     return None
 
 
-def identificar(nombre: str | None = None, cif: str | None = None,
-                proveedores: list[Proveedor] | None = None) -> tuple[str | None, str]:
+def identificar(
+    nombre: str | None = None, cif: str | None = None, proveedores: list[Proveedor] | None = None
+) -> tuple[str | None, str]:
     """Devuelve (clave, metodo). Orden: CIF, nombre en el registro, nombre en la lista del gateway, nada."""
     cif_n = normalizar_cif(cif)
     if cif_n:

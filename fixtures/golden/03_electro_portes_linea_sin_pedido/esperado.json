@@ -1,0 +1,23 @@
+{
+  "lectura": {
+    "tipo": "ALBARAN", "cif": "B00000003", "numero": "ALB. 2026/1.234", "nuestro_pedido": "20261061",
+    "base": "84.28", "total": "101.98",
+    "lineas": [
+      {"codigo_proveedor": "EL-CABLE-25", "cantidad": "100", "precio_bruto": "0.42", "descuento_pct": "10"},
+      {"codigo_proveedor": "EL-REL-24", "cantidad": "12", "precio_bruto": "3.10", "descuento_pct": "10"},
+      {"codigo_proveedor": "EL-FUS-10", "cantidad": "1", "precio_bruto": "4.00"},
+      {"codigo_proveedor": null, "es_portes": true, "importe": "9.00"}
+    ]
+  },
+  "cotejo": {
+    "semaforo": "AMBAR", "relacion": "CON_PEDIDO", "entrega": "PARCIAL", "precio": "CONOCIDO",
+    "total_albaran": "84.28", "total_cotejado_pedido": "33.48",
+    "lineas": [
+      {"semaforo": "AMBAR", "entrega": null, "avisos": ["LINEA_SIN_PEDIDO"]},
+      {"semaforo": "VERDE", "entrega": "COMPLETA", "avisos": []},
+      {"semaforo": "AMBAR", "entrega": null, "avisos": ["LINEA_SIN_PEDIDO"]},
+      {"semaforo": "AMBAR", "entrega": null, "avisos": ["PORTES_NO_PACTADOS"]}
+    ],
+    "avisos": []
+  }
+}

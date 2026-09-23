@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block titulo %}Bandeja de revisión{% endblock %}
+{% block contenido %}
+<h2>Documentos</h2>
+<form method="get" class="filtros">
+  <select name="estado" style="width:auto"><option value="">Todos los estados</option>
+    {% for e in estados %}<option value="{{ e }}" {{ "selected" if e == estado }}>{{ e }}</option>{% endfor %}</select>
+  <select name="semaforo" style="width:auto"><option value="">Verde y ámbar</option>
+    <option value="VERDE" {{ "selected" if semaforo == "VERDE" }}>Verde</option>
+    <option value="AMBAR" {{ "selected" if semaforo == "AMBAR" }}>Ámbar</option></select>
+  <select name="tipo" style="width:auto"><option value="">Albaranes y facturas</option>
+    <option value="ALBARAN" {{ "selected" if tipo == "ALBARAN" }}>Albaranes</option>
+    <option value="FACTURA" {{ "selected" if tipo == "FACTURA" }}>Facturas</option></select>
+  <input name="proveedor" value="{{ proveedor }}" placeholder="proveedor (clave)" style="width:auto">
+  <button type="submit">Filtrar</button>
+</form>
+<table>
+  <tr><th>Recibido</th><th>Tipo</th><th>Proveedor</th><th>Número</th><th>Pedido</th><th>Semáforo</th><th>Entrega</th><th>Precio</th><th>Avisos</th><th>Estado</th></tr>
+  {% for d in documentos %}
+  <tr class="{{ d.semaforo or '' }}">
+    <td>{{ d.recibido.strftime("%d/%m %H:%M") }}</td><td>{{ d.tipo }}</td><td>{{ d.proveedor }}</td>
+    <td><a href="/documentos/{{ d.id }}">{{ d.numero }}</a></td>
+    <td>{{ d.pedido or d.relacion or "" }}</td>
+    <td><span class="pill {{ d.semaforo or '' }}">{{ d.semaforo or "—" }}</span></td>
+    <td>{{ d.entrega or "" }}</td><td>{{ d.precio or "" }}</td><td class="num">{{ d.n_avisos }}</td>
+    <td><span class="pill {{ d.estado }}">{{ d.estado }}</span></td>
+  </tr>
+  {% else %}
+  <tr><td colspan="10">No hay documentos. Lanza <code>ejecutar.bat procesar_buzon</code> o deja ficheros en datos/entrada.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

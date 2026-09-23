@@ -91,8 +91,9 @@ def calcular(
                     tipo=compra.tipo,
                     proveedor=articulo.proveedor_habitual if articulo else None,
                     multiplo=articulo.multiplo_compra if articulo else Decimal("1"),
-                    precio=(compra.precio if compra.precio is not None
-                            else (articulo.precio_compra if articulo else None)),
+                    precio=(
+                        compra.precio if compra.precio is not None else (articulo.precio_compra if articulo else None)
+                    ),
                     fuera_circuito=es_hierro(compra.descripcion, REGLAS_POR_DEFECTO),
                 )
                 por_codigo[compra.codigo] = n

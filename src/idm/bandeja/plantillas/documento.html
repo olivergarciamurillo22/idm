@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block titulo %}{{ d.tipo }} {{ d.numero }}{% endblock %}
+{% block contenido %}
+<h2>{{ d.tipo }} {{ d.numero }} · {{ d.proveedor }}
+  <span class="pill {{ d.semaforo or '' }}">{{ d.semaforo or "—" }}</span>
+  <span class="pill {{ d.estado }}">{{ d.estado }}</span></h2>
+{% if ok %}<p class="ok">Hecho: {{ ok }}.</p>{% endif %}
+{% if d.numero_registro_siddex %}<p class="ok"><b>Nº registro Siddex: {{ d.numero_registro_siddex }}</b> (anotar en el papel)</p>{% endif %}
+<div class="dos">
+  <div>
+    {% if es_pdf %}<iframe src="/documentos/{{ d.id }}/fichero"></iframe>
+    {% else %}<img src="/documentos/{{ d.id }}/fichero" style="max-width:100%;border:1px solid #ccc">{% endif %}
+  </div>
+  <div>
+    <table>
+      <tr><th>Número original</th><td>{{ d.numero_original }}</td><th>Fecha</th><td>{{ d.leido.fecha if d.leido else "" }}</td></tr>
+      <tr><th>Su pedido</th><td>{{ d.leido.nuestro_pedido if d.leido else "" }}</td><th>Pedido usado</th><td>{{ d.pedido or d.relacion }}</td></tr>
+      <tr><th>Lectura</th><td>{{ d.leido.metodo if d.leido else "" }} · confianza {{ d.leido.confianza if d.leido else "" }}</td>
+          <th>Entrega / precio</th><td>{{ d.entrega or "" }} / {{ d.precio or "" }}</td></tr>
+    </table>
+    {% if d.avisos %}<ul class="aviso">{% for a in d.avisos %}<li>{{ a }}</li>{% endfor %}</ul>{% endif %}
+
+    {% if d.albaran %}
+    <h3>Líneas</h3>
+    <table>
+      <tr><th>#</th><th>Ref. proveedor</th><th>Código IDM</th><th>Descripción</th><th class="num">Cant.</th><th class="num">Bruto</th><th class="num">Dto %</th><th class="num">Importe</th><th>Cotejo</th></tr>
+      {% for li in d.albaran.lineas %}
+      {% set cl = d.cotejo.lineas[loop.index0] if d.cotejo and d.cotejo.lineas|length > loop.index0 else None %}
+      <tr class="{{ cl.semaforo if cl else '' }}">
+        <td>{{ loop.index }}</td><td>{{ li.codigo_proveedor or "" }}</td>
+        <td>{{ li.codigo_idm or "" }}
+          {% if not li.codigo_idm and not li.es_portes %}
+          <form method="post" action="/documentos/{{ d.id }}/equivalencia" class="inline">
+            <input type="hidden" name="linea" value="{{ loop.index0 }}">
+            <input name="codigo_idm" placeholder="código IDM" style="width:120px;margin:0"> <button class="gris">Guardar</button>
+          </form>{% endif %}
+          {% if li.metodo_resolucion %}<br><small>{{ li.metodo_resolucion }}</small>{% endif %}</td>
+        <td>{{ li.descripcion }}</td><td class="num">{{ li.cantidad }} {{ li.unidad }}</td>
+        <td class="num">{{ li.precio_bruto if li.precio_bruto is not none else "—" }}</td>
+        <td class="num">{{ li.descuento_pct }}</td><td class="num">{{ li.importe if li.importe is not none else "—" }}</td>
+        <td>{% if cl %}{{ cl.entrega or "" }}{% for a in cl.avisos %}<div class="aviso">{{ a.tipo }}: {{ a.mensaje }}</div>{% endfor %}{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% if d.cotejo %}
+      <p>Total albarán: <b>{{ d.cotejo.total_albaran if d.cotejo.total_albaran is not none else "pendiente" }}</b>
+         · al precio del pedido: {{ d.cotejo.total_cotejado_pedido if d.cotejo.total_cotejado_pedido is not none else "—" }}</p>
+      {% for a in d.cotejo.avisos %}<p class="aviso">{{ a.tipo }}: {{ a.mensaje }}</p>{% endfor %}
+      {% if d.cotejo.pendientes_pedido %}<p>Queda pendiente del pedido:
+        {% for p in d.cotejo.pendientes_pedido %}{{ p.codigo_idm }} × {{ p.cantidad_pendiente }}{{ ", " if not loop.last }}{% endfor %}</p>{% endif %}
+    {% endif %}
+    {% if d.pedido_propuesto %}
+      <p class="aviso">Sin pedido: se propone <b>{{ d.pedido_propuesto.numero }}</b> con {{ d.pedido_propuesto.lineas|length }} líneas.
+        <a href="/pedidos">Ver pedidos propuestos</a></p>
+    {% endif %}
+    {% endif %}
+
+    {% if d.cotejo_factura %}
+    {% set cf = d.cotejo_factura %}
+    <h3>Factura contra albaranes</h3>
+    <p>Albaranes encontrados: {{ cf.albaranes_encontrados|join(", ") or "ninguno" }}
+       {% if cf.albaranes_no_encontrados %}· <b>no encontrados: {{ cf.albaranes_no_encontrados|join(", ") }}</b>{% endif %}</p>
+    <p>Líneas factura: {{ cf.total_lineas_factura }} · albaranes: {{ cf.total_albaranes }} · portes: {{ cf.portes }}</p>
+    {% if cf.precios_completados %}<p>Precios completados: {% for p in cf.precios_completados %}{{ p.albaran }} {{ p.codigo_proveedor }} → {{ p.precio_bruto }} ({{ p.descuento_pct }} %){{ "; " if not loop.last }}{% endfor %}</p>{% endif %}
+    {% for a in cf.avisos %}<p class="aviso">{{ a.tipo }}: {{ a.mensaje }}</p>{% endfor %}
+    {% endif %}
+
+    {% if d.estado not in ("APROBADO", "RECHAZADO") %}
+    <h3>Decisión</h3>
+    <form method="post" action="/documentos/{{ d.id }}/aprobar">
+      <label>Nº registro Siddex (para anotarlo en el papel) <input name="numero_registro_siddex" placeholder="20262921"></label>
+      <label>Quién <input name="quien" placeholder="Fernando"></label>
+      <label>Notas <input name="notas"></label>
+      <button type="submit">Aprobar</button>
+    </form>
+    <form method="post" action="/documentos/{{ d.id }}/rechazar" style="margin-top:8px">
+      <input type="hidden" name="quien" value="">
+      <label>Motivo <input name="notas" placeholder="por qué se rechaza"></label>
+      <button type="submit" class="rojo">Rechazar</button>
+    </form>
+    {% else %}
+    <p>Decidido por {{ d.decidido_por or "?" }} el {{ d.decidido_en.strftime("%d/%m/%Y %H:%M") if d.decidido_en else "" }}. {{ d.notas }}</p>
+    {% endif %}
+
+    <h3>Eventos</h3>
+    <table>{% for e in eventos %}<tr><td>{{ e.fecha.strftime("%d/%m %H:%M:%S") }}</td><td>{{ e.tipo }}</td><td><small>{{ e.datos }}</small></td></tr>{% endfor %}</table>
+  </div>
+</div>
+{% endblock %}

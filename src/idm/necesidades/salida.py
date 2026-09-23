@@ -9,23 +9,57 @@ from openpyxl.styles import Font
 
 from idm.necesidades.calculo import Necesidad, ResultadoNecesidades
 
-CABECERAS = ["Código", "Descripción", "Unidad", "Tipo", "Proveedor", "Cantidad bruta", "Stock",
-             "Pendiente recibir", "Neta", "Múltiplo", "A pedir", "Precio", "Importe", "Máquinas"]
+CABECERAS = [
+    "Código",
+    "Descripción",
+    "Unidad",
+    "Tipo",
+    "Proveedor",
+    "Cantidad bruta",
+    "Stock",
+    "Pendiente recibir",
+    "Neta",
+    "Múltiplo",
+    "A pedir",
+    "Precio",
+    "Importe",
+    "Máquinas",
+]
 
 
 def _fila(n: Necesidad) -> list:
     maquinas = ", ".join(f"{m}×{c}" for m, c in n.maquinas.items())
-    return [n.codigo, n.descripcion, n.unidad, n.tipo, n.proveedor or "", float(n.cantidad_bruta),
-            float(n.stock), float(n.pendiente_recibir), float(n.cantidad_neta), float(n.multiplo),
-            float(n.cantidad_pedir), float(n.precio) if n.precio is not None else None, float(n.importe), maquinas]
+    return [
+        n.codigo,
+        n.descripcion,
+        n.unidad,
+        n.tipo,
+        n.proveedor or "",
+        float(n.cantidad_bruta),
+        float(n.stock),
+        float(n.pendiente_recibir),
+        float(n.cantidad_neta),
+        float(n.multiplo),
+        float(n.cantidad_pedir),
+        float(n.precio) if n.precio is not None else None,
+        float(n.importe),
+        maquinas,
+    ]
 
 
 def escribir_excel(resultado: ResultadoNecesidades, ruta: Path) -> Path:
     libro = Workbook()
     ws = libro.active
     ws.title = "Necesidades"
-    ws.append([f"Necesidades {resultado.hoja}", "", "", "Máquinas:",
-               ", ".join(f"{m}×{c}" for m, c in resultado.maquinas.items())])
+    ws.append(
+        [
+            f"Necesidades {resultado.hoja}",
+            "",
+            "",
+            "Máquinas:",
+            ", ".join(f"{m}×{c}" for m, c in resultado.maquinas.items()),
+        ]
+    )
     ws.append(CABECERAS)
     for celda in ws[2]:
         celda.font = Font(bold=True)

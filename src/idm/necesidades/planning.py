@@ -48,13 +48,15 @@ def leer_planning(ruta: Path, hoja: str) -> list[LineaPlanning]:
                 break
             continue
         cantidad = a_decimal(fila[col_producto + 1]) if col_producto + 1 < len(fila) else None
-        lineas.append(LineaPlanning(
-            producto=producto,
-            cantidad=cantidad or Decimal("0"),
-            cliente=celdas[col_producto + 2] if col_producto + 2 < len(celdas) else "",
-            vendedor=celdas[col_producto + 3] if col_producto + 3 < len(celdas) else "",
-            fila=numero,
-        ))
+        lineas.append(
+            LineaPlanning(
+                producto=producto,
+                cantidad=cantidad or Decimal("0"),
+                cliente=celdas[col_producto + 2] if col_producto + 2 < len(celdas) else "",
+                vendedor=celdas[col_producto + 3] if col_producto + 3 < len(celdas) else "",
+                fila=numero,
+            )
+        )
     libro.close()
     if col_producto is None:
         raise ValueError(f"No se encontró la cabecera PRODUCTO en la hoja {hoja}")

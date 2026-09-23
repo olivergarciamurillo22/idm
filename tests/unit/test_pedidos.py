@@ -21,10 +21,18 @@ def _gateway(fixtures):
 def test_generar_agrupa_por_proveedor(fixtures):
     g = _gateway(fixtures)
     necesidades = [
-        Necesidad("T30.000.100", "TORNILLO", "UD", "Comercial", "FICT_ELECTRO", cantidad_pedir=Decimal("200"),
-                  precio=Decimal("0.08")),
-        Necesidad("R40.000.001", "RUEDA", "UD", "Comercial", "FICT_VEGA", cantidad_pedir=Decimal("8"),
-                  precio=Decimal("38")),
+        Necesidad(
+            "T30.000.100",
+            "TORNILLO",
+            "UD",
+            "Comercial",
+            "FICT_ELECTRO",
+            cantidad_pedir=Decimal("200"),
+            precio=Decimal("0.08"),
+        ),
+        Necesidad(
+            "R40.000.001", "RUEDA", "UD", "Comercial", "FICT_VEGA", cantidad_pedir=Decimal("8"), precio=Decimal("38")
+        ),
         Necesidad("P20.000.010", "CORTE TUBO", "UD", "MP", None, cantidad_pedir=Decimal("4"), fuera_circuito=True),
         Necesidad("X00.000.001", "SIN PROVEEDOR", "UD", "Comercial", None, cantidad_pedir=Decimal("1")),
     ]
@@ -38,7 +46,9 @@ def test_generar_agrupa_por_proveedor(fixtures):
     electro, vega = r.pedidos
     assert electro.proveedor == "FICT_ELECTRO" and vega.proveedor == "FICT_VEGA"
     assert {li.codigo_idm: li.cantidad for li in electro.lineas} == {
-        "T30.000.100": Decimal("200"), "I34.000.900": Decimal("12")}
+        "T30.000.100": Decimal("200"),
+        "I34.000.900": Decimal("12"),
+    }
     assert {li.codigo_idm: li.cantidad for li in vega.lineas} == {"R40.000.001": Decimal("10")}  # 8 + 2 encargo
     assert electro.lineas[1].descuento_pct == Decimal("10")  # del maestro
     assert r.encargos_por_pedido == {"P-20260923-01": ["e1"], "P-20260923-02": ["e2"]}
@@ -48,8 +58,13 @@ def test_generar_agrupa_por_proveedor(fixtures):
 def test_pdf_correo_y_hoja_siddex(fixtures, tmp_path):
     g = _gateway(fixtures)
     provs = {p.clave: p for p in g.proveedores()}
-    r = generar.generar([], [Encargo(proveedor="FICT_VEGA", articulo="I33.000.786", cantidad=Decimal("5"))],
-                        g.articulos(), g.proveedores(), date(2026, 9, 23))
+    r = generar.generar(
+        [],
+        [Encargo(proveedor="FICT_VEGA", articulo="I33.000.786", cantidad=Decimal("5"))],
+        g.articulos(),
+        g.proveedores(),
+        date(2026, 9, 23),
+    )
     pedido = r.pedidos[0]
     assert pedido.total == Decimal("25.14")
     ruta_pdf = pdf.generar_pdf(pedido, provs["FICT_VEGA"], {"nombre": "EMPRESA FICTICIA"}, tmp_path / "pedidos")

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block titulo %}Pedidos propuestos{% endblock %}
+{% block contenido %}
+<h2>Pedidos propuestos (albaranes sin pedido)</h2>
+{% for d in documentos %}
+<h3>{{ d.pedido_propuesto.numero }} · {{ d.proveedor }} · albarán <a href="/documentos/{{ d.id }}">{{ d.numero }}</a></h3>
+<table>
+  <tr><th>Código IDM</th><th>Ref. proveedor</th><th>Descripción</th><th class="num">Cantidad</th><th class="num">Precio</th><th class="num">Dto %</th></tr>
+  {% for li in d.pedido_propuesto.lineas %}
+  <tr><td>{{ li.codigo_idm }}</td><td>{{ li.codigo_proveedor or "" }}</td><td>{{ li.descripcion }}</td>
+      <td class="num">{{ li.cantidad }} {{ li.unidad }}</td><td class="num">{{ li.precio_bruto }}</td><td class="num">{{ li.descuento_pct }}</td></tr>
+  {% endfor %}
+</table>
+<form method="post" action="/pedidos/{{ d.id }}/confirmar" style="margin:8px 0 24px">
+  <label>Quién <input name="quien" placeholder="Fernandillo" style="width:200px"></label>
+  <button type="submit">Confirmar pedido y generar hoja para Siddex</button>
+</form>
+{% else %}
+<p>No hay pedidos propuestos pendientes.</p>
+{% endfor %}
+{% endblock %}

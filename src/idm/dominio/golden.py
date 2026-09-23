@@ -63,11 +63,17 @@ def _cargar_albaran(carpeta, esperado, lector, interpretar, diferencias) -> Alba
 def _resumen_cotejo(cotejo: dict) -> dict:
     """Reduce el cotejo a lo que se fija en el golden: estados, totales y tipos de aviso."""
     return {
-        **{k: cotejo[k] for k in ("semaforo", "relacion", "entrega", "precio",
-                                  "total_albaran", "total_cotejado_pedido")},
+        **{
+            k: cotejo[k]
+            for k in ("semaforo", "relacion", "entrega", "precio", "total_albaran", "total_cotejado_pedido")
+        },
         "lineas": [
-            {"semaforo": linea["semaforo"], "entrega": linea["entrega"],
-             "precio": linea["precio"], "avisos": [a["tipo"] for a in linea["avisos"]]}
+            {
+                "semaforo": linea["semaforo"],
+                "entrega": linea["entrega"],
+                "precio": linea["precio"],
+                "avisos": [a["tipo"] for a in linea["avisos"]],
+            }
             for linea in cotejo["lineas"]
         ],
         "avisos": [a["tipo"] for a in cotejo["avisos"]],

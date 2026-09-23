@@ -52,11 +52,16 @@ def generar(
             resultado.sin_proveedor.append(f"{n.codigo} {n.descripcion}: sin proveedor habitual en el maestro")
             continue
         art = articulos.get(n.codigo)
-        por_proveedor.setdefault(n.proveedor, []).append(LineaPedido(
-            codigo_idm=n.codigo, descripcion=n.descripcion, cantidad=n.cantidad_pedir, unidad=n.unidad,
-            precio_bruto=n.precio if n.precio is not None else CERO,
-            descuento_pct=art.descuento_pct if art else CERO,
-        ))
+        por_proveedor.setdefault(n.proveedor, []).append(
+            LineaPedido(
+                codigo_idm=n.codigo,
+                descripcion=n.descripcion,
+                cantidad=n.cantidad_pedir,
+                unidad=n.unidad,
+                precio_bruto=n.precio if n.precio is not None else CERO,
+                descuento_pct=art.descuento_pct if art else CERO,
+            )
+        )
 
     for e in encargos:
         clave = _resolver_proveedor(e.proveedor, proveedores)
@@ -69,25 +74,37 @@ def generar(
         if existente is not None:
             existente.cantidad += e.cantidad
         else:
-            lineas.append(LineaPedido(
-                codigo_idm=art.codigo if art else e.articulo,
-                descripcion=art.descripcion if art else (e.descripcion or e.articulo),
-                cantidad=e.cantidad, unidad=art.unidad if art else e.unidad,
-                precio_bruto=(art.precio_compra if art and art.precio_compra is not None else CERO),
-                descuento_pct=art.descuento_pct if art else CERO,
-            ))
+            lineas.append(
+                LineaPedido(
+                    codigo_idm=art.codigo if art else e.articulo,
+                    descripcion=art.descripcion if art else (e.descripcion or e.articulo),
+                    cantidad=e.cantidad,
+                    unidad=art.unidad if art else e.unidad,
+                    precio_bruto=(art.precio_compra if art and art.precio_compra is not None else CERO),
+                    descuento_pct=art.descuento_pct if art else CERO,
+                )
+            )
         encargos_por_proveedor.setdefault(clave, []).append(e.id)
 
     for indice, (clave, lineas) in enumerate(sorted(por_proveedor.items()), start=1):
         numero = numero_provisional(fecha, indice)
-        resultado.pedidos.append(Pedido(numero=numero, proveedor=clave, fecha=fecha, lineas=lineas,
-                                        relacion=RelacionPedido.CON_PEDIDO, origen=origen))
+        resultado.pedidos.append(
+            Pedido(
+                numero=numero,
+                proveedor=clave,
+                fecha=fecha,
+                lineas=lineas,
+                relacion=RelacionPedido.CON_PEDIDO,
+                origen=origen,
+            )
+        )
         resultado.encargos_por_pedido[numero] = encargos_por_proveedor.get(clave, [])
     return resultado
 
 
-def desde_encargo_urgente(encargo: Encargo, articulos: dict[str, Articulo], proveedores: list[Proveedor],
-                          fecha: date | None = None) -> ResultadoGeneracion:
+def desde_encargo_urgente(
+    encargo: Encargo, articulos: dict[str, Articulo], proveedores: list[Proveedor], fecha: date | None = None
+) -> ResultadoGeneracion:
     """Un solo encargo → un pedido, para el caso 'llamo ahora y quiero el pedido ya'."""
     r = generar([], [encargo], articulos, proveedores, fecha, origen=OrigenEncargo.WEB)
     return r

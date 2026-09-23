@@ -36,9 +36,14 @@ def interpretar(texto: str, quien: str = "") -> ResultadoMensaje:
         if cantidad is None or cantidad <= 0:
             resultado.errores.append(f"Línea {numero}: cantidad no válida '{partes[2]}'")
             continue
-        resultado.encargos.append(Encargo(
-            proveedor=partes[0], articulo=partes[1], cantidad=cantidad,
-            unidad=partes[3].upper() if len(partes) > 3 and partes[3] else "UD",
-            quien=quien, origen=OrigenEncargo.MENSAJE,
-        ))
+        resultado.encargos.append(
+            Encargo(
+                proveedor=partes[0],
+                articulo=partes[1],
+                cantidad=cantidad,
+                unidad=partes[3].upper() if len(partes) > 3 and partes[3] else "UD",
+                quien=quien,
+                origen=OrigenEncargo.MENSAJE,
+            )
+        )
     return resultado

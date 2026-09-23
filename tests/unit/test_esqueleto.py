@@ -17,7 +17,16 @@ def test_datos_ignorada(raiz):
 
 def test_estructura_reparto(raiz):
     for carpeta in [
-        "dominio", "necesidades", "encargos", "pedidos", "albaranes",
-        "cotejo", "siddex", "equivalencias", "bandeja", "almacen", "tareas",
+        "dominio",
+        "necesidades",
+        "encargos",
+        "pedidos",
+        "albaranes",
+        "cotejo",
+        "siddex",
+        "equivalencias",
+        "bandeja",
+        "almacen",
+        "tareas",
     ]:
         assert (raiz / "src" / "idm" / carpeta / "__init__.py").exists(), carpeta

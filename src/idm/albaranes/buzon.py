@@ -41,9 +41,11 @@ class CarpetaEntrada:
     def pendientes(self) -> list[DocumentoEntrante]:
         if not self.carpeta.exists():
             return []
-        return [DocumentoEntrante(ruta=r, sha256=sha256_fichero(r), origen="carpeta")
-                for r in sorted(self.carpeta.iterdir())
-                if r.is_file() and r.suffix.lower() in EXTENSIONES_ADMITIDAS]
+        return [
+            DocumentoEntrante(ruta=r, sha256=sha256_fichero(r), origen="carpeta")
+            for r in sorted(self.carpeta.iterdir())
+            if r.is_file() and r.suffix.lower() in EXTENSIONES_ADMITIDAS
+        ]
 
 
 def nombre_seguro(nombre: str) -> str:
@@ -82,8 +84,10 @@ class RegistroProcesados:
         self._ids.add(message_id)
         self.ruta.parent.mkdir(parents=True, exist_ok=True)
         with self.ruta.open("a", encoding="utf-8") as f:
-            f.write(json.dumps({"message_id": message_id, "fecha": datetime.now().isoformat(), **datos},
-                               ensure_ascii=False) + "\n")
+            f.write(
+                json.dumps({"message_id": message_id, "fecha": datetime.now().isoformat(), **datos}, ensure_ascii=False)
+                + "\n"
+            )
 
 
 class BuzonIMAP:
@@ -117,9 +121,22 @@ class BuzonIMAP:
                         contador += 1
                     ruta.write_bytes(contenido)
                     guardados.append(str(ruta))
-                    resultado.append(DocumentoEntrante(ruta=ruta, sha256=sha256_fichero(ruta),
-                                                       origen=f"imap:{self.buzon.usuario}",
-                                                       remitente=mensaje.get("From"), asunto=mensaje.get("Subject")))
-                self.registro.anotar(message_id, {"buzon": self.buzon.usuario, "adjuntos": guardados,
-                                                  "de": mensaje.get("From"), "asunto": mensaje.get("Subject")})
+                    resultado.append(
+                        DocumentoEntrante(
+                            ruta=ruta,
+                            sha256=sha256_fichero(ruta),
+                            origen=f"imap:{self.buzon.usuario}",
+                            remitente=mensaje.get("From"),
+                            asunto=mensaje.get("Subject"),
+                        )
+                    )
+                self.registro.anotar(
+                    message_id,
+                    {
+                        "buzon": self.buzon.usuario,
+                        "adjuntos": guardados,
+                        "de": mensaje.get("From"),
+                        "asunto": mensaje.get("Subject"),
+                    },
+                )
         return resultado

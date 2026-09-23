@@ -1,0 +1,18 @@
+{
+  "lectura": {
+    "tipo": "ALBARAN", "cif": "A00000002", "numero": "5526/2.063", "fecha": "2026-09-15", "nuestro_pedido": null,
+    "lineas": [
+      {"codigo_proveedor": "MO01001", "cantidad": "1", "precio_bruto": null},
+      {"codigo_proveedor": "FL-2240", "cantidad": "2", "precio_bruto": null}
+    ]
+  },
+  "cotejo": {
+    "semaforo": "AMBAR", "relacion": "SIN_PEDIDO", "entrega": null, "precio": "PENDIENTE_FACTURA",
+    "total_albaran": null,
+    "lineas": [
+      {"semaforo": "AMBAR", "precio": "PENDIENTE_FACTURA", "avisos": ["LINEA_SIN_PEDIDO"]},
+      {"semaforo": "AMBAR", "precio": "PENDIENTE_FACTURA", "avisos": ["LINEA_SIN_PEDIDO"]}
+    ],
+    "avisos": ["SIN_PEDIDO"]
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "numero": "20261061", "proveedor": "FICT_ELECTRO", "fecha": "2026-09-11",
+  "lineas": [
+    {"codigo_idm": "I34.000.900", "codigo_proveedor": "EL-REL-24", "descripcion": "RELE 24V 40A", "cantidad": "12", "precio_bruto": "3.10", "descuento_pct": "10"},
+    {"codigo_idm": "T30.000.100", "codigo_proveedor": "EL-TOR-1030", "descripcion": "TORNILLO M10x30", "cantidad": "100", "precio_bruto": "0.08", "descuento_pct": "0"}
+  ]
+}

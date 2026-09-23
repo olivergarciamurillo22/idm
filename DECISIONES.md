@@ -63,3 +63,18 @@ tiene rejilla se prueba una regex por línea. Las plantillas por proveedor real 
 ## 2026-09-23 · La foto de albarán entra por el mismo circuito y sale con confianza 0
 `LectorImagenNulo` no lee nada pero deja el documento en la bandeja con el aviso "requiere lectura de imagen". Así el
 circuito ya funciona con papel fotografiado (Fernando teclea) mientras IDM decide si los documentos pueden salir.
+
+## 2026-09-23 · Búsqueda del pedido para un albarán
+Primero el "su pedido" que trae el albarán; si no viene o no existe, el pedido abierto del mismo proveedor con más
+líneas en común (por código IDM o referencia del proveedor). Si no hay ninguno, SIN_PEDIDO y pedido propuesto.
+
+## 2026-09-23 · Pedido propuesto se confirma en la bandeja y sale como hoja para Siddex
+Fernandillo confirma en /pedidos; el albarán pasa a CON_PEDIDO con el número `PP-<albarán>` y se genera la misma hoja
+Excel que para los pedidos normales. No se graba nada en Siddex por detrás.
+
+## 2026-09-23 · Equivalencias confirmadas en la bandeja quedan aprendidas
+Cuando Fernando escribe el código IDM de una referencia desconocida, se guarda en `datos/equivalencias_aprendidas.csv`
+y se usa en los siguientes documentos (método "aprendida"). El Maestro de Fabricantes sigue mandando cuando existe.
+
+## 2026-09-23 · ruff format como formato único
+El código se formatea con `ruff format` (estilo black, 120 columnas) para que Pedro y Oliver no discutan estilo.

@@ -60,12 +60,23 @@ def ejecutar(carpeta: Path, lector: LectorDocumentos | None = None, incluir_imag
             resultado.anotar("tipo", doc.tipo == esperado["tipo"], nombre, esperado["tipo"], doc.tipo)
             resultado.anotar("cif", doc.cif == esperado["cif"], nombre, esperado["cif"], doc.cif)
             resultado.anotar("numero", doc.numero == esperado["numero"], nombre, esperado["numero"], doc.numero)
-            resultado.anotar("fecha", doc.fecha is not None and doc.fecha.isoformat() == esperado["fecha"], nombre,
-                             esperado["fecha"], doc.fecha)
-            resultado.anotar("nuestro_pedido", doc.nuestro_pedido == esperado.get("nuestro_pedido"), nombre,
-                             esperado.get("nuestro_pedido"), doc.nuestro_pedido)
-            resultado.anotar("n_lineas", len(doc.lineas) == len(esperado["lineas"]), nombre, len(esperado["lineas"]),
-                             len(doc.lineas))
+            resultado.anotar(
+                "fecha",
+                doc.fecha is not None and doc.fecha.isoformat() == esperado["fecha"],
+                nombre,
+                esperado["fecha"],
+                doc.fecha,
+            )
+            resultado.anotar(
+                "nuestro_pedido",
+                doc.nuestro_pedido == esperado.get("nuestro_pedido"),
+                nombre,
+                esperado.get("nuestro_pedido"),
+                doc.nuestro_pedido,
+            )
+            resultado.anotar(
+                "n_lineas", len(doc.lineas) == len(esperado["lineas"]), nombre, len(esperado["lineas"]), len(doc.lineas)
+            )
             for i, linea_esperada in enumerate(esperado["lineas"]):
                 obtenida = doc.lineas[i] if i < len(doc.lineas) else None
                 for campo in CAMPOS_LINEA:

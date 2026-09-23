@@ -33,8 +33,12 @@ def cargar_mapa(ruta: Path = RUTA_MAPA_POR_DEFECTO) -> dict[str, EntradaMapa]:
     with ruta.open(encoding="utf-8", newline="") as f:
         for fila in csv.DictReader(f, delimiter=";"):
             nombre = normalizar_nombre(fila["nombre_planning"])
-            mapa[nombre] = EntradaMapa(nombre, (fila.get("codigo_siddex") or "").strip().upper() or None,
-                                       (fila.get("variante") or "base").strip(), fila.get("notas", ""))
+            mapa[nombre] = EntradaMapa(
+                nombre,
+                (fila.get("codigo_siddex") or "").strip().upper() or None,
+                (fila.get("variante") or "base").strip(),
+                fila.get("notas", ""),
+            )
     return mapa
 
 
@@ -64,7 +68,7 @@ def resolver(nombre_planning: str, mapa: dict[str, EntradaMapa]) -> Resultado:
             break
         familia_tokens.append(t)
     familia = " ".join(familia_tokens)
-    variante = variante_desde_tokens(tokens[len(familia_tokens):])
+    variante = variante_desde_tokens(tokens[len(familia_tokens) :])
     # Prueba familia + variante, después familia sola si la variante es base.
     candidatos = [f"{familia} {variante}".strip()] if variante != "base" else [familia]
     # Para A4R el planning escribe "A4R-2000-820", "A4R ED", "A4R L 2250": la familia es el primer token.

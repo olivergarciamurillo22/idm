@@ -55,3 +55,11 @@ deliberadamente rígido para que el registro sea inequívoco y quepa en un Whats
 ## 2026-09-23 · Numeración provisional de pedidos
 `P-AAAAMMDD-NN` hasta que el pedido se graba en Siddex; entonces se guarda `numero_siddex`. El PDF y el correo llevan el
 provisional; en la hoja para Siddex aparece también para que Fernandillo lo relacione.
+
+## 2026-09-23 · El lector de texto usa primero tablas con rejilla y después regex por línea
+pdfplumber devuelve las tablas con rejilla limpias (cabecera + celdas); se mapean por nombre de cabecera. Si el PDF no
+tiene rejilla se prueba una regex por línea. Las plantillas por proveedor real heredan la genérica hasta tener sus PDF.
+
+## 2026-09-23 · La foto de albarán entra por el mismo circuito y sale con confianza 0
+`LectorImagenNulo` no lee nada pero deja el documento en la bandeja con el aviso "requiere lectura de imagen". Así el
+circuito ya funciona con papel fotografiado (Fernando teclea) mientras IDM decide si los documentos pueden salir.

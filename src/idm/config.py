@@ -40,6 +40,14 @@ class Config:
     buzones: tuple[Buzon, ...] = ()
     bandeja_host: str = "0.0.0.0"
     bandeja_puerto: int = 8000
+    ocr_motor: str = "ninguno"  # ninguno | tesseract
+    ocr_tuberia: str = "contraste_3200,recorte_3200"  # tuberías de albaranes.preprocesado.TUBERIAS, se unen
+    ocr_lang: str = "spa+eng"
+
+    @property
+    def cifs_propios(self) -> set[str]:
+        cif = (self.empresa.get("cif") or "").replace(" ", "").replace("-", "").upper()
+        return {cif} if cif else set()
 
     def crear_carpetas(self) -> None:
         for ruta in (
@@ -103,4 +111,7 @@ def cargar(ruta_env: Path | None = None) -> Config:
         buzones=_buzones(g("IMAP_BUZONES", "")),
         bandeja_host=g("BANDEJA_HOST", "0.0.0.0"),
         bandeja_puerto=int(g("BANDEJA_PUERTO", "8000")),
+        ocr_motor=g("OCR_MOTOR", "ninguno").strip().lower(),
+        ocr_tuberia=g("OCR_TUBERIA", "contraste_3200,recorte_3200").strip().lower(),
+        ocr_lang=g("OCR_LANG", "spa+eng").strip(),
     )

@@ -263,6 +263,8 @@ def _procesar(entrante, lector, gateway, tabla, reg, carpeta_procesados, reglas,
         reg.evento("documento.duplicado", otro.id, {"numero": doc.numero, "sha256_nuevo": doc.sha256})
         archivar(entrante, carpeta_procesados)
         return Procesado(otro, False, Motivo.DUPLICADO_NUMERO)
+    if leido.resultado == ResultadoLectura.IMAGEN_OCR:
+        doc.semaforo = Semaforo.AMBAR  # lo leído por OCR nunca se da por verde sin que alguien lo mire
     doc.estado = EstadoDocumento.EN_REVISION
     return _cerrar(doc, entrante, reg, carpeta_procesados, motivo)
 

@@ -9,10 +9,11 @@ from pathlib import Path
 from idm import config
 from idm.albaranes.buzon import BuzonIMAP, CarpetaEntrada, DocumentoEntrante, RegistroProcesados
 from idm.albaranes.extraer import sha256_fichero
-from idm.albaranes.lector import LectorAutomatico, LectorTextoPDF
+from idm.albaranes.lector import lector_por_defecto, tuberias_desde_texto
 from idm.almacen.documentos import Ejecucion, Repositorio
 from idm.almacen.sesion import abrir
 from idm.cotejo.procesar import VERSION_PROCESAMIENTO, Motivo, procesar
+from idm.equivalencias import proveedores
 from idm.equivalencias.tabla import TablaEquivalencias
 from idm.siddex.desde_excel import SiddexDesdeExcel
 from idm.siddex.gateway import SiddexGateway
@@ -31,8 +32,8 @@ def ejecutar(
     """Procesa la lista dentro de una Ejecución registrada. Devuelve una línea de informe por documento."""
     ejecucion = repo.guardar_ejecucion(Ejecucion(tarea=tarea, version=VERSION_PROCESAMIENTO))
     tabla = TablaEquivalencias.desde(gateway.equivalencias(), cfg.ruta_datos / "equivalencias_aprendidas.csv")
-    cif_propio = cfg.empresa.get("cif", "")
-    lector = LectorAutomatico(texto=LectorTextoPDF(cifs_propios={cif_propio} if cif_propio else None))
+    tuberias = tuberias_desde_texto(cfg.ocr_tuberia)
+    lector = lector_por_defecto(cfg.cifs_propios, cfg.ocr_motor, tuberias[0], tuberias[1:])
     informe = [f"Ejecución {ejecucion.id} · versión {VERSION_PROCESAMIENTO} · {len(entrantes)} documento(s)"]
     for entrante in entrantes:
         r = procesar(
@@ -88,6 +89,7 @@ def _entrante(ruta: Path, origen: str) -> DocumentoEntrante:
 def main(argv: list[str] | None = None) -> int:
     _consola.preparar()
     cfg = config.cargar()
+    proveedores.cargar_locales(cfg.ruta_datos / proveedores.NOMBRE_CSV_LOCAL)
     p = argparse.ArgumentParser(description="Procesa los documentos que han llegado.")
     p.add_argument("--carpeta", type=Path, default=None, help="carpeta de entrada (por defecto RUTA_ENTRADA)")
     p.add_argument("--fichero", type=Path, default=None, help="procesa solo este fichero")

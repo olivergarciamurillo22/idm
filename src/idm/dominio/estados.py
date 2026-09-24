@@ -24,7 +24,8 @@ class ResultadoLectura(StrEnum):
     """Qué ha podido hacer el lector con el fichero. Nunca se devuelve "datos vacíos" sin decir por qué."""
 
     PDF_TEXTO = "PDF_TEXTO"  # PDF con capa de texto: leído
-    REQUIERE_OCR = "REQUIERE_OCR"  # PDF escaneado o imagen: hace falta OCR/modelo (fuera de alcance hoy)
+    IMAGEN_OCR = "IMAGEN_OCR"  # imagen o escaneo leído por OCR local: campos con confianza, revisar en bandeja
+    REQUIERE_OCR = "REQUIERE_OCR"  # PDF escaneado o imagen sin motor OCR disponible o configurado
     EXCEL = "EXCEL"  # hoja de cálculo en la entrada: no es un documento de proveedor
     VACIO = "VACIO"  # fichero de 0 bytes
     CORRUPTO = "CORRUPTO"  # no se puede abrir

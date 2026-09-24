@@ -9,6 +9,7 @@ import uvicorn
 from idm import config
 from idm.almacen.sesion import abrir
 from idm.bandeja.app import crear_app
+from idm.equivalencias import proveedores
 from idm.equivalencias.tabla import TablaEquivalencias
 from idm.siddex.desde_excel import SiddexDesdeExcel
 from idm.tareas import _consola
@@ -17,6 +18,7 @@ from idm.tareas import _consola
 def crear() -> "uvicorn.Config | object":
     cfg = config.cargar()
     cfg.crear_carpetas()
+    proveedores.cargar_locales(cfg.ruta_datos / proveedores.NOMBRE_CSV_LOCAL)
     _, repo, encargos = abrir(cfg)
     gateway = SiddexDesdeExcel(cfg.ruta_siddex)
     tabla = TablaEquivalencias.desde(gateway.equivalencias(), cfg.ruta_datos / "equivalencias_aprendidas.csv")

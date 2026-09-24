@@ -2,11 +2,18 @@
 Es la única tabla que une lo que dice un documento (nombre, CIF) con la clave que usan reglas y plantillas.
 No decide nada sobre precios ni pedidos; los datos reales (códigos, CIF) se completan desde el Maestro."""
 
+import csv
 import re
 import unicodedata
 from dataclasses import dataclass, field
+from pathlib import Path
 
 from idm.dominio.modelos import Proveedor
+
+# Datos reales (códigos Siddex, CIF, correos) de los proveedores: NUNCA en git. Van en datos/proveedores_conocidos.csv
+# con columnas clave;codigo_siddex;cif;nombre;patrones_nombre (separados por |);email. Se funden con CONOCIDOS.
+NOMBRE_CSV_LOCAL = "proveedores_conocidos.csv"
+_locales: dict[str, "ProveedorConocido"] = {}
 
 
 @dataclass(frozen=True)
@@ -55,6 +62,44 @@ CONOCIDOS: tuple[ProveedorConocido, ...] = (
 )
 
 
+def cargar_locales(ruta: Path | None) -> int:
+    """Carga (o recarga) los proveedores del CSV local. Devuelve cuántos. Sin fichero → 0, sin error."""
+    _locales.clear()
+    if ruta is None or not Path(ruta).exists():
+        return 0
+    with Path(ruta).open(encoding="utf-8", newline="") as f:
+        for fila in csv.DictReader(f, delimiter=";"):
+            clave = (fila.get("clave") or "").strip().upper()
+            if not clave:
+                continue
+            patrones = tuple(p.strip() for p in (fila.get("patrones_nombre") or "").split("|") if p.strip())
+            _locales[clave] = ProveedorConocido(
+                clave,
+                (fila.get("nombre") or clave).strip(),
+                (fila.get("codigo_siddex") or "").strip() or None,
+                (fila.get("cif") or "").strip() or None,
+                patrones,
+                (fila.get("email") or "").strip() or None,
+            )
+    return len(_locales)
+
+
+def conocidos() -> tuple[ProveedorConocido, ...]:
+    """CONOCIDOS (versionado, sin datos sensibles) completado con lo local: el local manda si repite clave."""
+    base = {p.clave: p for p in CONOCIDOS}
+    for clave, local in _locales.items():
+        previo = base.get(clave)
+        base[clave] = ProveedorConocido(
+            clave,
+            local.nombre or (previo.nombre if previo else clave),
+            local.codigo_siddex or (previo.codigo_siddex if previo else None),
+            local.cif or (previo.cif if previo else None),
+            tuple(dict.fromkeys((previo.patrones_nombre if previo else ()) + local.patrones_nombre)),
+            local.email or (previo.email if previo else None),
+        )
+    return tuple(base.values())
+
+
 def normalizar_nombre(texto: str) -> str:
     """Mayúsculas, sin acentos ni puntuación, espacios simples: 'Hierros Vélez, S.L.' → 'HIERROS VELEZ S L'."""
     sin_acentos = unicodedata.normalize("NFKD", texto).encode("ascii", "ignore").decode()
@@ -68,7 +113,7 @@ def normalizar_cif(cif: str | None) -> str | None:
 
 
 def clave_por_codigo_siddex(codigo: str) -> str | None:
-    for p in CONOCIDOS:
+    for p in conocidos():
         if p.codigo_siddex == str(codigo).strip():
             return p.clave
     return None
@@ -80,7 +125,7 @@ def identificar(
     """Devuelve (clave, metodo). Orden: CIF, nombre en el registro, nombre en la lista del gateway, nada."""
     cif_n = normalizar_cif(cif)
     if cif_n:
-        for p in CONOCIDOS:
+        for p in conocidos():
             if normalizar_cif(p.cif) == cif_n:
                 return p.clave, "cif"
         for p in proveedores or []:
@@ -88,7 +133,7 @@ def identificar(
                 return p.clave, "cif"
     if nombre:
         nombre_n = normalizar_nombre(nombre)
-        for p in CONOCIDOS:
+        for p in conocidos():
             if any(re.search(patron, nombre_n) for patron in p.patrones_nombre):
                 return p.clave, "nombre"
         for p in proveedores or []:

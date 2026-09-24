@@ -43,7 +43,9 @@ def test_migrar_procesar_y_bandeja_con_sql(tmp_path, fixtures):
     sesion, repo, encargos = abrir(cfg)
     entrantes = CarpetaEntrada(cfg.ruta_entrada).pendientes()
     informe = procesar_buzon.ejecutar(entrantes, SiddexDesdeExcel(cfg.ruta_siddex), repo, cfg)
-    assert len(informe) == 2 and all(li.startswith("procesado") for li in informe)
+    assert informe[0].startswith("Ejecución") and informe[-1].startswith("Fin: nuevos=2")
+    assert len(informe) == 4 and all(li.startswith("procesado") for li in informe[1:-1])
+    assert repo.ejecuciones()[0].n_nuevos == 2 and repo.ejecuciones()[0].fin is not None
     assert not list(cfg.ruta_entrada.iterdir()) and len(list(cfg.ruta_procesados.iterdir())) == 2
     assert len(repo.listar()) == 2 and len(repo.eventos()) >= 8
 
@@ -53,7 +55,8 @@ def test_migrar_procesar_y_bandeja_con_sql(tmp_path, fixtures):
     informe = procesar_buzon.ejecutar(
         CarpetaEntrada(cfg.ruta_entrada).pendientes(), SiddexDesdeExcel(cfg.ruta_siddex), repo, cfg
     )
-    assert informe[0].startswith("duplicado_sha") and len(repo.listar()) == 2
+    assert informe[1].startswith("duplicado_sha") and len(repo.listar()) == 2
+    assert repo.ejecuciones()[0].n_duplicados == 1 and len(repo.ejecuciones()) == 2
 
     encargos.guardar(Encargo(proveedor="FICT_VEGA", articulo="I33.000.786", cantidad=Decimal("5")))
     informe = generar_pedidos.ejecutar(

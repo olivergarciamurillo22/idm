@@ -15,6 +15,7 @@ from idm.dominio.modelos import (
     LineaPedido,
     LineaPendiente,
     Pedido,
+    ReglaEvaluada,
 )
 from idm.dominio.reglas import REGLAS_POR_DEFECTO, ReglasCotejo, es_linea_portes
 
@@ -131,7 +132,34 @@ def _cotejar_linea(
         importe_albaran=importe_albaran,
         importe_pedido=_importe_pedido_para(linea, linea_pedido),
         avisos=avisos,
+        reglas=_reglas_linea(indice_pedido, entrega, precio, avisos),
     )
+
+
+def _reglas_linea(
+    indice_pedido: int, entrega: EstadoEntrega, precio: EstadoPrecio, avisos: list[Aviso]
+) -> list[ReglaEvaluada]:
+    """Deja escrito qué reglas se aplicaron a la línea y qué dijo cada una (trazabilidad del cotejo)."""
+    tipos = {a.tipo for a in avisos}
+    sin_precio = precio == EstadoPrecio.PENDIENTE_FACTURA
+    return [
+        ReglaEvaluada(regla="ARTICULO_EN_PEDIDO", resultado="OK", detalle=f"línea {indice_pedido} del pedido"),
+        ReglaEvaluada(
+            regla="CANTIDAD",
+            resultado="AVISO" if TipoAviso.EXCESO_CANTIDAD in tipos else "OK",
+            detalle=str(entrega),
+        ),
+        ReglaEvaluada(
+            regla="PRECIO_BRUTO",
+            resultado="NO_APLICA" if sin_precio else ("AVISO" if TipoAviso.PRECIO_DISTINTO in tipos else "OK"),
+            detalle="sin precio en albarán" if sin_precio else "al céntimo",
+        ),
+        ReglaEvaluada(
+            regla="DESCUENTO",
+            resultado="NO_APLICA" if sin_precio else ("AVISO" if TipoAviso.DESCUENTO_DISTINTO in tipos else "OK"),
+            detalle="sin precio en albarán" if sin_precio else "porcentaje exacto",
+        ),
+    ]
 
 
 def _comparar_precio(indice: int, linea: LineaAlbaran, linea_pedido: LineaPedido, reglas: ReglasCotejo) -> list[Aviso]:
@@ -204,6 +232,9 @@ def _linea_sin_pedido(indice: int, linea: LineaAlbaran) -> CotejoLinea:
         importe_albaran=linea.importe,
         importe_pedido=None,
         avisos=[aviso],
+        reglas=[
+            ReglaEvaluada(regla="ARTICULO_EN_PEDIDO", resultado="AVISO", detalle=aviso.detalle.get("motivo", "no está"))
+        ],
     )
 
 
@@ -231,6 +262,13 @@ def _cotejar_portes(indice: int, linea: LineaAlbaran, proveedor: str, reglas: Re
         importe_albaran=importe,
         importe_pedido=None,
         avisos=avisos,
+        reglas=[
+            ReglaEvaluada(
+                regla="PORTES_PACTADOS",
+                resultado="AVISO" if avisos else "OK",
+                detalle=f"pactado {redondear(pactado)}" if pactado is not None else "sin importe pactado",
+            )
+        ],
     )
 
 

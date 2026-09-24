@@ -5,10 +5,9 @@ from datetime import date
 from decimal import Decimal
 
 import pytest
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from idm.almacen.documentos import DocumentoRegistrado, Evento
+from idm.almacen.documentos import ConflictoDuplicado, DocumentoRegistrado, Ejecucion, Evento
 from idm.almacen.sesion import migrar, motor
 from idm.almacen.sql import EncargosSQL, RepositorioSQL
 from idm.dominio.estados import EstadoDocumento, EstadoEncargo, RelacionPedido, Semaforo, TipoDocumento
@@ -44,9 +43,12 @@ def test_documentos_idempotencia_y_filtros(sesion):
     assert repo.existe_sha("a" * 64).id == d.id
     assert repo.existe_numero("FICT_VEGA", TipoDocumento.ALBARAN, "B26 1").id == d.id
     assert repo.existe_numero("FICT_VEGA", TipoDocumento.ALBARAN, "B26 2") is None
-    with pytest.raises(IntegrityError):
-        repo.guardar(_doc("b" * 64))  # mismo proveedor+tipo+número: la BD lo impide
-    sesion.rollback()
+    with pytest.raises(ConflictoDuplicado) as exc:
+        repo.guardar(_doc("b" * 64))  # mismo proveedor+tipo+número: la BD lo impide y se traduce a ConflictoDuplicado
+    assert exc.value.campo == "numero"
+    with pytest.raises(ConflictoDuplicado) as exc:
+        repo.guardar(_doc("a" * 64, numero="B26 9"))  # mismo sha256 con otro id
+    assert exc.value.campo == "sha256"
     repo.guardar(_doc("c" * 64, numero="B26 2", proveedor="FICT_ELECTRO"))
     assert len(repo.listar()) == 2
     assert [x.proveedor for x in repo.listar(proveedor="FICT_ELECTRO")] == ["FICT_ELECTRO"]
@@ -76,6 +78,16 @@ def test_eventos_y_pedidos(sesion):
     guardado = repo.pedidos("FICT_VEGA")[0]
     assert guardado.numero_siddex == "20261099" and guardado.lineas[0].importe == Decimal("45.70")
     assert guardado.relacion == RelacionPedido.CON_PEDIDO
+
+
+def test_ejecuciones(sesion):
+    repo = RepositorioSQL(sesion)
+    e = repo.guardar_ejecucion(Ejecucion(tarea="procesar_buzon", version="2026.09.24"))
+    e.n_documentos, e.n_nuevos = 3, 2
+    repo.guardar_ejecucion(e)
+    repo.registrar_evento(Evento(tipo="documento.recibido", documento_id="d1", ejecucion_id=e.id))
+    assert repo.ejecuciones()[0].n_nuevos == 2 and repo.ejecuciones()[0].version == "2026.09.24"
+    assert repo.eventos("d1")[0].ejecucion_id == e.id
 
 
 def test_encargos_sql(sesion):

@@ -131,3 +131,22 @@ vacío, Excel, extensión desconocida: alguien tiene que mirar el fichero). Los 
 (código cerrado `CodigoError`, mensaje, recuperable, detalle) guardados con el documento; la excepción genérica solo
 queda como red de seguridad en `procesar()` para que un fichero raro no tumbe el lote. Los duplicados siguen sin crear
 documento: son un evento sobre el original.
+
+## 2026-09-24 · Trazabilidad por ejecución: Ejecucion + Traza por documento + reglas evaluadas
+Cada pasada de `procesar_buzon` es una fila en `ejecuciones` (id, tarea, inicio/fin, versión, contadores). Cada documento
+guarda una `Traza` (fichero, sha, resultado de lectura, tipo, proveedor y método, campos extraídos, normalizaciones,
+artículos con método, pedido y método, albaranes relacionados, factura, reglas con resultado, diferencias, errores,
+estado final, nº de reproceso) y todos sus eventos llevan `ejecucion_id`. Las reglas las escribe la propia función pura
+(`CotejoLinea.reglas`), así la traza no reinterpreta el cotejo. `VERSION_PROCESAMIENTO` en `cotejo/procesar.py` se
+cambia cuando cambia algo que altera el resultado. Sin sistema de observabilidad aparte: es JSON en la base de datos.
+
+## 2026-09-24 · Idempotencia: sha256 primero, (proveedor, tipo, número) después, y la base de datos manda
+Mismo contenido (aunque cambie el nombre) → `duplicado_sha`, evento sobre el original, fichero retirado de la entrada.
+Mismo número con contenido distinto → `duplicado_numero`. Si dos procesos se cruzan, la restricción única de la BD
+lanza `ConflictoDuplicado` y `procesar()` lo resuelve como duplicado sin dejar nada a medias. Reproceso solo explícito
+(`--reprocesar` o `--reprocesar-id`): conserva id y fecha de recepción, incrementa `reprocesos`, y se niega si el
+documento está APROBADO. Lo que ya está registrado no se toca al volver a pasar el mismo fichero.
+
+## 2026-09-24 · procesar_buzon es de instancia única
+Bloqueo por fichero con O_EXCL (`datos/procesar_buzon.lock`, caducidad 2 h) para que la tarea programada de cada
+10 minutos no se pise a sí misma si una pasada tarda más.

@@ -20,6 +20,7 @@ class ResultadoDocumento:
     cotejo: Cotejo
     pedido_propuesto: Pedido | None
     metodo_pedido: str  # "nuestro_pedido", "pedido_abierto", "ninguno"
+    proveedor_metodo: str = "no_resuelto"
     avisos: list[Aviso] = field(default_factory=list)
     eventos: list[Evento] = field(default_factory=list)
 
@@ -75,6 +76,7 @@ def cotejar_documento(
         cotejo=resultado_cotejo,
         pedido_propuesto=propuesto,
         metodo_pedido=metodo,
+        proveedor_metodo=interpretado.proveedor_metodo,
         avisos=interpretado.avisos,
         eventos=eventos,
     )

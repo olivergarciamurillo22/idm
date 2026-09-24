@@ -5,10 +5,11 @@ Funciona con SQLite y con PostgreSQL cambiando DATABASE_URL; el esquema lo gesti
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import JSON, DateTime, Numeric, String, Text, UniqueConstraint, select
+from sqlalchemy import JSON, DateTime, Integer, Numeric, String, Text, UniqueConstraint, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
 
-from idm.almacen.documentos import DocumentoRegistrado, Evento
+from idm.almacen.documentos import ConflictoDuplicado, DocumentoRegistrado, Ejecucion, Evento
 from idm.dominio.estados import EstadoDocumento, EstadoEncargo, Semaforo, TipoDocumento
 from idm.dominio.modelos import Albaran, Pedido
 from idm.encargos.registro import Encargo
@@ -40,7 +41,23 @@ class EventoORM(Base):
     fecha: Mapped[datetime] = mapped_column(DateTime, index=True)
     tipo: Mapped[str] = mapped_column(String(40), index=True)
     documento_id: Mapped[str | None] = mapped_column(String(12), index=True)
+    ejecucion_id: Mapped[str | None] = mapped_column(String(12), index=True)
     datos: Mapped[dict] = mapped_column(JSON)
+
+
+class EjecucionORM(Base):
+    __tablename__ = "ejecuciones"
+    id: Mapped[str] = mapped_column(String(12), primary_key=True)
+    tarea: Mapped[str] = mapped_column(String(40), index=True)
+    inicio: Mapped[datetime] = mapped_column(DateTime, index=True)
+    fin: Mapped[datetime | None] = mapped_column(DateTime)
+    version: Mapped[str] = mapped_column(String(20), default="")
+    n_documentos: Mapped[int] = mapped_column(Integer, default=0)
+    n_nuevos: Mapped[int] = mapped_column(Integer, default=0)
+    n_duplicados: Mapped[int] = mapped_column(Integer, default=0)
+    n_no_procesables: Mapped[int] = mapped_column(Integer, default=0)
+    n_errores: Mapped[int] = mapped_column(Integer, default=0)
+    detalle: Mapped[dict] = mapped_column(JSON, default=dict)
 
 
 class EncargoORM(Base):
@@ -121,7 +138,17 @@ class RepositorioSQL:
                 "datos",
             ):
                 setattr(fila, col, getattr(nueva, col))
-        self.sesion.commit()
+        try:
+            self.sesion.commit()
+        except IntegrityError as exc:
+            # Carrera entre dos procesos o duplicado no detectado antes: la BD manda, se traduce a excepción propia
+            self.sesion.rollback()
+            texto = str(exc.orig).lower()
+            campo = "sha256" if "sha256" in texto else "numero"
+            valor = (
+                documento.sha256 if campo == "sha256" else f"{documento.proveedor}/{documento.tipo}/{documento.numero}"
+            )
+            raise ConflictoDuplicado(campo, valor) from exc
         return documento
 
     def obtener(self, id_documento: str) -> DocumentoRegistrado | None:
@@ -162,6 +189,7 @@ class RepositorioSQL:
                 fecha=evento.fecha,
                 tipo=evento.tipo,
                 documento_id=evento.documento_id,
+                ejecucion_id=evento.ejecucion_id,
                 datos=evento.model_dump(mode="json")["datos"],
             )
         )
@@ -173,7 +201,64 @@ class RepositorioSQL:
         if documento_id:
             consulta = consulta.where(EventoORM.documento_id == documento_id)
         return [
-            Evento(id=f.id, fecha=f.fecha, tipo=f.tipo, documento_id=f.documento_id, datos=f.datos)
+            Evento(
+                id=f.id,
+                fecha=f.fecha,
+                tipo=f.tipo,
+                documento_id=f.documento_id,
+                ejecucion_id=f.ejecucion_id,
+                datos=f.datos,
+            )
+            for f in self.sesion.scalars(consulta)
+        ]
+
+    def guardar_ejecucion(self, ejecucion: Ejecucion) -> Ejecucion:
+        fila = self.sesion.get(EjecucionORM, ejecucion.id)
+        datos = ejecucion.model_dump(mode="json")
+        if fila is None:
+            self.sesion.add(
+                EjecucionORM(
+                    **{
+                        k: getattr(ejecucion, k)
+                        for k in (
+                            "id",
+                            "tarea",
+                            "inicio",
+                            "fin",
+                            "version",
+                            "n_documentos",
+                            "n_nuevos",
+                            "n_duplicados",
+                            "n_no_procesables",
+                            "n_errores",
+                        )
+                    },
+                    detalle=datos["detalle"],
+                )
+            )
+        else:
+            for k in ("fin", "n_documentos", "n_nuevos", "n_duplicados", "n_no_procesables", "n_errores"):
+                setattr(fila, k, getattr(ejecucion, k))
+            fila.detalle = datos["detalle"]
+        self.sesion.commit()
+        return ejecucion
+
+    def ejecuciones(self, limite: int = 50) -> list[Ejecucion]:
+        consulta = select(EjecucionORM).order_by(EjecucionORM.inicio.desc()).limit(limite)
+        return [
+            Ejecucion(
+                id=f.id,
+                tarea=f.tarea,
+                inicio=f.inicio,
+                fin=f.fin,
+                version=f.version,
+                n_documentos=f.n_documentos,
+                n_nuevos=f.n_nuevos,
+                n_duplicados=f.n_duplicados,
+                n_no_procesables=f.n_no_procesables,
+                n_errores=f.n_errores,
+                detalle=f.detalle or {},
+            )
             for f in self.sesion.scalars(consulta)
         ]
 

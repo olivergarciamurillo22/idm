@@ -26,7 +26,14 @@
       <tr><th>Su pedido</th><td>{{ d.leido.nuestro_pedido if d.leido else "" }}</td><th>Pedido usado</th><td>{{ d.pedido or d.relacion }}</td></tr>
       <tr><th>Lectura</th><td><span class="pill {{ 'AMBAR' if d.leido and d.leido.resultado in ('IMAGEN_OCR','REQUIERE_OCR') else '' }}">{{ d.leido.resultado if d.leido else "" }}</span>
           {{ d.leido.metodo if d.leido else "" }} · confianza {{ d.leido.confianza if d.leido else "" }}
-          {% if d.leido and d.leido.confianza < 0.6 %}<span class="aviso">(baja: comprobar cada campo)</span>{% endif %}</td>
+          {% if d.leido and d.leido.confianza < 0.6 %}<span class="aviso">(baja: comprobar cada campo)</span>{% endif %}
+          {% if d.leido and d.leido.motor %}<br><small>Motor: <b>{{ d.leido.motor }}</b>
+            {% if d.leido.metadatos_motor.get("externo") == "True" %}(servicio externo){% else %}(local){% endif %}
+            {% if d.leido.coste_estimado_eur is not none %} · coste estimado {{ d.leido.coste_estimado_eur }} €{% endif %}
+            {% if d.leido.metadatos_motor.get("tiempo_s") %} · {{ d.leido.metadatos_motor.get("tiempo_s") }} s{% endif %}
+            {% if d.leido.metadatos_motor.get("request_id") %} · petición {{ d.leido.metadatos_motor.get("request_id") }}{% endif %}</small>{% endif %}
+          {% if d.leido and d.leido.campos_dudosos %}<br><span class="aviso">Campos dudosos (baja confianza):
+            {{ d.leido.campos_dudosos|join(", ") }}</span>{% endif %}</td>
           <th>Entrega / precio</th><td>{{ d.entrega or "" }} / {{ d.precio or "" }}</td></tr>
     </table>
     {% if d.leido and d.leido.resultado == "REQUIERE_OCR" %}
@@ -55,10 +62,12 @@
     <h3>Líneas</h3>
     <table>
       <tr><th>#</th><th>Ref. proveedor</th><th>Código IDM</th><th>Descripción</th><th class="num">Cant.</th><th class="num">Bruto</th><th class="num">Dto %</th><th class="num">Importe</th><th>Cotejo</th></tr>
+      {% set dudosos = d.leido.campos_dudosos if d.leido else [] %}
       {% for li in d.albaran.lineas %}
       {% set cl = d.cotejo.lineas[loop.index0] if d.cotejo and d.cotejo.lineas|length > loop.index0 else None %}
+      {% set pre = "linea[" ~ loop.index0 ~ "]." %}
       <tr class="{{ cl.semaforo if cl else '' }}">
-        <td>{{ loop.index }}</td><td>{{ li.codigo_proveedor or "" }}</td>
+        <td>{{ loop.index }}</td><td {% if (pre ~ "codigo_proveedor") in dudosos %}class="dudoso" title="baja confianza"{% endif %}>{{ li.codigo_proveedor or "" }}</td>
         <td>{{ li.codigo_idm or "" }}
           {% if not li.codigo_idm and not li.es_portes %}
           <form method="post" action="/documentos/{{ d.id }}/equivalencia" class="inline">
@@ -66,9 +75,10 @@
             <input name="codigo_idm" placeholder="código IDM" style="width:120px;margin:0"> <button class="gris">Guardar</button>
           </form>{% endif %}
           {% if li.metodo_resolucion %}<br><small>{{ li.metodo_resolucion }}</small>{% endif %}</td>
-        <td>{{ li.descripcion }}</td><td class="num">{{ li.cantidad }} {{ li.unidad }}</td>
-        <td class="num">{{ li.precio_bruto if li.precio_bruto is not none else "—" }}</td>
-        <td class="num">{{ li.descuento_pct }}</td><td class="num">{{ li.importe if li.importe is not none else "—" }}</td>
+        <td>{{ li.descripcion }}</td><td class="num {{ 'dudoso' if (pre ~ 'cantidad') in dudosos }}">{{ li.cantidad }} {{ li.unidad }}</td>
+        <td class="num {{ 'dudoso' if (pre ~ 'precio_bruto') in dudosos }}">{{ li.precio_bruto if li.precio_bruto is not none else "—" }}</td>
+        <td class="num {{ 'dudoso' if (pre ~ 'descuento_pct') in dudosos }}">{{ li.descuento_pct }}</td>
+        <td class="num {{ 'dudoso' if (pre ~ 'importe') in dudosos }}">{{ li.importe if li.importe is not none else "—" }}</td>
         <td>{% if cl %}{{ cl.entrega or "" }}{% for a in cl.avisos %}<div class="aviso">{{ a.tipo }}: {{ a.mensaje }}</div>{% endfor %}{% endif %}</td>
       </tr>
       {% endfor %}
@@ -113,6 +123,12 @@
     <p>Decidido por {{ d.decidido_por or "?" }} el {{ d.decidido_en.strftime("%d/%m/%Y %H:%M") if d.decidido_en else "" }}. {{ d.notas }}</p>
     {% endif %}
 
+    {% set correcciones = eventos|selectattr("tipo", "equalto", "decision.tomada")|selectattr("datos.decision", "equalto", "CORRECCION_MANUAL")|list %}
+    {% if correcciones %}
+    <h3>Correcciones hechas a mano</h3>
+    <table>{% for e in correcciones %}<tr><td>{{ e.fecha.strftime("%d/%m %H:%M") }}</td><td>{{ e.datos.quien or "" }}</td>
+      <td>{% for campo, cambio in e.datos.cambios.items() %}{{ campo }}: {{ cambio }}{{ "; " if not loop.last }}{% endfor %}</td></tr>{% endfor %}</table>
+    {% endif %}
     <h3>Eventos</h3>
     <table>{% for e in eventos %}<tr><td>{{ e.fecha.strftime("%d/%m %H:%M:%S") }}</td><td>{{ e.tipo }}</td><td><small>{{ e.datos }}</small></td></tr>{% endfor %}</table>
   </div>

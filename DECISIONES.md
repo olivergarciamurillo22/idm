@@ -119,3 +119,15 @@ Se eligió esto frente a `tests/fixtures/` porque los fixtures los usan también
 permitidas; 2) `.githooks/pre-commit` bloquea datos/, documentos fuera de fixtures, reales sin `.anonimizado.`, `.env`
 y ficheros > 5 MB; 3) `tests/unit/test_proteccion_datos.py` comprueba las dos cosas. Cada clon nuevo debe ejecutar
 `git config core.hooksPath .githooks` (está en docs/instalacion-windows.md).
+
+## 2026-09-24 · El lector responde siempre con un ResultadoLectura explícito
+`PDF_TEXTO`, `REQUIERE_OCR` (escaneo o imagen), `EXCEL`, `VACIO`, `CORRUPTO` (no abre, o .pdf que no empieza por %PDF),
+`NO_SOPORTADO`. Ningún camino devuelve "datos vacíos" sin motivo. OCR sigue fuera de alcance: REQUIERE_OCR deja el
+documento EN_REVISION para que Fernando lo teclee.
+
+## 2026-09-24 · Estados nuevos ERROR y NO_PROCESABLE; errores como datos
+`EstadoDocumento` añade ERROR (fallo técnico inesperado, con traceback guardado, reprocesable) y NO_PROCESABLE (corrupto,
+vacío, Excel, extensión desconocida: alguien tiene que mirar el fichero). Los errores conocidos son `ErrorProcesamiento`
+(código cerrado `CodigoError`, mensaje, recuperable, detalle) guardados con el documento; la excepción genérica solo
+queda como red de seguridad en `procesar()` para que un fichero raro no tumbe el lote. Los duplicados siguen sin crear
+documento: son un evento sobre el original.

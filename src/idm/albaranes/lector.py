@@ -9,10 +9,10 @@ from pathlib import Path
 from typing import Protocol
 
 from idm.albaranes import plantillas as pl
-from idm.albaranes.extraer import Extraccion, es_imagen, es_pdf, extraer, sha256_fichero
+from idm.albaranes.extraer import EXTENSIONES_EXCEL, Extraccion, es_excel, es_imagen, es_pdf, extraer, sha256_fichero
 from idm.dominio.dinero import CERO, a_decimal, redondear
-from idm.dominio.estados import TipoDocumento
-from idm.dominio.modelos import DocumentoLeido, LineaLeida
+from idm.dominio.estados import CodigoError, ResultadoLectura, TipoDocumento
+from idm.dominio.modelos import DocumentoLeido, ErrorProcesamiento, LineaLeida
 from idm.dominio.reglas import es_linea_portes
 from idm.equivalencias.proveedores import identificar
 
@@ -175,6 +175,7 @@ class LectorTextoPDF:
             iva=a_decimal(_primero(plantilla.iva, texto, "importe")),
             total=a_decimal(_primero(plantilla.total, texto, "importe")),
             metodo="pdf_texto",
+            resultado=ResultadoLectura.PDF_TEXTO,
             texto=texto,
         )
         if doc.tipo == TipoDocumento.FACTURA:
@@ -186,18 +187,47 @@ class LectorTextoPDF:
 
 
 class LectorImagenNulo:
-    """Implementación mínima para escaneos y fotos: no lee nada y lo dice. Detrás irá OCR local o un servicio
-    externo según IDM decida si los documentos pueden salir de la empresa (DECISIONES.md)."""
+    """Implementación mínima para escaneos y fotos: no lee nada y lo dice con REQUIERE_OCR. Detrás irá OCR local
+    o un servicio externo según IDM decida si los documentos pueden salir de la empresa (DECISIONES.md)."""
 
     def leer(self, ruta: Path) -> DocumentoLeido:
-        aviso = "Documento sin capa de texto: requiere lectura de imagen (OCR/modelo) o tecleo manual"
+        mensaje = "Documento sin capa de texto: requiere lectura de imagen (OCR/modelo) o tecleo manual"
         return DocumentoLeido(
-            ruta=str(ruta), sha256=sha256_fichero(ruta), metodo="imagen_nulo", confianza=0.0, avisos=[aviso]
+            ruta=str(ruta),
+            sha256=sha256_fichero(ruta),
+            metodo="imagen_nulo",
+            resultado=ResultadoLectura.REQUIERE_OCR,
+            confianza=0.0,
+            avisos=[mensaje],
+            errores=[ErrorProcesamiento(codigo=CodigoError.LECTURA_REQUIERE_OCR, mensaje=mensaje, recuperable=False)],
         )
 
 
+def _no_leido(
+    ruta: Path, resultado: ResultadoLectura, codigo: CodigoError, mensaje: str, sha256: str = ""
+) -> DocumentoLeido:
+    return DocumentoLeido(
+        ruta=str(ruta),
+        sha256=sha256 or _sha_seguro(ruta),
+        metodo="no_leido",
+        resultado=resultado,
+        confianza=0.0,
+        avisos=[mensaje],
+        errores=[ErrorProcesamiento(codigo=codigo, mensaje=mensaje, recuperable=False)],
+    )
+
+
+def _sha_seguro(ruta: Path) -> str:
+    try:
+        return sha256_fichero(ruta)
+    except OSError:
+        return ""
+
+
 class LectorAutomatico:
-    """Despachador: PDF con texto → LectorTextoPDF; escaneo o imagen → lector de imagen inyectado."""
+    """Despachador. Decide por extensión y contenido y devuelve SIEMPRE un ResultadoLectura explícito:
+    PDF con texto → LectorTextoPDF; PDF sin texto o imagen → lector de imagen (REQUIERE_OCR);
+    Excel → EXCEL; 0 bytes → VACIO; no se puede abrir → CORRUPTO; otra extensión → NO_SOPORTADO."""
 
     def __init__(self, texto: LectorTextoPDF | None = None, imagen: LectorDocumentos | None = None) -> None:
         self.texto = texto or LectorTextoPDF()
@@ -205,16 +235,57 @@ class LectorAutomatico:
 
     def leer(self, ruta: Path) -> DocumentoLeido:
         ruta = Path(ruta)
-        if es_pdf(ruta):
-            ex = extraer(ruta)
-            if ex.tiene_texto:
-                return self.texto.leer(ruta, ex)
-            return self.imagen.leer(ruta)
+        try:
+            tamano = ruta.stat().st_size
+        except OSError as exc:
+            return _no_leido(
+                ruta, ResultadoLectura.CORRUPTO, CodigoError.FICHERO_INACCESIBLE, f"No se puede acceder: {exc}"
+            )
+        if tamano == 0:
+            return _no_leido(ruta, ResultadoLectura.VACIO, CodigoError.LECTURA_VACIO, "Fichero vacío (0 bytes)")
+        if es_excel(ruta):
+            return _no_leido(
+                ruta,
+                ResultadoLectura.EXCEL,
+                CodigoError.LECTURA_EXCEL,
+                f"Hoja de cálculo ({ruta.suffix}) en la entrada: no es un documento de proveedor. "
+                f"Si es un export de Siddex va en datos/siddex/. Extensiones: {', '.join(sorted(EXTENSIONES_EXCEL))}",
+            )
         if es_imagen(ruta):
             return self.imagen.leer(ruta)
-        doc = DocumentoLeido(ruta=str(ruta), sha256=sha256_fichero(ruta), metodo="no_soportado")
-        doc.avisos.append(f"Extensión no soportada: {ruta.suffix}")
-        return doc
+        if es_pdf(ruta):
+            return self._leer_pdf(ruta)
+        return _no_leido(
+            ruta,
+            ResultadoLectura.NO_SOPORTADO,
+            CodigoError.LECTURA_NO_SOPORTADA,
+            f"Extensión no soportada: '{ruta.suffix}'. Se admiten PDF e imágenes (jpg, png, tif)",
+        )
+
+    def _leer_pdf(self, ruta: Path) -> DocumentoLeido:
+        with ruta.open("rb") as f:
+            cabecera = f.read(5)
+        if not cabecera.startswith(b"%PDF"):
+            return _no_leido(
+                ruta,
+                ResultadoLectura.CORRUPTO,
+                CodigoError.LECTURA_CORRUPTO,
+                "El fichero tiene extensión .pdf pero no empieza por %PDF (¿descarga incompleta o renombrado?)",
+            )
+        try:
+            ex = extraer(ruta)
+        except Exception as exc:  # noqa: BLE001 - pdfplumber/pdfminer lanzan tipos variados; se convierte en CORRUPTO
+            return _no_leido(
+                ruta,
+                ResultadoLectura.CORRUPTO,
+                CodigoError.LECTURA_CORRUPTO,
+                f"No se puede abrir el PDF: {type(exc).__name__}: {str(exc)[:200]}",
+            )
+        if ex.paginas == 0:
+            return _no_leido(ruta, ResultadoLectura.CORRUPTO, CodigoError.LECTURA_CORRUPTO, "PDF sin páginas")
+        if ex.tiene_texto:
+            return self.texto.leer(ruta, ex)
+        return self.imagen.leer(ruta)
 
 
 LECTOR_POR_DEFECTO = LectorAutomatico()

@@ -18,6 +18,8 @@
       <tr><th>Lectura</th><td>{{ d.leido.metodo if d.leido else "" }} · confianza {{ d.leido.confianza if d.leido else "" }}</td>
           <th>Entrega / precio</th><td>{{ d.entrega or "" }} / {{ d.precio or "" }}</td></tr>
     </table>
+    {% if d.errores %}<div class="error">{% for e in d.errores %}<b>{{ e.codigo }}</b>: {{ e.mensaje }}
+      {{ "(se puede reprocesar)" if e.recuperable else "(hay que actuar a mano)" }}<br>{% endfor %}</div>{% endif %}
     {% if d.avisos %}<ul class="aviso">{% for a in d.avisos %}<li>{{ a }}</li>{% endfor %}</ul>{% endif %}
 
     {% if d.albaran %}

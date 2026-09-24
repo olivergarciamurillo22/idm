@@ -11,6 +11,7 @@ import pdfplumber
 UMBRAL_TEXTO = 80
 EXTENSIONES_IMAGEN = {".jpg", ".jpeg", ".png", ".tif", ".tiff", ".heic", ".webp"}
 EXTENSIONES_PDF = {".pdf"}
+EXTENSIONES_EXCEL = {".xls", ".xlsx", ".xlsm", ".csv", ".ods"}
 
 
 @dataclass
@@ -38,6 +39,10 @@ def es_imagen(ruta: Path) -> bool:
 
 def es_pdf(ruta: Path) -> bool:
     return Path(ruta).suffix.lower() in EXTENSIONES_PDF
+
+
+def es_excel(ruta: Path) -> bool:
+    return Path(ruta).suffix.lower() in EXTENSIONES_EXCEL
 
 
 def extraer_pdf(ruta: Path) -> Extraccion:

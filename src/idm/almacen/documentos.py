@@ -16,7 +16,7 @@ from idm.dominio.estados import (
     Semaforo,
     TipoDocumento,
 )
-from idm.dominio.modelos import Albaran, Cotejo, DocumentoLeido, Factura, Pedido
+from idm.dominio.modelos import Albaran, Cotejo, DocumentoLeido, ErrorProcesamiento, Factura, Pedido
 
 
 class DocumentoRegistrado(BaseModel):
@@ -42,6 +42,7 @@ class DocumentoRegistrado(BaseModel):
     cotejo_factura: dict | None = None
     pedido_propuesto: Pedido | None = None
     avisos: list[str] = Field(default_factory=list)
+    errores: list[ErrorProcesamiento] = Field(default_factory=list)
     numero_registro_siddex: str | None = None
     decidido_por: str | None = None
     decidido_en: datetime | None = None

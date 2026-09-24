@@ -9,9 +9,11 @@ from pydantic import BaseModel, Field, field_validator
 
 from idm.dominio.dinero import CERO, importe_linea, redondear
 from idm.dominio.estados import (
+    CodigoError,
     EstadoEntrega,
     EstadoPrecio,
     RelacionPedido,
+    ResultadoLectura,
     Semaforo,
     TipoAviso,
     TipoDocumento,
@@ -169,6 +171,23 @@ class Aviso(BaseModel):
     detalle: dict[str, str] = Field(default_factory=dict)
 
 
+class ErrorProcesamiento(BaseModel):
+    """Error conocido representado como dato, no solo como excepción: se guarda con el documento y se puede filtrar."""
+
+    codigo: CodigoError
+    mensaje: str
+    recuperable: bool = True  # True = tiene sentido reprocesar (p. ej. Siddex caído); False = hay que actuar a mano
+    detalle: dict[str, str] = Field(default_factory=dict)
+
+
+class ReglaEvaluada(BaseModel):
+    """Una regla de cotejo aplicada a una línea, con su resultado. Es la base de la trazabilidad del cotejo."""
+
+    regla: str  # ARTICULO_EN_PEDIDO, CANTIDAD, PRECIO_BRUTO, DESCUENTO, PORTES_PACTADOS
+    resultado: str  # OK, AVISO, NO_APLICA
+    detalle: str = ""
+
+
 class CotejoLinea(BaseModel):
     indice_albaran: int
     codigo_idm: str | None
@@ -179,6 +198,7 @@ class CotejoLinea(BaseModel):
     importe_albaran: Decimal | None
     importe_pedido: Decimal | None
     avisos: list[Aviso] = Field(default_factory=list)
+    reglas: list[ReglaEvaluada] = Field(default_factory=list)
 
 
 class LineaPendiente(BaseModel):
@@ -237,6 +257,12 @@ class DocumentoLeido(BaseModel):
     iva: Decimal | None = None
     total: Decimal | None = None
     metodo: str = "desconocido"  # pdf_texto, imagen_nulo, ...
+    resultado: ResultadoLectura = ResultadoLectura.NO_SOPORTADO
     confianza: float = 0.0
     avisos: list[str] = Field(default_factory=list)
+    errores: list[ErrorProcesamiento] = Field(default_factory=list)
     texto: str | None = None
+
+    @property
+    def leido(self) -> bool:
+        return self.resultado == ResultadoLectura.PDF_TEXTO

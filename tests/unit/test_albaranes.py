@@ -10,7 +10,7 @@ from idm.albaranes.buzon import CarpetaEntrada, RegistroProcesados, adjuntos_adm
 from idm.albaranes.extraer import extraer, sha256_fichero
 from idm.albaranes.lector import LectorAutomatico, leer
 from idm.albaranes.normalizar import normalizar_numero
-from idm.dominio.estados import TipoDocumento
+from idm.dominio.estados import CodigoError, ResultadoLectura, TipoDocumento
 
 DOCS = "documentos"
 
@@ -67,13 +67,43 @@ def test_lector_factura(fixtures):
 def test_lector_imagen_nulo(fixtures):
     doc = leer(fixtures / DOCS / "albaran_recambios_sin_precio_foto.png")
     assert doc.metodo == "imagen_nulo" and doc.confianza == 0.0 and doc.lineas == []
+    assert doc.resultado == ResultadoLectura.REQUIERE_OCR and not doc.leido
+    assert doc.errores[0].codigo == CodigoError.LECTURA_REQUIERE_OCR and not doc.errores[0].recuperable
     assert "requiere lectura de imagen" in doc.avisos[0]
+
+
+def test_lector_no_procesables(fixtures_raiz):
+    carpeta = fixtures_raiz / "no_procesables"
+    esperado = {
+        "corrupto.pdf": (ResultadoLectura.CORRUPTO, CodigoError.LECTURA_CORRUPTO),
+        "vacio.pdf": (ResultadoLectura.VACIO, CodigoError.LECTURA_VACIO),
+        "hoja.xlsx": (ResultadoLectura.EXCEL, CodigoError.LECTURA_EXCEL),
+        "texto.txt": (ResultadoLectura.NO_SOPORTADO, CodigoError.LECTURA_NO_SOPORTADA),
+        "escaneado_sin_texto.pdf": (ResultadoLectura.REQUIERE_OCR, CodigoError.LECTURA_REQUIERE_OCR),
+    }
+    for nombre, (resultado, codigo) in esperado.items():
+        doc = leer(carpeta / nombre)
+        assert doc.resultado == resultado, nombre
+        assert doc.errores and doc.errores[0].codigo == codigo, nombre
+        assert doc.avisos and doc.lineas == [] and not doc.leido, nombre
+
+
+def test_lector_pdf_renombrado_es_corrupto(tmp_path):
+    f = tmp_path / "foto_renombrada.pdf"
+    f.write_bytes(b"\x89PNG\r\n" + b"x" * 100)
+    doc = leer(f)
+    assert doc.resultado == ResultadoLectura.CORRUPTO and "%PDF" in doc.avisos[0]
+
+
+def test_lector_fichero_inexistente(tmp_path):
+    doc = LectorAutomatico().leer(tmp_path / "no_existe.pdf")
+    assert doc.resultado == ResultadoLectura.CORRUPTO and doc.errores[0].codigo == CodigoError.FICHERO_INACCESIBLE
 
 
 def test_lector_extension_no_soportada(tmp_path):
     f = tmp_path / "cosa.txt"
     f.write_text("hola")
-    assert LectorAutomatico().leer(f).metodo == "no_soportado"
+    assert LectorAutomatico().leer(f).resultado == ResultadoLectura.NO_SOPORTADO
 
 
 def test_carpeta_entrada_y_registro(fixtures, tmp_path):

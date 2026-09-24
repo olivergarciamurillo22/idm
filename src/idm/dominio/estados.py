@@ -6,12 +6,43 @@ from enum import StrEnum
 
 
 class EstadoDocumento(StrEnum):
+    """Ciclo: RECIBIDO (pendiente) → LEIDO → COTEJADO → EN_REVISION (requiere revisión) → APROBADO | RECHAZADO.
+    Laterales: ERROR (fallo técnico, se puede reprocesar) y NO_PROCESABLE (corrupto, vacío o formato no admitido).
+    Los duplicados no crean documento: quedan como evento documento.duplicado sobre el original."""
+
     RECIBIDO = "RECIBIDO"
     LEIDO = "LEIDO"
     COTEJADO = "COTEJADO"
     EN_REVISION = "EN_REVISION"
     APROBADO = "APROBADO"
     RECHAZADO = "RECHAZADO"
+    ERROR = "ERROR"
+    NO_PROCESABLE = "NO_PROCESABLE"
+
+
+class ResultadoLectura(StrEnum):
+    """Qué ha podido hacer el lector con el fichero. Nunca se devuelve "datos vacíos" sin decir por qué."""
+
+    PDF_TEXTO = "PDF_TEXTO"  # PDF con capa de texto: leído
+    REQUIERE_OCR = "REQUIERE_OCR"  # PDF escaneado o imagen: hace falta OCR/modelo (fuera de alcance hoy)
+    EXCEL = "EXCEL"  # hoja de cálculo en la entrada: no es un documento de proveedor
+    VACIO = "VACIO"  # fichero de 0 bytes
+    CORRUPTO = "CORRUPTO"  # no se puede abrir
+    NO_SOPORTADO = "NO_SOPORTADO"  # extensión desconocida
+
+
+class CodigoError(StrEnum):
+    LECTURA_CORRUPTO = "LECTURA_CORRUPTO"
+    LECTURA_VACIO = "LECTURA_VACIO"
+    LECTURA_NO_SOPORTADA = "LECTURA_NO_SOPORTADA"
+    LECTURA_EXCEL = "LECTURA_EXCEL"
+    LECTURA_REQUIERE_OCR = "LECTURA_REQUIERE_OCR"
+    PROVEEDOR_DESCONOCIDO = "PROVEEDOR_DESCONOCIDO"
+    FICHERO_INACCESIBLE = "FICHERO_INACCESIBLE"
+    GATEWAY_SIDDEX = "GATEWAY_SIDDEX"
+    CONFLICTO_DUPLICADO = "CONFLICTO_DUPLICADO"
+    REPROCESO_NO_PERMITIDO = "REPROCESO_NO_PERMITIDO"
+    INESPERADO = "INESPERADO"
 
 
 class RelacionPedido(StrEnum):

@@ -13,13 +13,13 @@ xlrd>=2.0,<3
 reportlab>=4.1,<5
 
 # Bandeja de revisión (red local)
-fastapi>=0.111,<1
+fastapi>=0.115,<1
+starlette>=1.0,<2   # la trae fastapi; se fija para que TestClient siga usando httpx2
 uvicorn>=0.29,<1
 jinja2>=3.1,<4
 python-multipart>=0.0.9
 
 # Desarrollo y pruebas
 pytest>=8.2,<9
-httpx>=0.27,<1
-httpx2>=2.0  # lo exige starlette>=1.7 para TestClient
+httpx2>=2.0,<3   # solo para TestClient (starlette>=1.7 lo importa; httpx 0.x es su respaldo y no hace falta)
 ruff>=0.4,<1

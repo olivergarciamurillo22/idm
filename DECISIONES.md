@@ -91,3 +91,18 @@ Sin `create_all` en producción. La migración inicial es `migrations/versions/0
 
 ## 2026-09-23 · Los eventos de negocio tienen un catálogo cerrado
 `almacen/eventos.TIPOS`. Un tipo nuevo se añade ahí y en la ARQUITECTURA; así la trazabilidad no se llena de nombres sueltos.
+
+## 2026-09-24 · Dependencias HTTP: httpx2 sí, httpx no
+Versiones instaladas: fastapi 0.141.1, starlette 1.7.0, uvicorn 0.53.0, httpx2 2.13.1. `starlette.testclient` importa
+`httpx2` y solo cae a `httpx` (0.x) si no está; el metadato de Starlette dice "Test client built on httpx2". Nada del
+código de producción usa ninguno de los dos: solo `TestClient` en tests. Por tanto `httpx` se quita de requirements
+(estaba solo porque hacía pasar tests por accidente y ni siquiera llegó a instalarse) y `httpx2` se queda como
+dependencia de desarrollo. Se fija `starlette>=1.0,<2` para que una actualización de FastAPI no cambie el cliente de tests.
+
+## 2026-09-24 · Consola UTF-8 en Windows
+Windows arranca la consola en cp1252 y `print` con acentos o "→" lanza UnicodeEncodeError. `tareas/_consola.preparar()`
+reconfigura stdout/stderr y `ejecutar.bat` fija `chcp 65001` y `PYTHONIOENCODING=utf-8`.
+
+## 2026-09-24 · El remoto se llama `idm`, no `idm-compras`
+Oliver ha creado `github.com/olivergarciamurillo22/idm`. La carpeta local conserva el nombre `idm-compras`. Ningún
+asistente configura el remoto ni empuja: lo hace Oliver.

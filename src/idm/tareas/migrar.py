@@ -6,9 +6,11 @@ import argparse
 
 from idm import config
 from idm.almacen.sesion import migrar
+from idm.tareas import _consola
 
 
 def main(argv: list[str] | None = None) -> int:
+    _consola.preparar()
     cfg = config.cargar()
     p = argparse.ArgumentParser(description="Aplica las migraciones de la base de datos.")
     p.add_argument("--url", default=cfg.database_url)

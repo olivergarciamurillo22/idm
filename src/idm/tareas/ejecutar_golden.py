@@ -11,9 +11,11 @@ from idm.cotejo.interpretar import interpretar_albaran
 from idm.dominio.golden import ejecutar_caso
 from idm.equivalencias.tabla import TablaEquivalencias
 from idm.siddex.desde_excel import SiddexDesdeExcel
+from idm.tareas import _consola
 
 
 def main(argv: list[str] | None = None) -> int:
+    _consola.preparar()
     p = argparse.ArgumentParser(description="Ejecuta el golden dataset.")
     p.add_argument("--carpeta", type=Path, default=RAIZ / "fixtures" / "golden")
     p.add_argument("--siddex", type=Path, default=RAIZ / "fixtures" / "siddex")

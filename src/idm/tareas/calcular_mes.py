@@ -11,6 +11,7 @@ from idm.necesidades.calculo import calcular
 from idm.necesidades.planning import hojas, leer_planning
 from idm.necesidades.salida import escribir_excel
 from idm.siddex.desde_excel import SiddexDesdeExcel
+from idm.tareas import _consola
 
 
 def ejecutar(hoja: str, planning: Path, siddex: Path, salida: Path, mapa: Path, descontar_stock: bool) -> Path:
@@ -28,6 +29,7 @@ def ejecutar(hoja: str, planning: Path, siddex: Path, salida: Path, mapa: Path, 
 
 
 def main(argv: list[str] | None = None) -> int:
+    _consola.preparar()
     cfg = config.cargar()
     p = argparse.ArgumentParser(description="Calcula las necesidades de compra del mes.")
     p.add_argument("--hoja", help="hoja del planning (p. ej. SEPT_26); sin ella, lista las hojas")

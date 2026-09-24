@@ -10,7 +10,8 @@ Instrucciones para cualquier asistente (Claude Code u otro) que trabaje en este 
   - usar la sesión de `gh` de `nuraydevs` para crear repos, issues o PRs de este proyecto;
   - copiar código, configuración, `.env`, credenciales, dominios o recursos (Vercel, Supabase, etc.) de Nuray aquí, ni de aquí a Nuray;
   - mencionar Nuray en commits, documentación, README o código.
-- El único remoto válido es `github.com/olivergarciamurillo22/idm-compras`. El hook `.githooks/pre-push` lo comprueba.
+- El único remoto válido es `github.com/olivergarciamurillo22/idm` (antes se llamó `idm-compras`; la carpeta local conserva ese nombre). El hook `.githooks/pre-push` solo deja empujar a `github.com/olivergarciamurillo22/`.
+- El remoto lo configura Oliver a mano. Un asistente **no** ejecuta `git remote add`, `git push` ni `gh repo create`, ni siquiera con la cuenta correcta, salvo que Oliver lo pida explícitamente en esa misma conversación.
 - Autoría de commits en este repo: `olivergarciamurillo22 <replika.agency@gmail.com>` (config local, no global).
 - Si la sesión activa de `gh` no es `olivergarciamurillo22`, **no crear ni empujar nada**: avisar a Oliver para que haga `gh auth login` con su cuenta.
 
@@ -34,8 +35,8 @@ Leer `ARQUITECTURA.md` antes de tocar nada. Los principios de ahí no se negocia
 ## Cómo ejecutar
 
 ```
-.venv/bin/python -m pytest          # tests (pyproject pone pythonpath=src)
-.venv/bin/ruff check src tests      # lint
-.venv/bin/ruff format src tests     # formato (antes de cada commit)
-./ejecutar.sh calcular_mes --ayuda  # tareas (Windows: ejecutar.bat)
+./ejecutar.sh tests                 # pytest (Windows: ejecutar.bat tests)
+./ejecutar.sh lint                  # ruff check + ruff format --check
+.venv/bin/ruff format src tests migrations   # formato (antes de cada commit)
+./ejecutar.sh calcular_mes --help   # tareas (Windows: ejecutar.bat calcular_mes --help)
 ```

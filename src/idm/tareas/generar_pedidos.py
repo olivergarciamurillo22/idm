@@ -18,6 +18,7 @@ from idm.necesidades.planning import leer_planning
 from idm.pedidos import enviar, exportar_siddex, generar, pdf
 from idm.siddex.desde_excel import SiddexDesdeExcel
 from idm.siddex.gateway import SiddexGateway
+from idm.tareas import _consola
 
 
 def ejecutar(
@@ -91,6 +92,7 @@ def ejecutar(
 
 
 def main(argv: list[str] | None = None) -> int:
+    _consola.preparar()
     cfg = config.cargar()
     p = argparse.ArgumentParser(description="Genera pedidos por proveedor a partir de encargos y necesidades.")
     p.add_argument("--hoja", help="hoja del planning para incluir las necesidades del mes")

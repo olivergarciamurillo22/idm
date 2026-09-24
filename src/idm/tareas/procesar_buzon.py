@@ -7,24 +7,22 @@ from pathlib import Path
 
 from idm import config
 from idm.albaranes.buzon import BuzonIMAP, CarpetaEntrada, DocumentoEntrante, FuenteDocumentos, RegistroProcesados
-from idm.albaranes.lector import LectorAutomatico
+from idm.albaranes.lector import LectorAutomatico, LectorTextoPDF
 from idm.almacen.documentos import Repositorio
 from idm.almacen.sesion import abrir
 from idm.cotejo.procesar import procesar
 from idm.equivalencias.tabla import TablaEquivalencias
 from idm.siddex.desde_excel import SiddexDesdeExcel
 from idm.siddex.gateway import SiddexGateway
+from idm.tareas import _consola
 
 
 def ejecutar(
     entrantes: list[DocumentoEntrante], gateway: SiddexGateway, repo: Repositorio, cfg: config.Config
 ) -> list[str]:
     tabla = TablaEquivalencias.desde(gateway.equivalencias(), cfg.ruta_datos / "equivalencias_aprendidas.csv")
-    lector = LectorAutomatico(
-        texto=__import__("idm.albaranes.lector", fromlist=["LectorTextoPDF"]).LectorTextoPDF(
-            cifs_propios={cfg.empresa.get("cif", "")} if cfg.empresa.get("cif") else None
-        )
-    )
+    cif_propio = cfg.empresa.get("cif", "")
+    lector = LectorAutomatico(texto=LectorTextoPDF(cifs_propios={cif_propio} if cif_propio else None))
     informe = []
     for entrante in entrantes:
         r = procesar(entrante, lector, gateway, tabla, repo, cfg.ruta_procesados)
@@ -45,6 +43,7 @@ def fuentes(cfg: config.Config, carpeta: Path | None, sin_imap: bool) -> list[Fu
 
 
 def main(argv: list[str] | None = None) -> int:
+    _consola.preparar()
     cfg = config.cargar()
     p = argparse.ArgumentParser(description="Procesa los documentos que han llegado.")
     p.add_argument("--carpeta", type=Path, default=None, help="carpeta de entrada (por defecto RUTA_ENTRADA)")

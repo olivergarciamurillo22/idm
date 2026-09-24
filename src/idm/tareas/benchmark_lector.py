@@ -7,9 +7,11 @@ from pathlib import Path
 
 from idm.albaranes import benchmark
 from idm.config import RAIZ
+from idm.tareas import _consola
 
 
 def main(argv: list[str] | None = None) -> int:
+    _consola.preparar()
     p = argparse.ArgumentParser(description="Mide los aciertos por campo del lector de documentos.")
     p.add_argument("--carpeta", type=Path, default=RAIZ / "fixtures" / "documentos")
     p.add_argument("--sin-imagenes", action="store_true")

@@ -11,6 +11,7 @@ from idm.almacen.sesion import abrir
 from idm.bandeja.app import crear_app
 from idm.equivalencias.tabla import TablaEquivalencias
 from idm.siddex.desde_excel import SiddexDesdeExcel
+from idm.tareas import _consola
 
 
 def crear() -> "uvicorn.Config | object":
@@ -23,6 +24,7 @@ def crear() -> "uvicorn.Config | object":
 
 
 def main(argv: list[str] | None = None) -> int:
+    _consola.preparar()
     cfg = config.cargar()
     p = argparse.ArgumentParser(description="Bandeja de revisión en la red local.")
     p.add_argument("--host", default=cfg.bandeja_host)

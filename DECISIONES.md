@@ -163,3 +163,10 @@ esto: es lo primero que se ejecuta cuando lleguen los ficheros reales.
 ## 2026-09-24 · Caché de pedidos por mtime en SiddexDesdeExcel
 `pedidos_abiertos`, `pedido` y `pendiente_recibir` releían el Excel en cada llamada (una por documento procesado).
 Ahora se cachea por fecha de modificación del fichero; al sustituir el export, se relee solo.
+
+## 2026-09-24 · Casos sin regla de IDM: representados, no decididos
+`fixtures/problematicos/` (P01 segundo albarán del mismo pedido con Siddex sin refrescar, P02 total impreso distinto de
+la suma de líneas) y tres tests `xfail(strict=True)` en `tests/unit/test_escenarios.py` (los dos anteriores y la factura
+parcial). Cada uno tiene un `PENDIENTE.md` o un motivo que dice qué decisión falta. Cuando IDM decida y se implemente,
+el XPASS estricto obliga a moverlos a golden. La factura parcial hoy sale VERDE y solo informa (`lineas_no_facturadas`):
+es provisional, no una regla.

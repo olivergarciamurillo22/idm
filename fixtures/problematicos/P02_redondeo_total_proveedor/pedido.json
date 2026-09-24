@@ -1,0 +1,8 @@
+{
+  "numero": "20261070", "proveedor": "FICT_VEGA",
+  "lineas": [
+    {"codigo_idm": "I99.000.001", "codigo_proveedor": "ARA-1", "descripcion": "ARANDELA A", "cantidad": "7", "precio_bruto": "0.335"},
+    {"codigo_idm": "I99.000.002", "codigo_proveedor": "ARA-2", "descripcion": "ARANDELA B", "cantidad": "7", "precio_bruto": "0.335"},
+    {"codigo_idm": "I99.000.003", "codigo_proveedor": "ARA-3", "descripcion": "ARANDELA C", "cantidad": "7", "precio_bruto": "0.335"}
+  ]
+}

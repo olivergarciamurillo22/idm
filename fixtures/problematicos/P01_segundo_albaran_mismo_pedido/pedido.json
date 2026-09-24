@@ -1,0 +1,7 @@
+{
+  "numero": "20261060", "proveedor": "FICT_VEGA",
+  "lineas": [
+    {"codigo_idm": "I33.000.786", "codigo_proveedor": "ABR-6205", "descripcion": "RODAMIENTO 6205 2RS", "cantidad": "5", "precio_bruto": "9.14", "descuento_pct": "45", "cantidad_recibida": "0"}
+  ],
+  "_nota": "recibida=0 aunque ya se aprobó un albarán de 2 en nuestra base de datos: Siddex no está al día"
+}

@@ -39,6 +39,9 @@ class CotejoFactura(BaseModel):
     total_albaranes: Decimal = CERO  # con precios completados
     precios_completados: list[PrecioCompletado] = Field(default_factory=list)
     precios_cambiados: list[PrecioCambiado] = Field(default_factory=list)
+    # Informativo: líneas de albaranes recibidos que esta factura no incluye (factura parcial). No cambia el semáforo
+    # hasta que IDM diga si se avisa o se espera a la siguiente factura (docs/PENDIENTE-IDM.md).
+    lineas_no_facturadas: list[str] = Field(default_factory=list)
     avisos: list[Aviso] = Field(default_factory=list)
 
 
@@ -129,7 +132,14 @@ def cotejar_factura(
                     Aviso(tipo=TipoAviso.LINEA_SIN_PEDIDO, mensaje="Líneas de la factura sin albarán asignado")
                 )
             continue
-        for lf, la in _emparejar(lineas, albaran):
+        parejas = _emparejar(lineas, albaran)
+        facturadas = {id(la) for _, la in parejas if la is not None}
+        r.lineas_no_facturadas += [
+            f"{numero}: {la.codigo_proveedor or la.descripcion} × {la.cantidad}"
+            for la in albaran.lineas
+            if id(la) not in facturadas and not la.es_portes
+        ]
+        for lf, la in parejas:
             if la is None:
                 r.avisos.append(
                     Aviso(

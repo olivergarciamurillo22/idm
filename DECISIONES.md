@@ -201,3 +201,48 @@ cantidad × precio × dto lo da) y tipo ALBARAN si el número tiene la forma de 
 ## 2026-09-24 · Anotación manuscrita = últimos 4 dígitos del Nº Registro de Siddex (evidencia documental)
 Las fotos muestran "2921" escrito en el albarán que Siddex registró como 20262921. No lo ha confirmado Fernando en
 palabras, pero la evidencia es directa. El programa devuelve ese número al aprobar (ya estaba) y no intenta leerlo del papel.
+
+## 2026-09-24 · Cloud como motor principal, Tesseract congelado como respaldo y baseline
+Cambio de criterio de Oliver: el PC donde se desarrolla no es el entorno de procesamiento y no se persiguen puntos de OCR
+local. Nueva capa `documental/` con `DocumentProvider` y un resultado común; implementados `TesseractProvider` (envuelve
+el lector local sin cambiar su lógica), `AzureDocumentIntelligenceProvider` y `MistralDocumentAIProvider`; Google queda
+como hueco. No se instalan más motores OCR locales: el intento con RapidOCR (ONNX) se deshizo sin commitear y se
+recreó el entorno virtual desde `requirements.txt` para que no quedara nada.
+
+## 2026-09-24 · "DocumentProvider" y no "proveedor"
+En IDM "proveedor" es quien envía el albarán. Para no confundirlo, el motor de lectura se llama DocumentProvider y sus
+implementaciones llevan el nombre del producto (AzureDocumentIntelligenceProvider…), como pidió Oliver.
+
+## 2026-09-24 · APIs REST oficiales sin SDK
+Azure Document Intelligence v4 (`2024-11-30`, `prebuilt-layout` con `features=keyValuePairs`, sondeo por
+`Operation-Location`) y Mistral OCR (`POST /v1/ocr`, `table_format=markdown`, confianza por palabra opcional, anotación
+de documento opcional). Se llaman con `urllib` de la biblioteca estándar a través de un cliente inyectable: cero
+dependencias nuevas, instalación en Windows igual de simple, y tests sin red con respuestas grabadas ficticias.
+Documentación consultada en las fuentes oficiales el 24/09/2026.
+
+## 2026-09-24 · Privacidad técnica en cuatro puntos
+Bandera `ALLOW_EXTERNAL_DOCUMENT_PROCESSING=false` por defecto + lista `EXTERNAL_DOCUMENT_PROVIDERS_ALLOWED` + rechazo
+al arrancar (router, `procesar_buzon` sale con código 3) + comprobación dentro de cada llamada externa. El benchmark
+exige además `--autorizo-envio-externo`. Los tests reales de `tests/cloud` solo envían la imagen sintética ficticia y
+por eso construyen su propia política en lugar de usar la bandera global. Los secretos de `Config` y de `Buzon` salen de
+`repr()` (antes un `print(cfg)` habría mostrado la clave SMTP: corregido).
+
+## 2026-09-24 · Fallo del proveedor = pendiente de reintento, no cambio de tercero
+`ErrorTransitorio` (red, 408, 429, 5xx, sondeo agotado) → `ResultadoLectura.PROVEEDOR_NO_DISPONIBLE` → documento en
+`ERROR` recuperable → `procesar_buzon --reintentar-pendientes`. `ErrorPermanente` (credenciales, documento rechazado,
+cuota 0) → error no recuperable con mensaje. Solo hay respaldo si se configura `DOCUMENT_PROVIDER_FALLBACK`.
+
+## 2026-09-24 · Motores locales reciben el original; externos, el JPEG derivado
+Convertir el HEIC a un JPEG reducido antes de Tesseract bajaba sus aciertos, así que los motores locales reciben el
+fichero original. A los externos se envía un JPEG a resolución completa (HEIC no es universal), con el sha del
+original y del enviado en la traza.
+
+## 2026-09-24 · Baseline de Tesseract: 33/50, no 35/50
+Al congelar la baseline se repitió la corrida con la herramienta antigua y con la capa nueva: ambas dan referencia 5,
+cantidad 7, precio 7, descuento 7, importe 7 = **33/50** (número 8/9, fecha 9/9, CIF 9/9, completos 4/9). El 35/50
+publicado antes fue un error de suma; varias filas intermedias de `docs/benchmark-lector-real.md` tampoco coincidían
+con sus corridas y la tabla se ha rehecho desde los JSON guardados.
+
+## 2026-09-24 · Coste: tarifas fechadas en un fichero, volumen como argumento
+`documental/tarifas.json` (o `DOCUMENT_PRICING_FILE`) con fecha y aviso de verificar. No se inventa el volumen mensual
+de IDM: `estimar_costes --documentos-mes N`. Cada llamada real guarda su coste estimado.

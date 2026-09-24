@@ -14,7 +14,8 @@
    - relación con pedido: `CON_PEDIDO, SIN_PEDIDO, PEDIDO_PROPUESTO`
    - precio: `CONOCIDO, PENDIENTE_FACTURA`
    - entrega: `COMPLETA, PARCIAL, EXCESO`
-7. **Toda pieza externa detrás de una interfaz fija e intercambiable:** lector de documentos (`leer(ruta) -> DocumentoLeido`), pasarela a Siddex (`SiddexGateway`), envío de correo, almacenamiento de ficheros. El dominio no conoce nombres de tablas de Siddex ni proveedores de IA.
+7. **Toda pieza externa detrás de una interfaz fija e intercambiable:** lector de documentos (`leer(ruta) -> DocumentoLeido`), proveedor documental (`DocumentProvider.analizar() -> ResultadoDocumental`: Tesseract local, Azure Document Intelligence, Mistral Document AI), pasarela a Siddex (`SiddexGateway`), envío de correo, almacenamiento de ficheros. El dominio no conoce nombres de tablas de Siddex ni proveedores de IA. Ver `docs/DOCUMENT-PROVIDERS.md`.
+14. **Ningún documento sale de la máquina sin autorización técnica:** `ALLOW_EXTERNAL_DOCUMENT_PROCESSING=false` por defecto, lista explícita de proveedores externos, comprobación al arrancar y en cada llamada, y confirmación explícita en el benchmark. Un fallo del proveedor deja el documento pendiente de reintento; nunca se reenvía a otro tercero por su cuenta.
 8. **Siddex, tres niveles en el tiempo:** primero exportaciones a Excel (`SiddexDesdeExcel`), luego lectura directa de su base de datos en solo lectura (`SiddexDesdeBD`, cuando haya acceso), y escritura solo por una vía soportada y al final del proyecto. **Nunca se escribe en la base de datos de producción de Siddex por detrás de la aplicación.**
 9. **Golden dataset:** `fixtures/golden/` con documentos ficticios y su resultado esperado en JSON; pytest los ejecuta todos y falla si algo que funcionaba deja de funcionar.
 10. **Idempotencia:** un documento se identifica por su SHA-256 y por `(proveedor, tipo, número normalizado)`; procesarlo dos veces no crea dos registros.
@@ -74,7 +75,8 @@
 PDF/foto ─► buzon ─► sha256 (¿ya visto? → duplicado, evento sobre el original) ─► lector.leer(ruta)
         ─► ResultadoLectura: PDF_TEXTO sigue · IMAGEN_OCR sigue pero siempre ÁMBAR · REQUIERE_OCR → EN_REVISION
            · CORRUPTO/VACIO/EXCEL/NO_SOPORTADO → NO_PROCESABLE
-        (imagen/HEIC: abrir con EXIF → preprocesado → mejor giro de 4 → OCR psm 4/6/11 × 2 tuberías → texto → intérprete)
+        (imagen/HEIC → documental/: entrada normalizada → DocumentProvider (local o cloud, si está autorizado)
+         → ResultadoDocumental común → normalización IDM con las plantillas → DocumentoLeido)
         ─► DocumentoLeido ─► normalizar nº por proveedor
         ─► equivalencias (código proveedor → código IDM, con método)
         ─► ¿nuestro pedido? ─┬─ sí ─► cotejar(albaran, pedido, reglas) → Cotejo (verde/ámbar)
@@ -89,7 +91,8 @@ PDF/foto ─► buzon ─► sha256 (¿ya visto? → duplicado, evento sobre el 
 | Interfaz | Módulo | Implementaciones |
 |---|---|---|
 | `LectorDocumentos.leer(ruta) -> DocumentoLeido` | `albaranes/lector.py` | `LectorTextoPDF` (pdfplumber), `LectorImagenOCR` (imagen/HEIC → preprocesado → `MotorOCR` → mismo intérprete de texto), `LectorImagenNulo` (REQUIERE_OCR) |
-| `MotorOCR.reconocer(imagen) -> ResultadoOCR` | `albaranes/ocr.py` | `MotorTesseract` (binario local), `MotorNulo`; otros motores locales se añaden aquí y se comparan con `benchmark_lector` |
+| `MotorOCR.reconocer(imagen) -> ResultadoOCR` | `albaranes/ocr.py` | `MotorTesseract` (binario local, congelado como respaldo y baseline), `MotorNulo` |
+| `DocumentProvider.analizar(DocumentoEntrada) -> ResultadoDocumental` | `documental/` | `TesseractProvider` (local), `AzureDocumentIntelligenceProvider`, `MistralDocumentAIProvider`, `GoogleDocumentAIProvider` (hueco); router por `DOCUMENT_PROVIDER`; comparación con `benchmark_documentos` |
 | `FuenteDocumentos.pendientes()` | `albaranes/buzon.py` | `CarpetaEntrada`, `BuzonIMAP` |
 | `SiddexGateway` | `siddex/gateway.py` | `SiddexDesdeExcel`, `SiddexDesdeBD` (TODO), escritura solo vía soportada |
 | `Correo.enviar(mensaje)` | `pedidos/enviar.py` | `CorreoSimulado` (.eml en datos/salida), `CorreoSMTP` |

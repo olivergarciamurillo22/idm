@@ -1,4 +1,4 @@
-# Benchmark real del lector de imágenes (lote de fotos del 23/09/2026)
+# Benchmark real del lector de imágenes (lote de fotos del 23/09/2026) · baseline de Tesseract CONGELADA
 
 Primera medición sobre material **real** (las fotos y la verdad de referencia están en `datos/`, ignoradas por git;
 aquí solo cifras). 27 fotos HEIC de iPhone: 18 pantallas de Siddex y 9 de albaranes en papel (6 albaranes distintos de
@@ -15,15 +15,23 @@ el programa). La tabla es extracción automática.
 
 ## Resultados (documentos con texto en papel, 9 fotos)
 
-| Configuración | tipo | cif | número | fecha | nº líneas | líneas (5 campos × 10) | completos |
+| Configuración (corrida guardada en datos/analisis_real/) | tipo | cif | número | fecha | nº líneas | líneas (5 campos × 10) | completos |
 |---|---|---|---|---|---|---|---|
 | Sin OCR (estado anterior: todo REQUIERE_OCR) | 0/9 | 2/9 | 0/9 | 0/9 | 0/9 | 6/50 | 0/9 |
-| OCR, sin preprocesado, OSD de Tesseract, psm 6 | 4/9 | 4/9 | 3/9 | 4/9 | 1/9 | 11/50 | 1/9 |
-| OCR, gris+contraste 2400 px, psm 6 | 4/9 | 6/9 | 1/9 | 1/9 | 1/9 | 8/50 | 0/9 |
-| OCR, orientación por confianza (4 giros), psm 4+6, 2400 px | 5/9 | 9/9 | 4/9 | 6/9 | 3/9 | 18/50 | 1/9 |
-| + filas geométricas, 3200 px, psm 4+6+11 | 5/9 | 9/9 | 8/9 | 9/9 | 4/9 | 23/50 | 2/9 |
-| + recorte al texto (segunda tubería unida) | 9/9 | 9/9 | 8/9 | 9/9 | 6/9 | 33/50 | 3/9 |
-| **+ ruido con límites de palabra (configuración final)** | **9/9** | **9/9** | **8/9** | **9/9** | **6/9** | **35/50** | **4/9** |
+| OCR sin preprocesado, OSD de Tesseract, psm 6 | 4/9 | 4/9 | 3/9 | 4/9 | 1/9 | 11/50 | 1/9 |
+| OCR gris + contraste 2400 px, psm 6 | 3/9 | 5/9 | 1/9 | 3/9 | 0/9 | 6/50 | 0/9 |
+| OCR binarizado 2400 px, psm 6 | 3/9 | 6/9 | 1/9 | 2/9 | 2/9 | 13/50 | 1/9 |
+| Orientación por confianza (4 giros), psm 4+6, 2400 px | 5/9 | 9/9 | 4/9 | 6/9 | 2/9 | 12/50 | 1/9 |
+| + filas reconstruidas por geometría | 5/9 | 9/9 | 4/9 | 6/9 | 3/9 | 18/50 | 1/9 |
+| + 3200 px | 4/9 | 9/9 | 7/9 | 8/9 | 4/9 | 23/50 | 2/9 |
+| + psm 11 | 5/9 | 9/9 | 8/9 | 9/9 | 4/9 | 23/50 | 2/9 |
+| + segunda tubería con recorte al texto (unión) | 9/9 | 9/9 | 8/9 | 9/9 | 5/9 | 24/50 | 3/9 |
+| **+ ruido de pie con límites de palabra (configuración final, baseline congelada)** | **9/9** | **9/9** | **8/9** | **9/9** | **6/9** | **33/50** | **4/9** |
+
+> **Corrección (24/09/2026).** Una versión anterior de esta tabla daba 35/50 en la fila final y cifras distintas en varias
+> filas intermedias. Eran errores de suma y de copia: la tabla se ha rehecho desde los JSON de cada corrida y la cifra
+> correcta de la configuración final es **33/50** (referencia 5, cantidad 7, precio 7, descuento 7, importe 7). La
+> lectura no ha cambiado: se ha verificado repitiendo la corrida con la herramienta antigua y con la capa nueva de proveedores.
 
 Tiempo: 6–10 s por foto en un portátil (4 giros de prueba + 3 modos × 2 tuberías).
 

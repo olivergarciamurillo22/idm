@@ -33,6 +33,8 @@ Todas las tareas se lanzan con `ejecutar.bat <tarea> [args]` (Windows) o `./ejec
 | `revisar_exports` | Dice qué columna de cada export de Siddex se reconoce, qué falta y qué sobra | `ejecutar.bat revisar_exports` |
 | `ejecutar_golden` | Ejecuta todos los casos de `fixtures/golden/` y muestra aciertos | `ejecutar.bat ejecutar_golden` |
 | `benchmark_lector` | Aciertos por campo del lector (PDF u OCR) sobre una carpeta con `.json` de verdad |
+| `benchmark_documentos` | Compara Tesseract, Azure y Mistral con la misma verdad (externos solo con autorización) | `ejecutar.bat benchmark_documentos --provider tesseract` |
+| `estimar_costes` | Coste por documento, 100, 1.000 y mes de cada proveedor documental | `ejecutar.bat estimar_costes --documentos-mes 300` |
 | `inventariar_fotos` | Inventario (sha, EXIF, duplicados) y derivados JPEG de una carpeta de fotos | `ejecutar.bat benchmark_lector` |
 | `servir_bandeja` | Bandeja de revisión web en la red local | `ejecutar.bat servir_bandeja` |
 | `migrar` | Crea o actualiza el esquema de la base de datos (Alembic) | `ejecutar.bat migrar` |

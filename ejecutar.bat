@@ -32,10 +32,12 @@ exit /b %errorlevel%
 :ayuda
 echo Tareas disponibles:
 echo   migrar             crea o actualiza datos\idm.db
-echo   procesar_buzon     procesa buzones IMAP y datos\entrada  (--sin-imap, --carpeta X, --fichero X, --reprocesar)
+echo   procesar_buzon     procesa buzones IMAP y datos\entrada  (--sin-imap, --carpeta X, --fichero X, --reintentar-pendientes)
 echo   servir_bandeja     bandeja de revision en http://ip:8000
 echo   calcular_mes       necesidades del mes  (--hoja SEPT_26)
 echo   generar_pedidos    pedidos por proveedor desde encargos y necesidades
+echo   benchmark_documentos  compara motores de lectura (--provider tesseract / azure / mistral)
+echo   estimar_costes     coste de lectura por documento y mes
 echo   benchmark_lector   aciertos por campo del lector
 echo   ejecutar_golden    golden dataset
 echo   tests / lint       pytest / ruff

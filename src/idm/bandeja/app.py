@@ -8,6 +8,7 @@ from fastapi import FastAPI, Form, Request
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
+from idm.albaranes.imagenes import ImagenNoLegible, abrir, es_imagen
 from idm.almacen.documentos import Evento, Repositorio
 from idm.config import Config
 from idm.dominio.estados import EstadoDocumento, RelacionPedido, Semaforo, TipoDocumento
@@ -73,11 +74,71 @@ def crear_app(
         )
 
     @app.get("/documentos/{id_doc}/fichero")
-    def fichero(id_doc: str):
+    def fichero(id_doc: str, rot: int = 0, lado: int = 1800):
+        """PDF tal cual; imagen (incluido HEIC) como JPEG derivado local con orientación EXIF y giro opcional."""
         doc = repositorio.obtener(id_doc)
         if doc is None or not Path(doc.ruta).exists():
             return HTMLResponse("Fichero no disponible", status_code=404)
-        return FileResponse(doc.ruta)
+        ruta = Path(doc.ruta)
+        if not es_imagen(ruta):
+            return FileResponse(doc.ruta)
+        carpeta = cfg.ruta_datos / "derivados_bandeja"
+        carpeta.mkdir(parents=True, exist_ok=True)
+        destino = carpeta / f"{doc.sha256}_{rot % 360}_{lado}.jpg"
+        if not destino.exists():
+            try:
+                img = abrir(ruta)
+            except ImagenNoLegible as exc:
+                return HTMLResponse(f"Imagen no legible: {exc}", status_code=415)
+            if rot % 360:
+                img = img.rotate(-(rot % 360), expand=True)
+            img.thumbnail((lado, lado))
+            img.convert("RGB").save(destino, "JPEG", quality=88)
+        return FileResponse(destino, media_type="image/jpeg")
+
+    @app.post("/documentos/{id_doc}/corregir")
+    def corregir(
+        id_doc: str,
+        numero: str = Form(""),
+        fecha: str = Form(""),
+        proveedor: str = Form(""),
+        nuestro_pedido: str = Form(""),
+        quien: str = Form(""),
+    ):
+        """Corrección manual de la cabecera leída (OCR o PDF). Queda como evento; el cotejo se repite con reprocesar."""
+        from datetime import date
+
+        from idm.albaranes.normalizar import normalizar_numero
+
+        doc = repositorio.obtener(id_doc)
+        if doc is None:
+            return HTMLResponse("No existe", status_code=404)
+        cambios: dict[str, str] = {}
+        if proveedor.strip() and proveedor.strip().upper() != doc.proveedor:
+            cambios["proveedor"] = f"{doc.proveedor} → {proveedor.strip().upper()}"
+            doc.proveedor = proveedor.strip().upper()
+            if doc.albaran:
+                doc.albaran.proveedor = doc.proveedor
+        if numero.strip() and numero.strip() != doc.numero_original:
+            nuevo = normalizar_numero(doc.proveedor, numero.strip())
+            cambios["numero"] = f"{doc.numero} → {nuevo}"
+            doc.numero_original, doc.numero = numero.strip(), nuevo
+            if doc.albaran:
+                doc.albaran.numero_original, doc.albaran.numero = numero.strip(), nuevo
+        if fecha.strip() and doc.albaran:
+            try:
+                doc.albaran.fecha = date.fromisoformat(fecha.strip())
+                cambios["fecha"] = fecha.strip()
+            except ValueError:
+                return HTMLResponse("Fecha no válida (AAAA-MM-DD)", status_code=400)
+        if nuestro_pedido.strip() and doc.albaran:
+            doc.albaran.nuestro_pedido = nuestro_pedido.strip()
+            cambios["nuestro_pedido"] = nuestro_pedido.strip()
+        if cambios:
+            doc.notas = (doc.notas + " | " if doc.notas else "") + "corregido a mano: " + ", ".join(cambios)
+            repositorio.guardar(doc)
+            evento("decision.tomada", doc.id, {"decision": "CORRECCION_MANUAL", "quien": quien, "cambios": cambios})
+        return RedirectResponse(f"/documentos/{id_doc}?ok=corregido", status_code=303)
 
     @app.post("/documentos/{id_doc}/aprobar")
     def aprobar(id_doc: str, numero_registro_siddex: str = Form(""), quien: str = Form(""), notas: str = Form("")):

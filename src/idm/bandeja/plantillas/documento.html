@@ -9,15 +9,44 @@
 <div class="dos">
   <div>
     {% if es_pdf %}<iframe src="/documentos/{{ d.id }}/fichero"></iframe>
-    {% else %}<img src="/documentos/{{ d.id }}/fichero" style="max-width:100%;border:1px solid #ccc">{% endif %}
+    {% else %}
+    {% set rot = request.query_params.get("rot", "0") %}{% set zoom = request.query_params.get("zoom", "100") %}
+    <p class="filtros">Girar:
+      {% for r in ("0","90","180","270") %}<a href="?rot={{ r }}&zoom={{ zoom }}" {% if r == rot %}style="font-weight:bold"{% endif %}>{{ r }}°</a>{% endfor %}
+      · Zoom: {% for z in ("100","150","200") %}<a href="?rot={{ rot }}&zoom={{ z }}" {% if z == zoom %}style="font-weight:bold"{% endif %}>{{ z }}%</a>{% endfor %}
+      · <a href="/documentos/{{ d.id }}/fichero?rot={{ rot }}&lado=4000" target="_blank">abrir grande</a></p>
+    <div style="overflow:auto;max-height:85vh;border:1px solid #ccc">
+      <img src="/documentos/{{ d.id }}/fichero?rot={{ rot }}" style="width:{{ zoom }}%;display:block">
+    </div>
+    {% endif %}
   </div>
   <div>
     <table>
       <tr><th>Número original</th><td>{{ d.numero_original }}</td><th>Fecha</th><td>{{ d.leido.fecha if d.leido else "" }}</td></tr>
       <tr><th>Su pedido</th><td>{{ d.leido.nuestro_pedido if d.leido else "" }}</td><th>Pedido usado</th><td>{{ d.pedido or d.relacion }}</td></tr>
-      <tr><th>Lectura</th><td>{{ d.leido.metodo if d.leido else "" }} · confianza {{ d.leido.confianza if d.leido else "" }}</td>
+      <tr><th>Lectura</th><td><span class="pill {{ 'AMBAR' if d.leido and d.leido.resultado in ('IMAGEN_OCR','REQUIERE_OCR') else '' }}">{{ d.leido.resultado if d.leido else "" }}</span>
+          {{ d.leido.metodo if d.leido else "" }} · confianza {{ d.leido.confianza if d.leido else "" }}
+          {% if d.leido and d.leido.confianza < 0.6 %}<span class="aviso">(baja: comprobar cada campo)</span>{% endif %}</td>
           <th>Entrega / precio</th><td>{{ d.entrega or "" }} / {{ d.precio or "" }}</td></tr>
     </table>
+    {% if d.leido and d.leido.resultado == "REQUIERE_OCR" %}
+      <p class="error">Foto o escaneo sin texto y sin motor OCR: hay que teclear los datos en Siddex como siempre.
+         Corrige abajo al menos proveedor y número para que quede registrado.</p>
+    {% endif %}
+    {% if d.estado not in ("APROBADO", "RECHAZADO") %}
+    <details {% if d.leido and (d.leido.confianza < 0.6 or d.leido.resultado != "PDF_TEXTO") %}open{% endif %}>
+      <summary>Corregir cabecera a mano</summary>
+      <form method="post" action="/documentos/{{ d.id }}/corregir" class="dos">
+        <label>Proveedor (clave) <input name="proveedor" value="{{ d.proveedor }}"></label>
+        <label>Nº albarán tal como está en el papel <input name="numero" value="{{ d.numero_original }}"></label>
+        <label>Fecha (AAAA-MM-DD) <input name="fecha" value="{{ d.albaran.fecha if d.albaran and d.albaran.fecha else '' }}"></label>
+        <label>Nuestro pedido <input name="nuestro_pedido" value="{{ d.albaran.nuestro_pedido if d.albaran and d.albaran.nuestro_pedido else '' }}"></label>
+        <label>Quién <input name="quien"></label>
+        <div><button type="submit" class="gris">Guardar corrección</button>
+          <small>Después: <code>ejecutar.bat procesar_buzon --reprocesar-id {{ d.id }}</code> para cotejar de nuevo.</small></div>
+      </form>
+    </details>
+    {% endif %}
     {% if d.errores %}<div class="error">{% for e in d.errores %}<b>{{ e.codigo }}</b>: {{ e.mensaje }}
       {{ "(se puede reprocesar)" if e.recuperable else "(hay que actuar a mano)" }}<br>{% endfor %}</div>{% endif %}
     {% if d.avisos %}<ul class="aviso">{% for a in d.avisos %}<li>{{ a }}</li>{% endfor %}</ul>{% endif %}

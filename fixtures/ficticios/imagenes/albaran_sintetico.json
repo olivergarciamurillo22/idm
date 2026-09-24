@@ -1,0 +1,28 @@
+{
+ "tipo": "ALBARAN",
+ "cif": "B00000001",
+ "numero": "AC B26 0100009999",
+ "fecha": "2026-09-20",
+ "nuestro_pedido": null,
+ "lineas": [
+  {
+   "codigo_proveedor": "REF-A1",
+   "descripcion": "TORNILLO M8X30",
+   "cantidad": "100",
+   "precio_bruto": "0.12",
+   "descuento_pct": "45",
+   "importe": "6.60"
+  },
+  {
+   "codigo_proveedor": "REF-B22",
+   "descripcion": "TUERCA M8",
+   "cantidad": "50",
+   "precio_bruto": "0.04",
+   "descuento_pct": "0",
+   "importe": "2.00"
+  }
+ ],
+ "base": "8.60",
+ "iva": "1.81",
+ "total": "10.41"
+}

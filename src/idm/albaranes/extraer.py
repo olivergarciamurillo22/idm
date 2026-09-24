@@ -9,7 +9,7 @@ from pathlib import Path
 import pdfplumber
 
 UMBRAL_TEXTO = 80
-EXTENSIONES_IMAGEN = {".jpg", ".jpeg", ".png", ".tif", ".tiff", ".heic", ".webp"}
+EXTENSIONES_IMAGEN = {".jpg", ".jpeg", ".png", ".tif", ".tiff", ".heic", ".heif", ".hif", ".webp", ".bmp"}
 EXTENSIONES_PDF = {".pdf"}
 EXTENSIONES_EXCEL = {".xls", ".xlsx", ".xlsm", ".csv", ".ods"}
 

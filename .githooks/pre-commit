@@ -12,7 +12,7 @@ for f in $(git diff --cached --name-only --diff-filter=ACMR); do
   esac
   ext=$(printf '%s' "$f" | tr '[:upper:]' '[:lower:]' | sed 's/.*\.//')
   case "$ext" in
-    pdf|xls|xlsx|xlsm|eml|msg|jpg|jpeg|png|tif|tiff|heic|webp|zip|7z)
+    pdf|xls|xlsx|xlsm|eml|msg|jpg|jpeg|png|tif|tiff|heic|heif|hif|webp|bmp|zip|7z)
       case "$f" in
         fixtures/ficticios/*|fixtures/golden/*|fixtures/problematicos/*|fixtures/no_procesables/*) ;;
         fixtures/reales/*)

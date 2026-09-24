@@ -17,6 +17,10 @@ datos/*
 *.tif
 *.tiff
 *.heic
+*.HEIC
+*.heif
+*.hif
+*.bmp
 *.webp
 *.zip
 *.7z

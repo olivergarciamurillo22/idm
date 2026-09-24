@@ -30,8 +30,13 @@ Comandos del día a día (todos con `ejecutar.bat`, que ya activa el entorno y l
 | Arrancar la bandeja | `ejecutar.bat servir_bandeja` → `http://<ip>:8000` |
 | Generar pedidos | `ejecutar.bat generar_pedidos` (`--hoja SEPT_26` para incluir el planning) |
 | Comprobar los exports de Siddex | `ejecutar.bat revisar_exports` |
-| Medir el lector | `ejecutar.bat benchmark_lector --detalle` |
+| Medir el lector | `ejecutar.bat benchmark_lector --detalle` (con fotos reales: `--carpeta datos\\analisis_real\\benchmark --lector ocr`) |
+| Inventariar un lote de fotos | `ejecutar.bat inventariar_fotos --carpeta datos\\material_real\\fotos_X --lado 1600` |
 | Tests / lint | `ejecutar.bat tests` · `ejecutar.bat lint` |
+
+OCR local para fotos y escaneos (opcional, todo en la máquina): instalar Tesseract con el instalador de UB Mannheim
+(marcar el idioma *Spanish*), comprobar que `tesseract --version` funciona en un cmd nuevo, y poner `OCR_MOTOR=tesseract`
+en `.env`. Sin él, las fotos quedan en la bandeja como REQUIERE_OCR para teclear.
 
 Carpetas que hay que rellenar (ver `datos/README.md`):
 - `datos\siddex\`: exports de Siddex (Maestro de Artículos, Proveedores, Fabricantes, Pedidos, Stock, escandallos .xls).

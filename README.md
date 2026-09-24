@@ -32,7 +32,8 @@ Todas las tareas se lanzan con `ejecutar.bat <tarea> [args]` (Windows) o `./ejec
 | `procesar_buzon` | Lee buzones IMAP o `datos/entrada`, extrae, coteja y guarda con traza y ejecución | `ejecutar.bat procesar_buzon --sin-imap` · `--fichero X` · `--reprocesar-id ID` |
 | `revisar_exports` | Dice qué columna de cada export de Siddex se reconoce, qué falta y qué sobra | `ejecutar.bat revisar_exports` |
 | `ejecutar_golden` | Ejecuta todos los casos de `fixtures/golden/` y muestra aciertos | `ejecutar.bat ejecutar_golden` |
-| `benchmark_lector` | Aciertos por campo del lector sobre `fixtures/ficticios/documentos/` | `ejecutar.bat benchmark_lector` |
+| `benchmark_lector` | Aciertos por campo del lector (PDF u OCR) sobre una carpeta con `.json` de verdad |
+| `inventariar_fotos` | Inventario (sha, EXIF, duplicados) y derivados JPEG de una carpeta de fotos | `ejecutar.bat benchmark_lector` |
 | `servir_bandeja` | Bandeja de revisión web en la red local | `ejecutar.bat servir_bandeja` |
 | `migrar` | Crea o actualiza el esquema de la base de datos (Alembic) | `ejecutar.bat migrar` |
 | `tests` / `lint` | pytest / ruff check + format --check | `ejecutar.bat tests` · `ejecutar.bat lint` |

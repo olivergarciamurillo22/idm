@@ -170,3 +170,34 @@ la suma de líneas) y tres tests `xfail(strict=True)` en `tests/unit/test_escena
 parcial). Cada uno tiene un `PENDIENTE.md` o un motivo que dice qué decisión falta. Cuando IDM decida y se implemente,
 el XPASS estricto obliga a moverlos a golden. La factura parcial hoy sale VERDE y solo informa (`lineas_no_facturadas`):
 es provisional, no una regla.
+
+## 2026-09-24 · HEIC de iPhone entra por el mismo circuito
+`pillow-heif` (pip, con ruedas para Windows) registra HEIC/HEIF en Pillow. `albaranes/imagenes.py` abre cualquier formato
+aplicando la orientación EXIF, deja un derivado JPEG local nombrado por el sha del original (`derivados.jsonl` guarda la
+relación) y nunca toca el original. Los derivados viven en `datos/` y no entran en git.
+
+## 2026-09-24 · OCR local como prototipo detrás de una interfaz, decidido por benchmark
+`MotorOCR` (reconocer(imagen) → ResultadoOCR) con `MotorTesseract` (binario local por subprocess) y `MotorNulo`.
+`LectorImagenOCR` = imagen → preprocesado → orientación por confianza → OCR en varios modos → el mismo intérprete de texto
+que el PDF. El dominio no sabe que existe el OCR. Se activa con `OCR_MOTOR=tesseract`; por defecto `ninguno` (REQUIERE_OCR).
+Los números están en `docs/benchmark-lector-real.md`; Tesseract NO es decisión de producción.
+
+## 2026-09-24 · Preprocesado: solo lo que el benchmark justifica
+Tubería por defecto `contraste_3200,recorte_3200` (dos pasadas unidas): reescalar a 3200 px, gris, autocontraste, y una
+segunda pasada recortando al área con texto. Binarizar y suavizar existen pero no se usan porque empeoran. La orientación
+se decide probando 0/90/180/270 en pequeño y sumando la confianza de las palabras fiables (el OSD de Tesseract falla).
+
+## 2026-09-24 · Plantillas describen layouts, no proveedores
+`LAYOUT_A/B/C` recogen lo observado en papel real: dónde está el número (etiqueta arriba, valor debajo), su forma
+(`XX Y00 0000000000`, `00.000000`, `0000/0.000`), el orden de columnas de las líneas y el ruido del pie. Los nombres
+comerciales solo aparecen en el mapa proveedor→layout; los códigos Siddex y CIF reales viven en
+`datos/proveedores_conocidos.csv` (fuera de git), que `equivalencias/proveedores.cargar_locales` funde con el registro.
+
+## 2026-09-24 · Lo leído por OCR nunca es verde
+Aunque el cotejo cuadre, un documento con `IMAGEN_OCR` queda ÁMBAR con el aviso de confianza y hay que aprobarlo mirando la
+foto. Dos reparaciones deterministas se permiten porque la aritmética las confirma: importe sin coma ("256" → 2,56 si
+cantidad × precio × dto lo da) y tipo ALBARAN si el número tiene la forma de albarán del proveedor.
+
+## 2026-09-24 · Anotación manuscrita = últimos 4 dígitos del Nº Registro de Siddex (evidencia documental)
+Las fotos muestran "2921" escrito en el albarán que Siddex registró como 20262921. No lo ha confirmado Fernando en
+palabras, pero la evidencia es directa. El programa devuelve ese número al aprobar (ya estaba) y no intenta leerlo del papel.

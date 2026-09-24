@@ -12,10 +12,13 @@ Imprime `5526/2.063`; en Siddex va `5526/2063` (se quitan los puntos).
 No: el albarán llega sin precio; se completa con la factura (PENDIENTE_FACTURA). Código alternativo MO01001 ↔ SERVICIO TURISMO (CONTRATOS).
 
 ## Portes
-PENDIENTE
+No aparecen en el albarán (tabla de totales vacía). Pactados: PENDIENTE.
 
 ## Cómo factura
 PENDIENTE
 
+## Layout de lectura
+Layout C de `docs/reglas-proveedor/layouts.md` (observado en fotos reales el 23/09/2026; datos en `datos/analisis_real/`).
+
 ## Documentos de muestra
-PENDIENTE: 3–4 albaranes y 1–2 facturas en PDF para afinar la plantilla de lectura (`albaranes/plantillas.py`).
+Fotos reales en `datos/material_real/` (fuera de git). PENDIENTE: 3–4 albaranes y 1–2 facturas en PDF para afinar la plantilla de lectura (`albaranes/plantillas.py`).

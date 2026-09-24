@@ -72,7 +72,9 @@
 
 ```
 PDF/foto ─► buzon ─► sha256 (¿ya visto? → duplicado, evento sobre el original) ─► lector.leer(ruta)
-        ─► ResultadoLectura: PDF_TEXTO sigue · REQUIERE_OCR → EN_REVISION · CORRUPTO/VACIO/EXCEL/NO_SOPORTADO → NO_PROCESABLE
+        ─► ResultadoLectura: PDF_TEXTO sigue · IMAGEN_OCR sigue pero siempre ÁMBAR · REQUIERE_OCR → EN_REVISION
+           · CORRUPTO/VACIO/EXCEL/NO_SOPORTADO → NO_PROCESABLE
+        (imagen/HEIC: abrir con EXIF → preprocesado → mejor giro de 4 → OCR psm 4/6/11 × 2 tuberías → texto → intérprete)
         ─► DocumentoLeido ─► normalizar nº por proveedor
         ─► equivalencias (código proveedor → código IDM, con método)
         ─► ¿nuestro pedido? ─┬─ sí ─► cotejar(albaran, pedido, reglas) → Cotejo (verde/ámbar)
@@ -86,7 +88,8 @@ PDF/foto ─► buzon ─► sha256 (¿ya visto? → duplicado, evento sobre el 
 
 | Interfaz | Módulo | Implementaciones |
 |---|---|---|
-| `LectorDocumentos.leer(ruta) -> DocumentoLeido` | `albaranes/lector.py` | `LectorTextoPDF` (pdfplumber), `LectorImagenNulo` (mínimo; OCR/modelo detrás) |
+| `LectorDocumentos.leer(ruta) -> DocumentoLeido` | `albaranes/lector.py` | `LectorTextoPDF` (pdfplumber), `LectorImagenOCR` (imagen/HEIC → preprocesado → `MotorOCR` → mismo intérprete de texto), `LectorImagenNulo` (REQUIERE_OCR) |
+| `MotorOCR.reconocer(imagen) -> ResultadoOCR` | `albaranes/ocr.py` | `MotorTesseract` (binario local), `MotorNulo`; otros motores locales se añaden aquí y se comparan con `benchmark_lector` |
 | `FuenteDocumentos.pendientes()` | `albaranes/buzon.py` | `CarpetaEntrada`, `BuzonIMAP` |
 | `SiddexGateway` | `siddex/gateway.py` | `SiddexDesdeExcel`, `SiddexDesdeBD` (TODO), escritura solo vía soportada |
 | `Correo.enviar(mensaje)` | `pedidos/enviar.py` | `CorreoSimulado` (.eml en datos/salida), `CorreoSMTP` |

@@ -150,3 +150,16 @@ documento está APROBADO. Lo que ya está registrado no se toca al volver a pasa
 ## 2026-09-24 · procesar_buzon es de instancia única
 Bloqueo por fichero con O_EXCL (`datos/procesar_buzon.lock`, caducidad 2 h) para que la tarea programada de cada
 10 minutos no se pise a sí misma si una pasada tarda más.
+
+## 2026-09-24 · Columnas de Siddex: configuración central, alias externos e informe por fichero
+`siddex/columnas.py` es el único sitio con los nombres de columna (campo, alias, requerida, descripción); marcado
+PROVISIONAL hasta tener los exports reales. Alias extra sin tocar código en `datos/siddex/columnas.json`. Cada lectura
+deja un `InformeColumnas` (encontradas ← cabecera real, faltantes requeridas/opcionales, columnas sin uso, fila de
+cabecera, nº de filas). Falta una requerida → `ColumnasFaltantes` con mensaje que lista las cabeceras vistas; el
+gateway no estricto devuelve vacío y lo apunta en `avisos` (estricto=True lanza). Las filas llevan siempre todos los
+campos (None si la columna no está) para que ningún consumidor reviente por KeyError. `revisar_exports` imprime todo
+esto: es lo primero que se ejecuta cuando lleguen los ficheros reales.
+
+## 2026-09-24 · Caché de pedidos por mtime en SiddexDesdeExcel
+`pedidos_abiertos`, `pedido` y `pendiente_recibir` releían el Excel en cada llamada (una por documento procesado).
+Ahora se cachea por fecha de modificación del fichero; al sustituir el export, se relee solo.

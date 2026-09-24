@@ -1,116 +1,63 @@
 """SiddexDesdeExcel: implementación de SiddexGateway sobre los exports a Excel de las pantallas de Siddex.
-Lee por nombre de cabecera (tabla COLUMNAS al principio) los ficheros de una carpeta: articulos, proveedores,
-fabricantes, pedidos, stock y escandallos .xls. No escribe nada y no conoce la base de datos de Siddex."""
+Las columnas se localizan por cabecera según siddex/columnas.py (+ alias en datos/siddex/columnas.json); cada fichero
+deja un InformeColumnas. Lee articulos, proveedores, fabricantes, pedidos, stock y escandallos. No escribe nada."""
 
-import unicodedata
 from decimal import Decimal
 from pathlib import Path
-
-import openpyxl
 
 from idm.dominio.dinero import CERO, a_decimal
 from idm.dominio.estados import RelacionPedido
 from idm.dominio.modelos import Articulo, Equivalencia, LineaPedido, Pedido, Proveedor
 from idm.equivalencias.proveedores import clave_para
+from idm.siddex.columnas import FICHEROS, ColumnasFaltantes, InformeColumnas, cargar_alias_extra, leer_tabla
 from idm.siddex.lectura import Escandallo, leer_escandallo, normalizar_codigo
-
-# PROVISIONAL: nombres de cabecera aceptados por cada campo. Se ajustan cuando lleguen los exports reales
-# (Maestro de Artículos, Proveedores, Fabricantes, Pedidos, Stocks). Ver DECISIONES.md.
-COLUMNAS: dict[str, dict[str, tuple[str, ...]]] = {
-    "articulos": {
-        "codigo": ("codigo", "articulo", "codigo articulo"),
-        "descripcion": ("descripcion", "denominacion"),
-        "unidad": ("unidad", "ud", "unidad medida"),
-        "proveedor": ("proveedor", "proveedor habitual", "codigo proveedor"),
-        "precio": ("precio", "precio compra", "ultimo precio"),
-        "descuento": ("descuento", "dto", "dto %"),
-        "multiplo": ("multiplo", "multiplo compra", "unidades caja", "caja"),
-        "tipo": ("tipo", "tipo articulo"),
-    },
-    "proveedores": {
-        "codigo": ("codigo", "codigo proveedor"),
-        "nombre": ("nombre", "razon social"),
-        "cif": ("cif", "nif"),
-        "email": ("email", "e-mail", "correo"),
-    },
-    "fabricantes": {
-        "codigo": ("codigo", "articulo", "codigo articulo"),
-        "proveedor": ("proveedor", "codigo proveedor", "fabricante"),
-        "codigo_proveedor": ("codigo alternativo", "referencia proveedor", "codigo proveedor articulo", "referencia"),
-        "descripcion": ("descripcion proveedor", "denominacion proveedor", "descripcion"),
-    },
-    "pedidos": {
-        "numero": ("pedido", "numero pedido", "nuestro pedido", "numero"),
-        "proveedor": ("proveedor", "codigo proveedor"),
-        "fecha": ("fecha", "fecha pedido"),
-        "codigo": ("articulo", "codigo", "codigo articulo"),
-        "descripcion": ("descripcion", "denominacion"),
-        "cantidad": ("cantidad", "pedido cantidad", "cant"),
-        "unidad": ("unidad", "ud"),
-        "precio": ("precio", "precio compra"),
-        "descuento": ("descuento", "dto", "dto %"),
-        "recibida": ("recibida", "cantidad recibida", "servida"),
-        "codigo_proveedor": ("codigo alternativo", "referencia proveedor", "referencia"),
-    },
-    "stock": {
-        "codigo": ("codigo", "articulo", "codigo articulo"),
-        "stock": ("stock", "existencias", "stock actual"),
-    },
-}
-
-FICHEROS = {
-    "articulos": "articulos.xlsx",
-    "proveedores": "proveedores.xlsx",
-    "fabricantes": "fabricantes.xlsx",
-    "pedidos": "pedidos.xlsx",
-    "stock": "stock.xlsx",
-}
-
-
-def _normalizar_cabecera(texto) -> str:
-    sin_acentos = unicodedata.normalize("NFKD", str(texto or "")).encode("ascii", "ignore").decode()
-    return " ".join(sin_acentos.lower().replace("_", " ").replace(".", " ").split())
-
-
-def leer_tabla(ruta: Path, columnas: dict[str, tuple[str, ...]]) -> list[dict[str, object]]:
-    """Devuelve una lista de dicts campo→valor usando la primera fila con cabeceras reconocidas."""
-    libro = openpyxl.load_workbook(ruta, data_only=True, read_only=True)
-    hoja = libro.worksheets[0]
-    filas = list(hoja.iter_rows(values_only=True))
-    libro.close()
-    for i, fila in enumerate(filas):
-        cabeceras = [_normalizar_cabecera(c) for c in fila]
-        indices = {
-            campo: next((k for k, cab in enumerate(cabeceras) if cab in nombres), None)
-            for campo, nombres in columnas.items()
-        }
-        if indices.get("codigo") is not None or indices.get("numero") is not None:
-            return [
-                {
-                    campo: (fila_datos[k] if k is not None and k < len(fila_datos) else None)
-                    for campo, k in indices.items()
-                }
-                for fila_datos in filas[i + 1 :]
-                if any(c not in (None, "") for c in fila_datos)
-            ]
-    raise ValueError(f"{ruta.name}: no se reconoce ninguna fila de cabeceras (ver COLUMNAS en desde_excel.py)")
 
 
 class SiddexDesdeExcel:
-    def __init__(self, carpeta: Path) -> None:
+    def __init__(self, carpeta: Path, estricto: bool = False) -> None:
+        """estricto=True: si faltan columnas requeridas lanza ColumnasFaltantes en vez de devolver vacío."""
         self.carpeta = Path(carpeta)
+        self.estricto = estricto
+        self.alias_extra = cargar_alias_extra(self.carpeta)
+        self.informes: dict[str, InformeColumnas] = {}
+        self.avisos: list[str] = []
         self._escandallos: dict[str, Escandallo] | None = None
+        self._cache_pedidos: tuple[float, dict[str, Pedido]] | None = None
 
     def _ruta(self, nombre: str) -> Path | None:
         ruta = self.carpeta / FICHEROS[nombre]
         return ruta if ruta.exists() else None
 
-    def proveedores(self) -> list[Proveedor]:
-        ruta = self._ruta("proveedores")
+    def _tabla(self, nombre: str) -> list[dict[str, object]]:
+        """Filas de un export o [] si no existe. Nunca pierde columnas en silencio: el informe lo dice."""
+        ruta = self._ruta(nombre)
         if ruta is None:
+            self.avisos.append(f"Falta el export {FICHEROS[nombre]} en {self.carpeta}")
             return []
+        try:
+            filas, informe = leer_tabla(ruta, nombre, self.alias_extra)
+        except ColumnasFaltantes as exc:
+            self.informes[nombre] = exc.informe
+            self.avisos.append(str(exc))
+            if self.estricto:
+                raise
+            return []
+        self.informes[nombre] = informe
+        for campo in informe.faltantes_opcionales:
+            self.avisos.append(f"{FICHEROS[nombre]}: sin columna '{campo}', se usa el valor por defecto")
+        if informe.desconocidas:
+            self.avisos.append(f"{FICHEROS[nombre]}: columnas sin uso: {', '.join(informe.desconocidas)}")
+        return filas
+
+    def informe_texto(self) -> str:
+        partes = [inf.texto() for inf in self.informes.values()]
+        if self.avisos:
+            partes.append("Avisos:\n  - " + "\n  - ".join(dict.fromkeys(self.avisos)))
+        return "\n".join(partes)
+
+    def proveedores(self) -> list[Proveedor]:
         resultado = []
-        for f in leer_tabla(ruta, COLUMNAS["proveedores"]):
+        for f in self._tabla("proveedores"):
             codigo = str(f["codigo"]).strip() if f["codigo"] is not None else None
             nombre = str(f["nombre"] or "").strip()
             resultado.append(
@@ -130,11 +77,8 @@ class SiddexDesdeExcel:
         return clave_para(str(valor).strip(), "")
 
     def articulos(self) -> dict[str, Articulo]:
-        ruta = self._ruta("articulos")
-        if ruta is None:
-            return {}
         resultado = {}
-        for f in leer_tabla(ruta, COLUMNAS["articulos"]):
+        for f in self._tabla("articulos"):
             if f["codigo"] in (None, ""):
                 continue
             codigo = normalizar_codigo(str(f["codigo"]))
@@ -151,11 +95,8 @@ class SiddexDesdeExcel:
         return resultado
 
     def equivalencias(self) -> list[Equivalencia]:
-        ruta = self._ruta("fabricantes")
-        if ruta is None:
-            return []
         resultado = []
-        for f in leer_tabla(ruta, COLUMNAS["fabricantes"]):
+        for f in self._tabla("fabricantes"):
             if f["codigo"] in (None, "") or f["codigo_proveedor"] in (None, ""):
                 continue
             proveedor = self._clave_proveedor(f["proveedor"])
@@ -173,10 +114,11 @@ class SiddexDesdeExcel:
 
     def _pedidos(self) -> dict[str, Pedido]:
         ruta = self._ruta("pedidos")
-        if ruta is None:
-            return {}
+        marca = ruta.stat().st_mtime if ruta else -1.0
+        if self._cache_pedidos is not None and self._cache_pedidos[0] == marca:
+            return self._cache_pedidos[1]
         pedidos: dict[str, Pedido] = {}
-        for f in leer_tabla(ruta, COLUMNAS["pedidos"]):
+        for f in self._tabla("pedidos"):
             if f["numero"] in (None, "") or f["codigo"] in (None, ""):
                 continue
             numero = str(f["numero"]).strip()
@@ -203,6 +145,7 @@ class SiddexDesdeExcel:
                     codigo_proveedor=str(f["codigo_proveedor"]).strip() if f["codigo_proveedor"] else None,
                 )
             )
+        self._cache_pedidos = (marca, pedidos)
         return pedidos
 
     def pedidos_abiertos(self, proveedor: str | None = None) -> list[Pedido]:
@@ -216,12 +159,9 @@ class SiddexDesdeExcel:
         return self._pedidos().get(str(numero).strip())
 
     def stock(self) -> dict[str, Decimal]:
-        ruta = self._ruta("stock")
-        if ruta is None:
-            return {}
         return {
             normalizar_codigo(str(f["codigo"])): a_decimal(f["stock"]) or CERO
-            for f in leer_tabla(ruta, COLUMNAS["stock"])
+            for f in self._tabla("stock")
             if f["codigo"] not in (None, "")
         }
 
@@ -239,8 +179,11 @@ class SiddexDesdeExcel:
             for ruta in sorted(self.carpeta.glob("*.xls")):
                 try:
                     e = leer_escandallo(ruta)
-                except Exception:  # noqa: BLE001 - un fichero raro no debe tumbar el resto
+                except Exception as exc:  # noqa: BLE001 - un .xls raro no debe tumbar el resto, pero se dice
+                    self.avisos.append(f"Escandallo {ruta.name}: no se puede leer ({type(exc).__name__}: {exc})")
                     continue
                 if e.codigo_maquina:
                     self._escandallos[e.codigo_maquina] = e
+                else:
+                    self.avisos.append(f"Escandallo {ruta.name}: sin cabecera ' Articulo: <código>' en la columna 1")
         return self._escandallos.get(normalizar_codigo(codigo_maquina))

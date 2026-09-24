@@ -1,0 +1,10 @@
+{
+  "_nota": "Baseline CONGELADA de Tesseract (motor local de respaldo) sobre las 9 fotos reales del 23/09/2026 (6 albaranes distintos, 3 layouts). Solo cifras: las fotos y su verdad están en datos/, fuera de git. Métrica de benchmark_lector (líneas emparejadas por posición); verificada al congelar: 33/50 (se había publicado 35/50 por error de suma). No se optimiza más Tesseract; esta cifra es la referencia para comparar proveedores cloud.",
+  "fecha": "2026-09-24",
+  "proveedor": "tesseract",
+  "configuracion": "contraste_3200,recorte_3200 · psm 4,6,11 · mejor giro de 4",
+  "documentos": 9,
+  "cabecera": {"numero": [8, 9], "fecha": [9, 9], "cif": [9, 9]},
+  "lineas_5_campos": [33, 50],
+  "completos": [4, 9]
+}

@@ -12,9 +12,26 @@ python -m venv .venv
 pip install -r requirements.txt
 copy .env.ejemplo .env
 notepad .env                      :: rutas, buzones, SMTP, MODO_SIMULACION=true
-python -m pytest                  :: todo en verde antes de seguir
+git config core.hooksPath .githooks   :: protección contra subir datos reales (una vez por clon)
+ejecutar.bat tests                :: todo en verde antes de seguir
 ejecutar.bat migrar               :: crea datos\idm.db
 ```
+
+Comandos del día a día (todos con `ejecutar.bat`, que ya activa el entorno y la consola UTF-8):
+
+| Quiero | Comando |
+|---|---|
+| Ver las tareas | `ejecutar.bat` |
+| Crear o actualizar la base de datos | `ejecutar.bat migrar` |
+| Procesar lo que hay en `datos\entrada` (sin correo) | `ejecutar.bat procesar_buzon --sin-imap` |
+| Procesar una carpeta concreta | `ejecutar.bat procesar_buzon --sin-imap --carpeta C:\ruta\carpeta` |
+| Procesar un solo fichero | `ejecutar.bat procesar_buzon --fichero C:\ruta\albaran.pdf` |
+| Volver a procesar un documento (no si está aprobado) | `ejecutar.bat procesar_buzon --reprocesar-id <id de la bandeja>` |
+| Arrancar la bandeja | `ejecutar.bat servir_bandeja` → `http://<ip>:8000` |
+| Generar pedidos | `ejecutar.bat generar_pedidos` (`--hoja SEPT_26` para incluir el planning) |
+| Comprobar los exports de Siddex | `ejecutar.bat revisar_exports` |
+| Medir el lector | `ejecutar.bat benchmark_lector --detalle` |
+| Tests / lint | `ejecutar.bat tests` · `ejecutar.bat lint` |
 
 Carpetas que hay que rellenar (ver `datos/README.md`):
 - `datos\siddex\`: exports de Siddex (Maestro de Artículos, Proveedores, Fabricantes, Pedidos, Stock, escandallos .xls).
@@ -57,6 +74,11 @@ ejecutar.bat migrar
 ```
 
 ## 4. Si algo falla
+
+- "No se ejecuta: Otra ejecución tiene el bloqueo": hay otra pasada de `procesar_buzon` en marcha (o murió). Si no hay
+  ninguna, borra `datos\procesar_buzon.lock`.
+- Un documento en estado ERROR guarda el traceback en la bandeja; se reprocesa con `--reprocesar-id` cuando se arregle la causa.
+- NO_PROCESABLE (corrupto, vacío, Excel, extensión rara): mirar el fichero en `datos\procesados\<sha>` y pedirlo de nuevo al proveedor.
 
 - `ejecutar.bat procesar_buzon --sin-imap` procesa solo la carpeta (descarta el correo como causa).
 - `ejecutar.bat ejecutar_golden` y `ejecutar.bat benchmark_lector` comprueban que el programa sigue leyendo bien.

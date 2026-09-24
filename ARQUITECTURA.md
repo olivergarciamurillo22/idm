@@ -8,7 +8,9 @@
 4. **El núcleo es Python puro y se prueba sin nada alrededor.** `cotejar(albaran, pedido, reglas)` se ejecuta sin base de datos, sin web, sin Siddex y sin ningún modelo.
 5. **Dinero con `Decimal`, nunca `float`.** Redondeo explícito a dos decimales en un solo sitio: `dominio/dinero.py`.
 6. **Estados separados por dimensión**, no un único `status`:
-   - documento: `RECIBIDO, LEIDO, COTEJADO, EN_REVISION, APROBADO, RECHAZADO`
+   - documento: `RECIBIDO, LEIDO, COTEJADO, EN_REVISION, APROBADO, RECHAZADO` y laterales `ERROR` (fallo técnico,
+     reprocesable) y `NO_PROCESABLE` (corrupto, vacío, Excel, formato no admitido). Los duplicados no crean documento.
+   - lectura (`ResultadoLectura`): `PDF_TEXTO, REQUIERE_OCR, EXCEL, VACIO, CORRUPTO, NO_SOPORTADO`
    - relación con pedido: `CON_PEDIDO, SIN_PEDIDO, PEDIDO_PROPUESTO`
    - precio: `CONOCIDO, PENDIENTE_FACTURA`
    - entrega: `COMPLETA, PARCIAL, EXCESO`
@@ -16,7 +18,9 @@
 8. **Siddex, tres niveles en el tiempo:** primero exportaciones a Excel (`SiddexDesdeExcel`), luego lectura directa de su base de datos en solo lectura (`SiddexDesdeBD`, cuando haya acceso), y escritura solo por una vía soportada y al final del proyecto. **Nunca se escribe en la base de datos de producción de Siddex por detrás de la aplicación.**
 9. **Golden dataset:** `fixtures/golden/` con documentos ficticios y su resultado esperado en JSON; pytest los ejecuta todos y falla si algo que funcionaba deja de funcionar.
 10. **Idempotencia:** un documento se identifica por su SHA-256 y por `(proveedor, tipo, número normalizado)`; procesarlo dos veces no crea dos registros.
-11. **Trazabilidad:** tabla de eventos de negocio (`documento.recibido`, `proveedor.resuelto`, `articulo.resuelto` con método, `precio.comparado`, `decision.tomada`) separada de los logs técnicos.
+11. **Trazabilidad:** tabla de eventos de negocio (`documento.recibido`, `proveedor.resuelto`, `articulo.resuelto` con método, `precio.comparado`, `decision.tomada`) separada de los logs técnicos. Cada pasada es una `Ejecución` y cada documento guarda una `Traza` (lectura, proveedor y método, campos extraídos, normalizaciones, artículos con método, pedido y método, albaranes, factura, reglas de cotejo con resultado, diferencias, errores, estado final, versión de procesamiento).
+12. **Errores como datos:** los errores conocidos son `ErrorProcesamiento` (código cerrado, mensaje, recuperable) guardados con el documento; la excepción genérica es solo red de seguridad para que un fichero raro no tumbe el lote.
+13. **Sin datos reales en git, con tres capas:** `.gitignore` (documentos ignorados salvo en fixtures permitidas), hook `pre-commit` y test que lo comprueba. Estructura `fixtures/{ficticios, reales (anonimizados), golden, problematicos, no_procesables}`.
 
 ## Diagrama de piezas
 
@@ -67,12 +71,14 @@
 ## Flujo de un albarán
 
 ```
-PDF/foto ─► buzon ─► sha256 (¿ya visto? → fin) ─► extraer (texto >80 car.? pdfplumber : imagen)
-        ─► lector.leer(ruta) → DocumentoLeido ─► normalizar nº por proveedor
+PDF/foto ─► buzon ─► sha256 (¿ya visto? → duplicado, evento sobre el original) ─► lector.leer(ruta)
+        ─► ResultadoLectura: PDF_TEXTO sigue · REQUIERE_OCR → EN_REVISION · CORRUPTO/VACIO/EXCEL/NO_SOPORTADO → NO_PROCESABLE
+        ─► DocumentoLeido ─► normalizar nº por proveedor
         ─► equivalencias (código proveedor → código IDM, con método)
         ─► ¿nuestro pedido? ─┬─ sí ─► cotejar(albaran, pedido, reglas) → Cotejo (verde/ámbar)
                              └─ no ─► proponer_pedido(albaran) → PEDIDO_PROPUESTO
-        ─► almacen (documento + eventos) ─► bandeja (Fernando aprueba / rechaza)
+        ─► almacen (documento + traza + eventos con ejecucion_id; (proveedor,tipo,nº) único → duplicado_numero)
+        ─► bandeja (Fernando aprueba / rechaza) · reproceso solo explícito y nunca sobre APROBADO
         ─► número de registro devuelto para anotarlo en el papel
 ```
 

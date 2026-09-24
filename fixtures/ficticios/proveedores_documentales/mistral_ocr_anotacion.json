@@ -1,0 +1,8 @@
+{
+  "pages": [
+    {"index": 0, "markdown": "SUMINISTROS FICTICIOS LA VEGA S.L.\n\nDocumento de entrega", "tables": [], "dimensions": {"dpi": 200, "height": 1300, "width": 1800}}
+  ],
+  "model": "mistral-ocr-2512",
+  "document_annotation": "{\"numero\": \"AC B26 0100009999\", \"fecha\": \"20/09/2026\", \"cif\": \"B00000001\", \"proveedor\": \"SUMINISTROS FICTICIOS LA VEGA S.L.\", \"nuestro_pedido\": null, \"lineas\": [{\"codigo_proveedor\": \"REF-A1\", \"descripcion\": \"TORNILLO M8X30\", \"cantidad\": \"100\", \"precio_bruto\": \"0,12\", \"descuento_pct\": \"45\", \"importe\": \"6,60\"}]}",
+  "usage_info": {"pages_processed": 1, "doc_size_bytes": 184321}
+}

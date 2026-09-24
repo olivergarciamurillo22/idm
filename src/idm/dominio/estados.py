@@ -26,6 +26,7 @@ class ResultadoLectura(StrEnum):
     PDF_TEXTO = "PDF_TEXTO"  # PDF con capa de texto: leído
     IMAGEN_OCR = "IMAGEN_OCR"  # imagen o escaneo leído por OCR local: campos con confianza, revisar en bandeja
     REQUIERE_OCR = "REQUIERE_OCR"  # PDF escaneado o imagen sin motor OCR disponible o configurado
+    PROVEEDOR_NO_DISPONIBLE = "PROVEEDOR_NO_DISPONIBLE"  # el servicio de lectura falló técnicamente: reintentar luego
     EXCEL = "EXCEL"  # hoja de cálculo en la entrada: no es un documento de proveedor
     VACIO = "VACIO"  # fichero de 0 bytes
     CORRUPTO = "CORRUPTO"  # no se puede abrir
@@ -43,6 +44,9 @@ class CodigoError(StrEnum):
     GATEWAY_SIDDEX = "GATEWAY_SIDDEX"
     CONFLICTO_DUPLICADO = "CONFLICTO_DUPLICADO"
     REPROCESO_NO_PERMITIDO = "REPROCESO_NO_PERMITIDO"
+    PROVEEDOR_DOCUMENTAL_NO_DISPONIBLE = "PROVEEDOR_DOCUMENTAL_NO_DISPONIBLE"
+    PROVEEDOR_DOCUMENTAL_ERROR = "PROVEEDOR_DOCUMENTAL_ERROR"
+    PROCESAMIENTO_EXTERNO_NO_AUTORIZADO = "PROCESAMIENTO_EXTERNO_NO_AUTORIZADO"
     INESPERADO = "INESPERADO"
 
 

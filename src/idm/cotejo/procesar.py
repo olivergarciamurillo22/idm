@@ -248,6 +248,23 @@ def _procesar(entrante, lector, gateway, tabla, reg, carpeta_procesados, reglas,
         doc.estado, doc.semaforo = EstadoDocumento.NO_PROCESABLE, Semaforo.AMBAR
         reg.evento("documento.no_procesable", doc.id, {"resultado": leido.resultado})
         return _cerrar(doc, entrante, reg, carpeta_procesados, Motivo.NO_PROCESABLE)
+    if leido.motor:
+        reg.evento(
+            "documento.proveedor_documental",
+            doc.id,
+            {
+                "motor": leido.motor,
+                "resultado": leido.resultado,
+                "coste_estimado_eur": str(leido.coste_estimado_eur) if leido.coste_estimado_eur is not None else None,
+                "campos_dudosos": leido.campos_dudosos,
+                **leido.metadatos_motor,
+            },
+        )
+    if leido.resultado == ResultadoLectura.PROVEEDOR_NO_DISPONIBLE:
+        # Fallo técnico del servicio de lectura: queda en ERROR y se reintenta después (--reintentar-pendientes).
+        # No se manda el documento a ningún otro proveedor por su cuenta.
+        doc.estado, doc.semaforo = EstadoDocumento.ERROR, Semaforo.AMBAR
+        return _cerrar(doc, entrante, reg, carpeta_procesados, Motivo.ERROR)
     doc.estado = EstadoDocumento.LEIDO
     if leido.resultado == ResultadoLectura.REQUIERE_OCR:
         doc.estado, doc.semaforo = EstadoDocumento.EN_REVISION, Semaforo.AMBAR

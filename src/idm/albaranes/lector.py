@@ -85,7 +85,7 @@ def _cif(texto: str, excluir: set[str]) -> str | None:
     return None
 
 
-# Un número de documento empieza por pocas letras y un dígito cerca ("AC B26 0100…", "F26/000731", "5526/2.063")
+# Un número de documento empieza por pocas letras y un dígito cerca ("AC B26 0100…", "F26/000731", "0000/0.000")
 RE_FORMA_NUMERO = re.compile(r"^[A-Z]{0,4}[ .\-/]{0,2}[A-Z]?\d", re.IGNORECASE)
 
 
@@ -426,7 +426,11 @@ class LectorImagenOCR:
             imagen = abrir(ruta) if es_imagen(ruta) else _pdf_a_imagen(ruta)
         except ImagenNoLegible as exc:
             return _no_leido(ruta, ResultadoLectura.CORRUPTO, CodigoError.LECTURA_CORRUPTO, str(exc))
-        original = imagen
+        resultado = self.reconocer_imagen(imagen)
+        return self._interpretar(ruta, resultado)
+
+    def reconocer_imagen(self, original: Image.Image) -> ResultadoOCR:
+        """Solo la parte OCR (preprocesado, giro, psm, tuberías): la reutiliza TesseractProvider en documental/."""
         resultados: list[ResultadoOCR] = []
         for i, pasos in enumerate((self.pasos, *self.pasos_extra)):
             imagen = preparar(original, pasos)
@@ -449,6 +453,9 @@ class LectorImagenOCR:
             else resultados[0]
         )
         self.ultimo = resultado
+        return resultado
+
+    def _interpretar(self, ruta: Path, resultado: ResultadoOCR) -> DocumentoLeido:
         if not resultado.disponible:
             doc = LectorImagenNulo().leer(ruta)
             doc.avisos.append(f"OCR falló: {resultado.error}")

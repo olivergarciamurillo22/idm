@@ -1,0 +1,39 @@
+{
+  "pages": [
+    {
+      "index": 0,
+      "markdown": "# SUMINISTROS FICTICIOS LA VEGA S.L.\n\nCIF. B00000001 Tlf.: 950 000 001\n\n| Tipo / Serie / No Albaran | Fecha/Hora | Pedido |\n| --- | --- | --- |\n| AC B26 0100009999 | 20/09/2026 / 10:15:00 | 0 |\n\n[tbl-1.md](tbl-1.md)\n\nImporte Neto 8,60 Portes 0,00 B. Imponible 8,60 %IVA 21,00 Importe Total 10,41",
+      "images": [],
+      "tables": [
+        {"id": "tbl-1.md", "format": "markdown", "content": "| Familia | Referencia | Denominacion | Precio | % Descuentos | Cantidad | Imp. Linea |\n|---|---|---|---|---|---|---|\n| TORN | REF-A1 | TORNILLO M8X30 | 0,12 | 45 | 100,00 | 6,60 |\n| TORN | REF-B22 | TUERCA M8 | 0,04 | 0 | 50,00 | 2,00 |"}
+      ],
+      "hyperlinks": [],
+      "header": null,
+      "footer": null,
+      "dimensions": {"dpi": 200, "height": 1300, "width": 1800},
+      "confidence_scores": {
+        "average_page_confidence_score": 0.96,
+        "minimum_page_confidence_score": 0.51,
+        "word_confidence_scores": [
+          {"text": "SUMINISTROS", "confidence": 0.99, "start_index": 2},
+          {"text": " B00000001", "confidence": 0.98, "start_index": 45},
+          {"text": " AC", "confidence": 0.99, "start_index": 150},
+          {"text": " B26", "confidence": 0.99, "start_index": 153},
+          {"text": " 0100009999", "confidence": 0.98, "start_index": 157},
+          {"text": " 20/09/2026", "confidence": 0.97, "start_index": 170},
+          {"text": " REF-A1", "confidence": 0.97, "start_index": 260},
+          {"text": " 0,12", "confidence": 0.97, "start_index": 290},
+          {"text": " 100,00", "confidence": 0.96, "start_index": 300},
+          {"text": " 6,60", "confidence": 0.96, "start_index": 308},
+          {"text": " REF-B22", "confidence": 0.95, "start_index": 320},
+          {"text": " 0,04", "confidence": 0.51, "start_index": 345},
+          {"text": " 50,00", "confidence": 0.97, "start_index": 352},
+          {"text": " 2,00", "confidence": 0.97, "start_index": 360}
+        ]
+      }
+    }
+  ],
+  "model": "mistral-ocr-2512",
+  "document_annotation": null,
+  "usage_info": {"pages_processed": 1, "doc_size_bytes": 184321}
+}

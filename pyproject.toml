@@ -19,3 +19,4 @@ pythonpath = ["src"]
 testpaths = ["tests"]
 addopts = "-q"
 filterwarnings = ["ignore::DeprecationWarning"]
+markers = ["cloud: llamadas reales a proveedores documentales (IDM_RUN_CLOUD_TESTS=1, solo material ficticio)"]

@@ -15,7 +15,7 @@ RAIZ = Path(__file__).resolve().parents[2]
 class Buzon:
     host: str
     usuario: str
-    clave: str
+    clave: str = field(repr=False)  # nunca en logs ni trazas
     carpeta: str = "INBOX"
 
 
@@ -35,14 +35,33 @@ class Config:
     smtp_host: str = ""
     smtp_puerto: int = 587
     smtp_usuario: str = ""
-    smtp_clave: str = ""
+    smtp_clave: str = field(default="", repr=False)
     smtp_remitente: str = ""
     buzones: tuple[Buzon, ...] = ()
     bandeja_host: str = "0.0.0.0"
     bandeja_puerto: int = 8000
-    ocr_motor: str = "ninguno"  # ninguno | tesseract
+    ocr_motor: str = "ninguno"  # obsoleto: se usa si DOCUMENT_PROVIDER no está definido
     ocr_tuberia: str = "contraste_3200,recorte_3200"  # tuberías de albaranes.preprocesado.TUBERIAS, se unen
     ocr_lang: str = "spa+eng"
+    # Lectura documental (documental/). Los secretos no salen en repr(): un print(cfg) no los filtra.
+    document_provider: str = "ninguno"  # ninguno | tesseract | azure | mistral | google | benchmark
+    document_provider_fallback: str = ""  # vacío = sin respaldo automático
+    document_providers_benchmark: tuple[str, ...] = ("tesseract",)
+    allow_external_document_processing: bool = False
+    external_document_providers_allowed: tuple[str, ...] = ()
+    azure_endpoint: str = ""
+    azure_key: str = field(default="", repr=False)
+    azure_model: str = "prebuilt-layout"
+    azure_api_version: str = "2024-11-30"
+    azure_features: tuple[str, ...] = ("keyValuePairs",)
+    mistral_key: str = field(default="", repr=False)
+    mistral_model: str = "mistral-ocr-latest"
+    mistral_endpoint: str = "https://api.mistral.ai/v1/ocr"
+    mistral_annotation: bool = False
+    mistral_confidence: str = "word"
+    document_pricing_file: Path | None = None
+    document_provider_timeout_s: float = 120.0
+    document_provider_max_retries: int = 3
 
     @property
     def cifs_propios(self) -> set[str]:
@@ -68,6 +87,11 @@ def _ruta(valor: str) -> Path:
 
 def _bool(valor: str) -> bool:
     return valor.strip().lower() in ("1", "true", "si", "sí", "yes")
+
+
+def _lista(valor: str, minusculas: bool = True) -> tuple[str, ...]:
+    partes = (p.strip() for p in (valor or "").split(","))
+    return tuple(p.lower() if minusculas else p for p in partes if p)
 
 
 def _buzones(valor: str) -> tuple[Buzon, ...]:
@@ -114,4 +138,22 @@ def cargar(ruta_env: Path | None = None) -> Config:
         ocr_motor=g("OCR_MOTOR", "ninguno").strip().lower(),
         ocr_tuberia=g("OCR_TUBERIA", "contraste_3200,recorte_3200").strip().lower(),
         ocr_lang=g("OCR_LANG", "spa+eng").strip(),
+        document_provider=(g("DOCUMENT_PROVIDER") or g("OCR_MOTOR") or "ninguno").strip().lower(),
+        document_provider_fallback=g("DOCUMENT_PROVIDER_FALLBACK", "").strip().lower(),
+        document_providers_benchmark=_lista(g("DOCUMENT_PROVIDERS_BENCHMARK", "tesseract")),
+        allow_external_document_processing=_bool(g("ALLOW_EXTERNAL_DOCUMENT_PROCESSING", "false")),
+        external_document_providers_allowed=_lista(g("EXTERNAL_DOCUMENT_PROVIDERS_ALLOWED", "")),
+        azure_endpoint=g("AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT", "").strip(),
+        azure_key=g("AZURE_DOCUMENT_INTELLIGENCE_KEY", "").strip(),
+        azure_model=g("AZURE_DOCUMENT_INTELLIGENCE_MODEL", "prebuilt-layout").strip(),
+        azure_api_version=g("AZURE_DOCUMENT_INTELLIGENCE_API_VERSION", "2024-11-30").strip(),
+        azure_features=_lista(g("AZURE_DOCUMENT_INTELLIGENCE_FEATURES", "keyValuePairs"), minusculas=False),
+        mistral_key=g("MISTRAL_API_KEY", "").strip(),
+        mistral_model=g("MISTRAL_OCR_MODEL", "mistral-ocr-latest").strip(),
+        mistral_endpoint=g("MISTRAL_OCR_ENDPOINT", "https://api.mistral.ai/v1/ocr").strip(),
+        mistral_annotation=_bool(g("MISTRAL_DOCUMENT_ANNOTATION", "false")),
+        mistral_confidence=g("MISTRAL_OCR_CONFIDENCE", "word").strip().lower(),
+        document_pricing_file=_ruta(g("DOCUMENT_PRICING_FILE")) if g("DOCUMENT_PRICING_FILE") else None,
+        document_provider_timeout_s=float(g("DOCUMENT_PROVIDER_TIMEOUT_S", "120")),
+        document_provider_max_retries=int(g("DOCUMENT_PROVIDER_MAX_RETRIES", "3")),
     )

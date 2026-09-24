@@ -1,0 +1,76 @@
+{
+  "status": "succeeded",
+  "createdDateTime": "2026-09-24T10:00:00Z",
+  "lastUpdatedDateTime": "2026-09-24T10:00:03Z",
+  "analyzeResult": {
+    "apiVersion": "2024-11-30",
+    "modelId": "prebuilt-layout",
+    "content": "SUMINISTROS FICTICIOS LA VEGA S.L.\nCIF. B00000001 Tlf.: 950 000 001\nTipo / Serie / No Albaran\nAC B26 0100009999\nFecha/Hora\n20/09/2026 / 10:15:00\nPedido\n0\nFamilia Referencia Denominacion Precio % Descuentos Cantidad Imp. Linea\nTORN REF-A1 TORNILLO M8X30 0,12 45 100,00 6,60\nTORN REF-B22 TUERCA M8 0,04 0 50,00 2,00\nImporte Neto Portes B. Imponible %IVA Importe IVA Importe Total\n8,60 0,00 8,60 21,00 1,81 10,41",
+    "pages": [
+      {
+        "pageNumber": 1,
+        "angle": 0.2,
+        "width": 1800,
+        "height": 1300,
+        "unit": "pixel",
+        "words": [
+          {"content": "SUMINISTROS", "polygon": [120, 83, 300, 83, 300, 120, 120, 120], "confidence": 0.995, "span": {"offset": 0, "length": 11}},
+          {"content": "FICTICIOS", "polygon": [310, 83, 470, 83, 470, 120, 310, 120], "confidence": 0.993, "span": {"offset": 12, "length": 9}},
+          {"content": "B00000001", "polygon": [180, 132, 330, 132, 330, 164, 180, 164], "confidence": 0.991, "span": {"offset": 40, "length": 9}},
+          {"content": "AC", "polygon": [120, 375, 160, 375, 160, 405, 120, 405], "confidence": 0.992, "span": {"offset": 88, "length": 2}},
+          {"content": "B26", "polygon": [170, 375, 230, 375, 230, 405, 170, 405], "confidence": 0.99, "span": {"offset": 91, "length": 3}},
+          {"content": "0100009999", "polygon": [240, 375, 420, 375, 420, 405, 240, 405], "confidence": 0.97, "span": {"offset": 95, "length": 10}},
+          {"content": "20/09/2026", "polygon": [560, 375, 720, 375, 720, 405, 560, 405], "confidence": 0.98, "span": {"offset": 117, "length": 10}},
+          {"content": "REF-A1", "polygon": [260, 540, 370, 540, 370, 572, 260, 572], "confidence": 0.95, "span": {"offset": 230, "length": 6}},
+          {"content": "0,12", "polygon": [1000, 540, 1063, 540, 1063, 572, 1000, 572], "confidence": 0.42, "span": {"offset": 256, "length": 4}},
+          {"content": "45", "polygon": [1150, 540, 1185, 540, 1185, 572, 1150, 572], "confidence": 0.96, "span": {"offset": 261, "length": 2}},
+          {"content": "100,00", "polygon": [1450, 540, 1550, 540, 1550, 572, 1450, 572], "confidence": 0.98, "span": {"offset": 264, "length": 6}},
+          {"content": "6,60", "polygon": [1620, 540, 1683, 540, 1683, 572, 1620, 572], "confidence": 0.97, "span": {"offset": 271, "length": 4}},
+          {"content": "REF-B22", "polygon": [260, 590, 395, 590, 395, 622, 260, 622], "confidence": 0.94, "span": {"offset": 281, "length": 7}},
+          {"content": "0,04", "polygon": [1000, 590, 1063, 590, 1063, 622, 1000, 622], "confidence": 0.97, "span": {"offset": 299, "length": 4}},
+          {"content": "50,00", "polygon": [1450, 590, 1535, 590, 1535, 622, 1450, 622], "confidence": 0.98, "span": {"offset": 306, "length": 5}},
+          {"content": "2,00", "polygon": [1620, 590, 1683, 590, 1683, 622, 1620, 622], "confidence": 0.98, "span": {"offset": 312, "length": 4}}
+        ],
+        "lines": [
+          {"content": "SUMINISTROS FICTICIOS LA VEGA S.L.", "polygon": [120, 83, 869, 84, 869, 120, 120, 119]},
+          {"content": "AC B26 0100009999", "polygon": [120, 375, 420, 375, 420, 405, 120, 405]}
+        ]
+      }
+    ],
+    "tables": [
+      {
+        "rowCount": 3,
+        "columnCount": 7,
+        "boundingRegions": [{"pageNumber": 1, "polygon": [120, 480, 1700, 480, 1700, 630, 120, 630]}],
+        "cells": [
+          {"kind": "columnHeader", "rowIndex": 0, "columnIndex": 0, "content": "Familia"},
+          {"kind": "columnHeader", "rowIndex": 0, "columnIndex": 1, "content": "Referencia"},
+          {"kind": "columnHeader", "rowIndex": 0, "columnIndex": 2, "content": "Denominacion"},
+          {"kind": "columnHeader", "rowIndex": 0, "columnIndex": 3, "content": "Precio"},
+          {"kind": "columnHeader", "rowIndex": 0, "columnIndex": 4, "content": "% Descuentos"},
+          {"kind": "columnHeader", "rowIndex": 0, "columnIndex": 5, "content": "Cantidad"},
+          {"kind": "columnHeader", "rowIndex": 0, "columnIndex": 6, "content": "Imp. Linea"},
+          {"rowIndex": 1, "columnIndex": 0, "content": "TORN"},
+          {"rowIndex": 1, "columnIndex": 1, "content": "REF-A1", "boundingRegions": [{"pageNumber": 1, "polygon": [260, 540, 370, 540, 370, 572, 260, 572]}]},
+          {"rowIndex": 1, "columnIndex": 2, "content": "TORNILLO M8X30"},
+          {"rowIndex": 1, "columnIndex": 3, "content": "0,12"},
+          {"rowIndex": 1, "columnIndex": 4, "content": "45"},
+          {"rowIndex": 1, "columnIndex": 5, "content": "100,00"},
+          {"rowIndex": 1, "columnIndex": 6, "content": "6,60"},
+          {"rowIndex": 2, "columnIndex": 0, "content": "TORN"},
+          {"rowIndex": 2, "columnIndex": 1, "content": "REF-B22"},
+          {"rowIndex": 2, "columnIndex": 2, "content": "TUERCA M8"},
+          {"rowIndex": 2, "columnIndex": 3, "content": "0,04"},
+          {"rowIndex": 2, "columnIndex": 4, "content": "0"},
+          {"rowIndex": 2, "columnIndex": 5, "content": "50,00"},
+          {"rowIndex": 2, "columnIndex": 6, "content": "2,00"}
+        ]
+      }
+    ],
+    "keyValuePairs": [
+      {"key": {"content": "Tipo / Serie / No Albaran"}, "value": {"content": "AC B26 0100009999", "boundingRegions": [{"pageNumber": 1, "polygon": [120, 375, 420, 375, 420, 405, 120, 405]}]}, "confidence": 0.88},
+      {"key": {"content": "Fecha/Hora"}, "value": {"content": "20/09/2026 / 10:15:00"}, "confidence": 0.9},
+      {"key": {"content": "Pedido"}, "value": {"content": "0"}, "confidence": 0.7}
+    ]
+  }
+}

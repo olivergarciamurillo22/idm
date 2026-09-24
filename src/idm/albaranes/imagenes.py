@@ -47,16 +47,19 @@ class ImagenNoLegible(Exception):
     pass
 
 
-def abrir(ruta: Path) -> Image.Image:
-    """Abre cualquier formato admitido y aplica la orientación EXIF (una foto de iPhone en vertical llega girada)."""
-    ruta = Path(ruta)
-    if es_heic(ruta) and not HEIF_DISPONIBLE:
-        raise ImagenNoLegible(f"{ruta.name}: HEIC sin soporte; instala pillow-heif")
+def abrir(ruta) -> Image.Image:
+    """Abre cualquier formato admitido (ruta o fichero en memoria) y aplica la orientación EXIF (una foto de iPhone en
+    vertical llega girada)."""
+    nombre = getattr(ruta, "name", None) or (Path(ruta).name if isinstance(ruta, str | Path) else "documento")
+    if isinstance(ruta, str | Path):
+        ruta = Path(ruta)
+        if es_heic(ruta) and not HEIF_DISPONIBLE:
+            raise ImagenNoLegible(f"{ruta.name}: HEIC sin soporte; instala pillow-heif")
     try:
         img = Image.open(ruta)
         img.load()
     except Exception as exc:  # noqa: BLE001 - Pillow lanza tipos variados según el formato
-        raise ImagenNoLegible(f"{ruta.name}: {type(exc).__name__}: {str(exc)[:200]}") from exc
+        raise ImagenNoLegible(f"{nombre}: {type(exc).__name__}: {str(exc)[:200]}") from exc
     return ImageOps.exif_transpose(img) or img
 
 

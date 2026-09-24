@@ -1,0 +1,36 @@
+{
+  "status": "succeeded",
+  "analyzeResult": {
+    "apiVersion": "2024-11-30",
+    "modelId": "prebuilt-invoice",
+    "content": "SUMINISTROS FICTICIOS LA VEGA S.L.\nDocumento de entrega",
+    "pages": [{"pageNumber": 1, "width": 8.5, "height": 11, "unit": "inch", "words": [
+      {"content": "SUMINISTROS", "polygon": [1.0, 0.5, 2.5, 0.5, 2.5, 0.7, 1.0, 0.7], "confidence": 0.99}
+    ]}],
+    "tables": [],
+    "documents": [
+      {
+        "docType": "invoice",
+        "confidence": 0.9,
+        "fields": {
+          "VendorName": {"type": "string", "valueString": "SUMINISTROS FICTICIOS LA VEGA S.L.", "content": "SUMINISTROS FICTICIOS LA VEGA S.L.", "confidence": 0.95},
+          "VendorTaxId": {"type": "string", "valueString": "B00000001", "content": "B00000001", "confidence": 0.93},
+          "InvoiceId": {"type": "string", "valueString": "AC B26 0100009999", "content": "AC B26 0100009999", "confidence": 0.91},
+          "InvoiceDate": {"type": "date", "valueDate": "2026-09-20", "content": "20/09/2026", "confidence": 0.94},
+          "Items": {
+            "type": "array",
+            "valueArray": [
+              {"type": "object", "valueObject": {
+                "ProductCode": {"type": "string", "valueString": "REF-A1", "confidence": 0.9},
+                "Description": {"type": "string", "valueString": "TORNILLO M8X30", "confidence": 0.9},
+                "Quantity": {"type": "number", "valueNumber": 100, "confidence": 0.9},
+                "UnitPrice": {"type": "currency", "valueCurrency": {"amount": 0.12, "currencyCode": "EUR"}, "confidence": 0.9},
+                "Amount": {"type": "currency", "valueCurrency": {"amount": 6.6, "currencyCode": "EUR"}, "confidence": 0.9}
+              }}
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

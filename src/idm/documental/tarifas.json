@@ -1,0 +1,34 @@
+{
+  "_aviso": "TARIFAS ORIENTATIVAS, NO VERDAD ETERNA. Precios públicos de pago por uso (tramo inicial, sin compromiso) tal como se conocían en la fecha indicada. No se han podido verificar en línea al escribir este fichero. VERIFICAR en la página de precios de cada proveedor antes de presupuestar y actualizar 'fecha_referencia'. Se pueden sustituir con DOCUMENT_PRICING_FILE.",
+  "fecha_referencia": "2026-09-24",
+  "moneda": "USD",
+  "usd_a_eur": 0.92,
+  "proveedores": {
+    "tesseract": {
+      "modelos": {"*": {"usd_por_1000_paginas": 0.0}},
+      "nota": "Local. Coste de máquina no incluido."
+    },
+    "azure": {
+      "modelos": {
+        "prebuilt-read": {"usd_por_1000_paginas": 1.5},
+        "prebuilt-layout": {"usd_por_1000_paginas": 10.0},
+        "prebuilt-invoice": {"usd_por_1000_paginas": 10.0},
+        "*": {"usd_por_1000_paginas": 10.0}
+      },
+      "extras": {"keyValuePairs": {"usd_por_1000_paginas": 0.0, "nota": "VERIFICAR si se factura aparte en la región elegida"}},
+      "fuente": "azure.microsoft.com/pricing/details/ai-document-intelligence (S0, pago por uso)"
+    },
+    "mistral": {
+      "modelos": {
+        "mistral-ocr-latest": {"usd_por_1000_paginas": 2.0},
+        "*": {"usd_por_1000_paginas": 2.0}
+      },
+      "extras": {"document_annotation": {"usd_por_1000_paginas": 3.0, "nota": "VERIFICAR"}},
+      "fuente": "mistral.ai/pricing (OCR; la versión por lotes es más barata)"
+    },
+    "google": {
+      "modelos": {"*": {"usd_por_1000_paginas": 1.5}},
+      "fuente": "cloud.google.com/document-ai/pricing (Enterprise Document OCR); no implementado"
+    }
+  }
+}

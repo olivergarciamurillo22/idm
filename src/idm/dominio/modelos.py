@@ -262,6 +262,11 @@ class DocumentoLeido(BaseModel):
     avisos: list[str] = Field(default_factory=list)
     errores: list[ErrorProcesamiento] = Field(default_factory=list)
     texto: str | None = None
+    # Quién leyó el documento, en términos neutros (el dominio no sabe qué es cada motor)
+    motor: str | None = None  # p. ej. "tesseract:5.5", "azure:prebuilt-layout"
+    coste_estimado_eur: Decimal | None = None
+    campos_dudosos: list[str] = Field(default_factory=list)  # "numero", "linea[0].precio_bruto"…
+    metadatos_motor: dict[str, str] = Field(default_factory=dict)  # request id, tiempo, páginas… sin secretos
 
     @property
     def leido(self) -> bool:

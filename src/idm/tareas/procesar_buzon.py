@@ -9,10 +9,11 @@ from pathlib import Path
 from idm import config
 from idm.albaranes.buzon import BuzonIMAP, CarpetaEntrada, DocumentoEntrante, RegistroProcesados
 from idm.albaranes.extraer import sha256_fichero
-from idm.albaranes.lector import lector_por_defecto, tuberias_desde_texto
 from idm.almacen.documentos import Ejecucion, Repositorio
 from idm.almacen.sesion import abrir
 from idm.cotejo.procesar import VERSION_PROCESAMIENTO, Motivo, procesar
+from idm.documental.base import ConfiguracionDocumentalInvalida
+from idm.documental.router import lector_desde_config
 from idm.equivalencias import proveedores
 from idm.equivalencias.tabla import TablaEquivalencias
 from idm.siddex.desde_excel import SiddexDesdeExcel
@@ -28,12 +29,15 @@ def ejecutar(
     cfg: config.Config,
     reprocesar: bool = False,
     tarea: str = "procesar_buzon",
+    lector=None,
 ) -> list[str]:
-    """Procesa la lista dentro de una Ejecución registrada. Devuelve una línea de informe por documento."""
+    """Procesa la lista dentro de una Ejecución registrada. Devuelve una línea de informe por documento.
+    El lector sale de la configuración (DOCUMENT_PROVIDER); si es externo y no está autorizado, ni se crea."""
+    lector = lector or lector_desde_config(cfg)
     ejecucion = repo.guardar_ejecucion(Ejecucion(tarea=tarea, version=VERSION_PROCESAMIENTO))
+    if hasattr(getattr(lector, "imagen", None), "ejecucion_id"):
+        lector.imagen.ejecucion_id = ejecucion.id  # las llamadas al proveedor quedan asociadas a la ejecución
     tabla = TablaEquivalencias.desde(gateway.equivalencias(), cfg.ruta_datos / "equivalencias_aprendidas.csv")
-    tuberias = tuberias_desde_texto(cfg.ocr_tuberia)
-    lector = lector_por_defecto(cfg.cifs_propios, cfg.ocr_motor, tuberias[0], tuberias[1:])
     informe = [f"Ejecución {ejecucion.id} · versión {VERSION_PROCESAMIENTO} · {len(entrantes)} documento(s)"]
     for entrante in entrantes:
         r = procesar(
@@ -82,6 +86,17 @@ def descargar_buzones(cfg: config.Config) -> list[str]:
     return avisos
 
 
+def pendientes_de_reintento(repo: Repositorio) -> list[DocumentoEntrante]:
+    """Documentos en ERROR cuyo error es recuperable y cuyo fichero archivado sigue existiendo."""
+    from idm.dominio.estados import EstadoDocumento
+
+    resultado = []
+    for doc in repo.listar(estado=EstadoDocumento.ERROR):
+        if doc.errores and all(e.recuperable for e in doc.errores) and Path(doc.ruta).exists():
+            resultado.append(_entrante(Path(doc.ruta), "reintento"))
+    return resultado
+
+
 def _entrante(ruta: Path, origen: str) -> DocumentoEntrante:
     return DocumentoEntrante(ruta=ruta, sha256=sha256_fichero(ruta), origen=origen)
 
@@ -98,8 +113,18 @@ def main(argv: list[str] | None = None) -> int:
     )
     p.add_argument("--reprocesar", action="store_true", help="con --fichero: reprocesa aunque ya esté registrado")
     p.add_argument("--sin-imap", action="store_true", help="no consulta los buzones, solo la carpeta")
+    p.add_argument(
+        "--reintentar-pendientes",
+        action="store_true",
+        help="vuelve a leer los documentos en ERROR recuperable (p. ej. el proveedor documental no respondía)",
+    )
     args = p.parse_args(argv)
     cfg.crear_carpetas()
+    try:
+        lector_desde_config(cfg)  # valida la configuración documental ANTES de tocar ningún documento
+    except ConfiguracionDocumentalInvalida as exc:
+        print(f"Configuración documental rechazada: {exc}")
+        return 3
     try:
         with Bloqueo(cfg.ruta_datos / "procesar_buzon.lock"):
             return _correr(cfg, args)
@@ -118,6 +143,9 @@ def _correr(cfg: config.Config, args) -> int:
                 print(f"No existe el documento {args.reprocesar_id} o su fichero {doc.ruta if doc else ''}")
                 return 1
             entrantes = [_entrante(Path(doc.ruta), "reproceso")]
+        elif args.reintentar_pendientes:
+            entrantes = pendientes_de_reintento(repo)
+            reprocesar = True
         elif args.fichero:
             if not args.fichero.exists():
                 print(f"No existe el fichero {args.fichero}")

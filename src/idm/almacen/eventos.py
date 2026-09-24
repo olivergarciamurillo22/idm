@@ -11,6 +11,7 @@ TIPOS = (
     "documento.no_procesable",
     "documento.error",
     "documento.reprocesado",
+    "documento.proveedor_documental",
     "proveedor.resuelto",
     "articulo.resuelto",
     "pedido.buscado",

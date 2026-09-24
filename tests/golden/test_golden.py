@@ -1,6 +1,6 @@
 """Ejecuta todos los casos de fixtures/golden/ y falla si alguno se desvía de esperado.json.
 Cada caso es un test parametrizado con el nombre de su carpeta. Los casos con documento.pdf pasan por el lector real
-y por interpretar_albaran con las equivalencias de los exports ficticios de fixtures/siddex."""
+y por interpretar_albaran con las equivalencias de los exports ficticios de fixtures/ficticios/siddex."""
 
 from pathlib import Path
 
@@ -18,7 +18,7 @@ CASOS = sorted(p for p in GOLDEN.iterdir() if p.is_dir() and (p / "esperado.json
 
 
 def _interpretar():
-    gateway = SiddexDesdeExcel(FIXTURES / "siddex")
+    gateway = SiddexDesdeExcel(FIXTURES / "ficticios" / "siddex")
     tabla = TablaEquivalencias.desde(gateway.equivalencias())
     proveedores = gateway.proveedores()
     return lambda doc: interpretar_albaran(doc, tabla, proveedores).albaran

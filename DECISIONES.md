@@ -106,3 +106,16 @@ reconfigura stdout/stderr y `ejecutar.bat` fija `chcp 65001` y `PYTHONIOENCODING
 ## 2026-09-24 · El remoto se llama `idm`, no `idm-compras`
 Oliver ha creado `github.com/olivergarciamurillo22/idm`. La carpeta local conserva el nombre `idm-compras`. Ningún
 asistente configura el remoto ni empuja: lo hace Oliver.
+
+## 2026-09-24 · Estructura de fixtures: ficticios / reales anonimizados / golden / problematicos / no_procesables
+`fixtures/ficticios/` (inventados, generados por script), `fixtures/reales/` (solo `*.anonimizado.*` con fila en
+`ANONIMIZACION.md`; el resto ignorado), `fixtures/golden/` (resultado esperado), `fixtures/problematicos/` (casos sin
+regla de IDM, tests xfail) y `fixtures/no_procesables/` (corrupto, vacío, Excel, texto, escaneo sin texto).
+Se eligió esto frente a `tests/fixtures/` porque los fixtures los usan también las tareas (`benchmark_lector`,
+`ejecutar_golden`) fuera de pytest.
+
+## 2026-09-24 · Tres capas contra la fuga de datos reales
+1) `.gitignore` ignora pdf/xls/xlsx/eml/imágenes en todo el repo y solo los readmite en las carpetas de fixtures
+permitidas; 2) `.githooks/pre-commit` bloquea datos/, documentos fuera de fixtures, reales sin `.anonimizado.`, `.env`
+y ficheros > 5 MB; 3) `tests/unit/test_proteccion_datos.py` comprueba las dos cosas. Cada clon nuevo debe ejecutar
+`git config core.hooksPath .githooks` (está en docs/instalacion-windows.md).

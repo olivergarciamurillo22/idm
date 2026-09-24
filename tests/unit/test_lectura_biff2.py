@@ -1,4 +1,4 @@
-"""Tests del parser BIFF2 de escandallos contra fixtures/siddex/escandallo_ficticio.xls.
+"""Tests del parser BIFF2 de escandallos contra fixtures/ficticios/siddex/escandallo_ficticio.xls.
 Comprueba cabecera, niveles, agregación por código (incluida minúscula) e incidencias.
 No usa el planning."""
 

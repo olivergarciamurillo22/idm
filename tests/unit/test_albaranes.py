@@ -1,5 +1,5 @@
 """Tests de albaranes/: extracción, normalización por proveedor, lector sobre PDF ficticios, carpeta y adjuntos IMAP.
-Todo sobre fixtures/documentos; sin servidor de correo real."""
+Todo sobre fixtures/ficticios/documentos; sin servidor de correo real."""
 
 from datetime import date
 from decimal import Decimal

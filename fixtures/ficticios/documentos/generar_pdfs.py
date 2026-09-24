@@ -1,6 +1,6 @@
 """Genera los PDF (con texto) y una foto simulada (PNG) de los documentos ficticios a partir de sus .json.
 Imita la estructura de un albarán/factura de proveedor: cabecera, número, fecha, su pedido, tabla con rejilla, totales.
-Ejecutar: PYTHONPATH=src .venv/bin/python fixtures/documentos/generar_pdfs.py"""
+Ejecutar: PYTHONPATH=src .venv/bin/python fixtures/ficticios/documentos/generar_pdfs.py"""
 
 import json
 from pathlib import Path
@@ -62,18 +62,26 @@ def pdf(datos: dict, ruta: Path) -> None:
     filas = [cab]
     for li in datos["lineas"]:
         fila = ([li.get("albaran") or ""] if es_factura else []) + [
-            li.get("codigo_proveedor") or "", li["descripcion"], cant(li["cantidad"]), li.get("unidad") or "UD"]
+            li.get("codigo_proveedor") or "",
+            li["descripcion"],
+            cant(li["cantidad"]),
+            li.get("unidad") or "UD",
+        ]
         if not sin_precio:
             dto = li.get("descuento_pct")
             fila += [num(li.get("precio_bruto")), cant(dto) if dto is not None else "", num(li.get("importe"))]
         filas.append(fila)
     tabla = Table(filas, repeatRows=1)
-    tabla.setStyle(TableStyle([
-        ("GRID", (0, 0), (-1, -1), 0.5, colors.black),
-        ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
-        ("FONTSIZE", (0, 0), (-1, -1), 9),
-        ("ALIGN", (-3, 1), (-1, -1), "RIGHT"),
-    ]))
+    tabla.setStyle(
+        TableStyle(
+            [
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.black),
+                ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
+                ("FONTSIZE", (0, 0), (-1, -1), 9),
+                ("ALIGN", (-3, 1), (-1, -1), "RIGHT"),
+            ]
+        )
+    )
     cuerpo.append(tabla)
     cuerpo.append(Spacer(1, 6 * mm))
     if not sin_precio:
@@ -89,10 +97,18 @@ def foto(datos: dict, ruta: Path) -> None:
     img = Image.new("RGB", (1240, 1754), "white")
     d = ImageDraw.Draw(img)
     y = 80
-    lineas = [datos["proveedor_texto"], f"CIF {datos['cif']}", "", f"ALBARAN N: {datos['numero']}",
-              f"Fecha: {fecha_es(datos['fecha'])}", ""]
-    lineas += [f"{li.get('codigo_proveedor') or ''}  {li['descripcion']}  {cant(li['cantidad'])} {li.get('unidad') or ''}"
-               for li in datos["lineas"]]
+    lineas = [
+        datos["proveedor_texto"],
+        f"CIF {datos['cif']}",
+        "",
+        f"ALBARAN N: {datos['numero']}",
+        f"Fecha: {fecha_es(datos['fecha'])}",
+        "",
+    ]
+    lineas += [
+        f"{li.get('codigo_proveedor') or ''}  {li['descripcion']}  {cant(li['cantidad'])} {li.get('unidad') or ''}"
+        for li in datos["lineas"]
+    ]
     for linea in lineas:
         d.text((80, y), linea, fill="black")
         y += 40

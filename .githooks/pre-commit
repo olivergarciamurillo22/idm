@@ -1,0 +1,32 @@
+#!/bin/sh
+# Bloquea commits que metan datos reales de IDM: cualquier cosa en datos/, documentos (pdf/xls/xlsx/eml/imágenes)
+# fuera de las carpetas de fixtures permitidas, ficheros en fixtures/reales sin ".anonimizado.", .env y ficheros > 5 MB.
+# Instalación: git config core.hooksPath .githooks   (ya hecho en el clon original; repetir en cada clon nuevo)
+fallo=0
+for f in $(git diff --cached --name-only --diff-filter=ACMR); do
+  case "$f" in
+    datos/README.md) ;;
+    datos/*) echo "BLOQUEADO: $f está en datos/ (datos reales de IDM)"; fallo=1 ;;
+    .env|.env.*)
+      case "$f" in .env.ejemplo) ;; *) echo "BLOQUEADO: $f contiene secretos"; fallo=1 ;; esac ;;
+  esac
+  ext=$(printf '%s' "$f" | tr '[:upper:]' '[:lower:]' | sed 's/.*\.//')
+  case "$ext" in
+    pdf|xls|xlsx|xlsm|eml|msg|jpg|jpeg|png|tif|tiff|heic|webp|zip|7z)
+      case "$f" in
+        fixtures/ficticios/*|fixtures/golden/*|fixtures/problematicos/*|fixtures/no_procesables/*) ;;
+        fixtures/reales/*)
+          case "$f" in *.anonimizado.*) ;; *) echo "BLOQUEADO: $f en fixtures/reales sin '.anonimizado.' en el nombre"; fallo=1 ;; esac ;;
+        *) echo "BLOQUEADO: $f es un documento fuera de fixtures/ (¿dato real de IDM?)"; fallo=1 ;;
+      esac ;;
+  esac
+  if [ -f "$f" ]; then
+    tam=$(wc -c < "$f" | tr -d ' ')
+    if [ "$tam" -gt 5242880 ]; then echo "BLOQUEADO: $f pesa más de 5 MB"; fallo=1; fi
+  fi
+done
+if [ "$fallo" -ne 0 ]; then
+  echo "Commit cancelado. Si el fichero es ficticio o está anonimizado, muévelo a la carpeta de fixtures que le corresponde." >&2
+  exit 1
+fi
+exit 0

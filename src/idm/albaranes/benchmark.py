@@ -1,4 +1,4 @@
-"""Benchmark del lector: para cada documento de fixtures/documentos con su .json de verdad, mide aciertos por campo.
+"""Benchmark del lector: aciertos por campo sobre cada documento con su .json de verdad (fixtures/ficticios/documentos).
 Campos: tipo, cif, número, fecha, nuestro pedido, nº de líneas; por línea código, cantidad, precio, descuento, importe.
 Imprime una tabla; no decide nada ni guarda resultados."""
 

@@ -1,4 +1,4 @@
-# fixtures/siddex
+# fixtures/ficticios/siddex
 
 Exports **ficticios** con la misma estructura que los reales de Siddex.
 

@@ -1,16 +1,51 @@
-# Datos de IDM: NUNCA entran en el repositorio
+# ---------- Datos de IDM: NUNCA entran en el repositorio ----------
 datos/*
 !datos/README.md
 
+# Documentos y hojas de cálculo: ignorados en todo el repositorio salvo en las carpetas de fixtures que se listan
+# abajo (ficticios generados por script, golden, problemáticos, no procesables) y los reales ya anonimizados.
+*.pdf
+*.PDF
+*.xls
+*.xlsx
+*.xlsm
+*.eml
+*.msg
+*.jpg
+*.jpeg
+*.png
+*.tif
+*.tiff
+*.heic
+*.webp
+*.zip
+*.7z
+!fixtures/ficticios/**
+!fixtures/golden/**
+!fixtures/problematicos/**
+!fixtures/no_procesables/**
+fixtures/reales/*
+!fixtures/reales/README.md
+!fixtures/reales/ANONIMIZACION.md
+!fixtures/reales/anonimizar.py
+!fixtures/reales/**/*.anonimizado.*
+
 # Secretos y entorno
 .env
+.env.*
+!.env.ejemplo
 .venv/
 venv/
+*.pem
+*.key
+*.pfx
 
 # Bases de datos locales
 *.db
 *.sqlite
 *.sqlite3
+*.db-journal
+*.db-wal
 
 # Python
 __pycache__/
@@ -24,9 +59,11 @@ dist/
 # Salidas locales
 salida/
 *.log
+*.lock
 
 # IDE / sistema
 .idea/
 .vscode/
 .DS_Store
 Thumbs.db
+desktop.ini

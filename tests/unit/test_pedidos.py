@@ -1,5 +1,5 @@
 """Tests de pedidos/: agrupar por proveedor, PDF, correo simulado y hoja para Siddex.
-Usa los exports ficticios de fixtures/siddex y escribe solo en tmp_path."""
+Usa los exports ficticios de fixtures/ficticios/siddex y escribe solo en tmp_path."""
 
 from datetime import date
 from decimal import Decimal

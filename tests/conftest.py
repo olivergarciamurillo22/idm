@@ -12,6 +12,12 @@ FIXTURES = RAIZ / "fixtures"
 
 @pytest.fixture
 def fixtures() -> Path:
+    """Carpeta de fixtures FICTICIOS (documentos, siddex, planning). Los reales anonimizados van en fixtures/reales."""
+    return FIXTURES / "ficticios"
+
+
+@pytest.fixture
+def fixtures_raiz() -> Path:
     return FIXTURES
 
 

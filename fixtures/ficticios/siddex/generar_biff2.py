@@ -1,6 +1,6 @@
-"""Genera fixtures/siddex/escandallo_ficticio.xls en BIFF2 (Excel 2.0), el formato real del export de Siddex.
+"""Genera fixtures/ficticios/siddex/escandallo_ficticio.xls en BIFF2 (Excel 2.0), el formato real del export de Siddex.
 Escritor mínimo: BOF, LABEL y NUMBER, EOF; suficiente para que xlrd lo lea como el original.
-Datos completamente ficticios. Ejecutar: PYTHONPATH=src .venv/bin/python fixtures/siddex/generar_biff2.py"""
+Datos completamente ficticios. Ejecutar: PYTHONPATH=src .venv/bin/python fixtures/ficticios/siddex/generar_biff2.py"""
 
 import struct
 from pathlib import Path

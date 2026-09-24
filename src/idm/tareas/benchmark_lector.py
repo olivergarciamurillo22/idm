@@ -1,4 +1,4 @@
-"""benchmark_lector: aciertos por campo del lector sobre fixtures/documentos (o la carpeta que se indique).
+"""benchmark_lector: aciertos por campo del lector sobre fixtures/ficticios/documentos (o la carpeta que se indique).
 Uso: ejecutar.bat benchmark_lector [--carpeta ruta] [--sin-imagenes] [--detalle]
 Sirve para comparar lectores (texto, OCR local, servicio externo) sobre los mismos documentos."""
 
@@ -13,7 +13,7 @@ from idm.tareas import _consola
 def main(argv: list[str] | None = None) -> int:
     _consola.preparar()
     p = argparse.ArgumentParser(description="Mide los aciertos por campo del lector de documentos.")
-    p.add_argument("--carpeta", type=Path, default=RAIZ / "fixtures" / "documentos")
+    p.add_argument("--carpeta", type=Path, default=RAIZ / "fixtures" / "ficticios" / "documentos")
     p.add_argument("--sin-imagenes", action="store_true")
     p.add_argument("--detalle", action="store_true", help="muestra cada fallo")
     args = p.parse_args(argv)

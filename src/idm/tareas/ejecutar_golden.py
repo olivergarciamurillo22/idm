@@ -18,7 +18,7 @@ def main(argv: list[str] | None = None) -> int:
     _consola.preparar()
     p = argparse.ArgumentParser(description="Ejecuta el golden dataset.")
     p.add_argument("--carpeta", type=Path, default=RAIZ / "fixtures" / "golden")
-    p.add_argument("--siddex", type=Path, default=RAIZ / "fixtures" / "siddex")
+    p.add_argument("--siddex", type=Path, default=RAIZ / "fixtures" / "ficticios" / "siddex")
     args = p.parse_args(argv)
     gateway = SiddexDesdeExcel(args.siddex)
     tabla = TablaEquivalencias.desde(gateway.equivalencias())

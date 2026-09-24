@@ -31,7 +31,7 @@ Todas las tareas se lanzan con `ejecutar.bat <tarea> [args]` (Windows) o `./ejec
 | `generar_pedidos` | Encargos + necesidades → pedido por proveedor: PDF, correo (simulado), hoja para Siddex | `ejecutar.bat generar_pedidos` |
 | `procesar_buzon` | Lee buzones IMAP o `datos/entrada`, extrae, coteja y guarda en la base de datos | `ejecutar.bat procesar_buzon --carpeta datos/entrada` |
 | `ejecutar_golden` | Ejecuta todos los casos de `fixtures/golden/` y muestra aciertos | `ejecutar.bat ejecutar_golden` |
-| `benchmark_lector` | Aciertos por campo del lector sobre `fixtures/documentos/` | `ejecutar.bat benchmark_lector` |
+| `benchmark_lector` | Aciertos por campo del lector sobre `fixtures/ficticios/documentos/` | `ejecutar.bat benchmark_lector` |
 | `servir_bandeja` | Bandeja de revisión web en la red local | `ejecutar.bat servir_bandeja` |
 | `migrar` | Crea o actualiza el esquema de la base de datos (Alembic) | `ejecutar.bat migrar` |
 
@@ -45,6 +45,6 @@ ruff check src tests
 ## Dónde va cada cosa
 
 - `datos/` datos reales de IDM (ignorada por git). Ver `datos/README.md`.
-- `fixtures/` documentos y exports **ficticios** para tests y golden dataset.
+- `fixtures/` ver `fixtures/README.md`: `ficticios/` (inventados), `reales/` (anonimizados, protegidos), `golden/`, `problematicos/`, `no_procesables/`.
 - `src/idm/` código. `docs/` cómo se hace hoy (as-is) y reglas por proveedor.
 - Instalación como tarea programada de Windows: `docs/instalacion-windows.md`.

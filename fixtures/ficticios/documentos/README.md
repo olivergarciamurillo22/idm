@@ -1,4 +1,4 @@
-# fixtures/documentos
+# fixtures/ficticios/documentos
 
 Documentos **ficticios** que imitan la estructura de los reales. Ningún dato de IDM ni de sus proveedores.
 

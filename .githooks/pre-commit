@@ -1,9 +1,11 @@
 #!/bin/sh
 # Bloquea commits que metan datos reales de IDM: cualquier cosa en datos/, documentos (pdf/xls/xlsx/eml/imágenes)
 # fuera de las carpetas de fixtures permitidas, ficheros en fixtures/reales sin ".anonimizado.", .env y ficheros > 5 MB.
-# Instalación: git config core.hooksPath .githooks   (ya hecho en el clon original; repetir en cada clon nuevo)
+# Lee los nombres línea a línea (admite espacios en los nombres). Instalación: git config core.hooksPath .githooks
 fallo=0
-for f in $(git diff --cached --name-only --diff-filter=ACMR); do
+lista=$(git diff --cached --name-only --diff-filter=ACMR)
+while IFS= read -r f; do
+  [ -z "$f" ] && continue
   case "$f" in
     datos/README.md) ;;
     datos/*) echo "BLOQUEADO: $f está en datos/ (datos reales de IDM)"; fallo=1 ;;
@@ -24,7 +26,9 @@ for f in $(git diff --cached --name-only --diff-filter=ACMR); do
     tam=$(wc -c < "$f" | tr -d ' ')
     if [ "$tam" -gt 5242880 ]; then echo "BLOQUEADO: $f pesa más de 5 MB"; fallo=1; fi
   fi
-done
+done <<LISTA
+$lista
+LISTA
 if [ "$fallo" -ne 0 ]; then
   echo "Commit cancelado. Si el fichero es ficticio o está anonimizado, muévelo a la carpeta de fixtures que le corresponde." >&2
   exit 1

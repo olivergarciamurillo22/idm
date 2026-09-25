@@ -61,7 +61,10 @@ def test_fixtures_versionables(raiz, ruta):
     assert not _ignorado(raiz, ruta), f"{ruta} no debería estar ignorado"
 
 
-@pytest.mark.skipif(GIT is None, reason="git no disponible")
+SH = shutil.which("sh")
+
+
+@pytest.mark.skipif(GIT is None or SH is None, reason="git o sh no disponibles")
 def test_hook_pre_commit_bloquea_documento_real(raiz, tmp_path):
     """Simula el hook sobre un índice temporal: un PDF fuera de fixtures debe bloquear el commit."""
     hook = raiz / ".githooks" / "pre-commit"
@@ -71,10 +74,20 @@ def test_hook_pre_commit_bloquea_documento_real(raiz, tmp_path):
     (repo / "docs").mkdir()
     (repo / "docs" / "albaran_real.pdf").write_bytes(b"%PDF-1.4 ficticio")
     (repo / "docs" / "IMG_0001.HEIC").write_bytes(b"\x00\x00\x00\x18ftypheic")
+    (repo / "docs" / "albaran de junio.pdf").write_bytes(b"%PDF-1.4 con espacios en el nombre")
     (repo / "notas.md").write_text("ok", encoding="utf-8")
-    subprocess.run([GIT, "add", "-f", "docs/albaran_real.pdf", "docs/IMG_0001.HEIC", "notas.md"], cwd=repo, check=True)
+    subprocess.run(
+        [GIT, "add", "-f", "docs/albaran_real.pdf", "docs/IMG_0001.HEIC", "docs/albaran de junio.pdf", "notas.md"],
+        cwd=repo,
+        check=True,
+    )
     r = subprocess.run(["sh", str(hook)], cwd=repo, capture_output=True, text=True, encoding="utf-8")
-    assert r.returncode == 1 and r.stdout.count("BLOQUEADO") == 2
-    subprocess.run([GIT, "rm", "-q", "--cached", "docs/albaran_real.pdf", "docs/IMG_0001.HEIC"], cwd=repo, check=True)
+    assert r.returncode == 1 and r.stdout.count("BLOQUEADO") == 3
+    assert "docs/albaran de junio.pdf" in r.stdout  # nombre con espacios reconocido entero
+    subprocess.run(
+        [GIT, "rm", "-q", "--cached", "docs/albaran_real.pdf", "docs/IMG_0001.HEIC", "docs/albaran de junio.pdf"],
+        cwd=repo,
+        check=True,
+    )
     r = subprocess.run(["sh", str(hook)], cwd=repo, capture_output=True, text=True, encoding="utf-8")
     assert r.returncode == 0

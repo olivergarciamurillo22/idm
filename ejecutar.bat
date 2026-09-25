@@ -22,6 +22,15 @@ if /i "%TAREA%"=="tests" (
   .venv\Scripts\python.exe -m pytest %RESTO%
   exit /b %errorlevel%
 )
+if /i "%TAREA%"=="verificar" (
+  echo == tests && .venv\Scripts\python.exe -m pytest -q || exit /b 1
+  echo == lint && .venv\Scripts\python.exe -m ruff check src tests migrations || exit /b 1
+  echo == formato && .venv\Scripts\python.exe -m ruff format --check src tests migrations || exit /b 1
+  echo == golden && .venv\Scripts\python.exe -m idm.tareas.ejecutar_golden || exit /b 1
+  for /f %%h in ('git config core.hooksPath') do if not "%%h"==".githooks" echo AVISO: falta "git config core.hooksPath .githooks"
+  echo TODO VERDE
+  exit /b 0
+)
 if /i "%TAREA%"=="lint" (
   .venv\Scripts\python.exe -m ruff check src tests migrations && .venv\Scripts\python.exe -m ruff format --check src tests migrations
   exit /b %errorlevel%
@@ -41,4 +50,5 @@ echo   estimar_costes     coste de lectura por documento y mes
 echo   benchmark_lector   aciertos por campo del lector
 echo   ejecutar_golden    golden dataset
 echo   tests / lint       pytest / ruff
+echo   verificar          tests + lint + formato + golden + hooks (antes de cada commit)
 exit /b 0

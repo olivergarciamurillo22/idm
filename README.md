@@ -49,3 +49,4 @@ para qué) y `docs/VALIDACION-PILOTO.md` (cómo se valida contra operaciones his
 - `fixtures/` ver `fixtures/README.md`: `ficticios/` (inventados), `reales/` (anonimizados, protegidos), `golden/`, `problematicos/`, `no_procesables/`.
 - `src/idm/` código. `docs/` cómo se hace hoy (as-is) y reglas por proveedor.
 - Instalación como tarea programada de Windows: `docs/instalacion-windows.md`.
+- Estado del proyecto y cómo retomarlo: `docs/ESTADO.md`. Antes de cada commit: `ejecutar.bat verificar`.

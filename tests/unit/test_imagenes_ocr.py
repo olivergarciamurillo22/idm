@@ -5,6 +5,7 @@ derivados e inventario, preprocesado, reconstrucción de filas, limpieza de text
 import json
 import shutil
 from decimal import Decimal
+from pathlib import Path
 
 import pytest
 from PIL import Image
@@ -161,3 +162,17 @@ def test_lector_ocr_borroso_y_cortado_no_revientan(fixtures):
     assert borroso.resultado == ResultadoLectura.IMAGEN_OCR and borroso.confianza < 1
     cortado = lector.leer(fixtures / IMG / "albaran_sintetico_cortado.jpg")
     assert cortado.resultado == ResultadoLectura.IMAGEN_OCR and cortado.numero == "AC B26 0100009999"
+
+
+def test_abrir_no_deja_el_fichero_abierto(fixtures, tmp_path):
+    """En Windows un fichero abierto no se puede mover: tras abrir e inventariar, el original debe poder moverse."""
+    import shutil as sh
+
+    for nombre in ("albaran_sintetico.heic", "albaran_sintetico.jpg"):
+        copia = tmp_path / nombre
+        sh.copy(fixtures / IMG / nombre, copia)
+        imagenes.abrir(copia)
+        imagenes.datos(copia)
+        movido = sh.move(str(copia), str(tmp_path / f"movido_{nombre}"))
+        assert Path(movido).exists() and not copia.exists()
+    assert imagenes.datos(fixtures / IMG / "albaran_sintetico_exif6.heic").orientacion == "horizontal"

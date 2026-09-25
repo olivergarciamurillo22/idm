@@ -56,11 +56,13 @@ def abrir(ruta) -> Image.Image:
         if es_heic(ruta) and not HEIF_DISPONIBLE:
             raise ImagenNoLegible(f"{ruta.name}: HEIC sin soporte; instala pillow-heif")
     try:
-        img = Image.open(ruta)
-        img.load()
+        # Con "with" el fichero se cierra al salir: en Windows un fichero abierto no se puede mover ni borrar
+        with Image.open(ruta) as img:
+            img.load()
+            girada = ImageOps.exif_transpose(img)
+            return girada if girada is not None else img.copy()
     except Exception as exc:  # noqa: BLE001 - Pillow lanza tipos variados según el formato
         raise ImagenNoLegible(f"{nombre}: {type(exc).__name__}: {str(exc)[:200]}") from exc
-    return ImageOps.exif_transpose(img) or img
 
 
 @dataclass
@@ -97,11 +99,12 @@ def datos(ruta: Path) -> DatosImagen:
     ruta = Path(ruta)
     sha = sha256_fichero(ruta)
     try:
-        crudo = Image.open(ruta)
-        formato = crudo.format
-        orientacion_exif, fecha = _exif(crudo)
-        img = ImageOps.exif_transpose(crudo) or crudo
-        ancho, alto = img.size
+        with Image.open(ruta) as crudo:  # se cierra al salir (Windows bloquea ficheros abiertos)
+            formato = crudo.format
+            orientacion_exif, fecha = _exif(crudo)
+            ancho, alto = crudo.size
+            if orientacion_exif in (5, 6, 7, 8):  # giros de 90/270: se intercambian ancho y alto
+                ancho, alto = alto, ancho
     except Exception as exc:  # noqa: BLE001
         return DatosImagen(
             ruta.name,

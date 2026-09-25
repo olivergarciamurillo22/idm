@@ -1,0 +1,46 @@
+# Verificación automática en cada push y pull request: tests, lint, formato y golden en Linux y en Windows
+# (Windows es donde correrá en IDM). Sin secretos ni datos: los tests usan solo fixtures ficticios y no leen .env;
+# los tests cloud reales se saltan (IDM_RUN_CLOUD_TESTS no está definida) y los de Tesseract también (no instalado).
+name: verificacion
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verificacion-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: tests (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: src
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Instalar dependencias
+        run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt
+      - name: Lint
+        run: python -m ruff check src tests migrations
+      - name: Formato
+        run: python -m ruff format --check src tests migrations
+      - name: Tests
+        run: python -m pytest -q
+      - name: Golden
+        run: python -m idm.tareas.ejecutar_golden

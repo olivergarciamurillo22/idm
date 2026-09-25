@@ -117,6 +117,6 @@ def test_secretos_fuera_de_repr_y_registros(http_falso, fixtures, tmp_path):
         fixtures / "imagenes" / "albaran_sintetico.jpg"
     )
     assert http_falso.peticiones[0]["cabeceras"]["Ocp-Apim-Subscription-Key"] == CLAVE  # se usa…
-    volcado = ruta_log.read_text() + json.dumps(doc.model_dump(mode="json"))
+    volcado = ruta_log.read_text(encoding="utf-8") + json.dumps(doc.model_dump(mode="json"))
     assert CLAVE not in volcado  # …pero no se guarda en ningún sitio
-    assert "base64" not in volcado and "albaran_sintetico" not in ruta_log.read_text()
+    assert "base64" not in volcado and "albaran_sintetico" not in ruta_log.read_text(encoding="utf-8")

@@ -41,7 +41,9 @@ def test_caida_reintento_y_evento(fixtures, respuestas_documentales, tmp_path):
     entrada = tmp_path / "entrada"
     entrada.mkdir()
     shutil.copy(fixtures / "imagenes" / "albaran_sintetico.jpg", entrada / "foto.jpg")
-    servicio = _Servicio(json.loads((respuestas_documentales / "azure_layout_albaran.json").read_text()))
+    servicio = _Servicio(
+        json.loads((respuestas_documentales / "azure_layout_albaran.json").read_text(encoding="utf-8"))
+    )
     lector = LectorAutomatico(
         LectorTextoPDF(), LectorDocumental(servicio, {"B99999999"}, tmp_path / "d", RegistroMemoria())
     )

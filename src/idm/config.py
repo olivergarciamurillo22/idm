@@ -62,6 +62,10 @@ class Config:
     document_pricing_file: Path | None = None
     document_provider_timeout_s: float = 120.0
     document_provider_max_retries: int = 3
+    tesseract_cmd: str = (
+        "tesseract"  # en Windows, si no está en el PATH: C:\\Program Files\\Tesseract-OCR\\tesseract.exe
+    )
+    azure_max_bytes: int = 4_000_000  # límite del plan gratuito F0 (el S0 admite 500 MB): cabe en ambos
 
     @property
     def cifs_propios(self) -> set[str]:
@@ -85,8 +89,32 @@ def _ruta(valor: str) -> Path:
     return ruta if ruta.is_absolute() else RAIZ / ruta
 
 
+VERDADEROS = ("1", "true", "si", "sí", "yes")
+FALSOS = ("", "0", "false", "no")
+
+
 def _bool(valor: str) -> bool:
-    return valor.strip().lower() in ("1", "true", "si", "sí", "yes")
+    """true/false (y sí/no, 1/0). Cualquier otra cosa es un error: una errata en ALLOW_EXTERNAL_DOCUMENT_PROCESSING
+    no debe convertirse en silencio en un valor distinto del que se quería."""
+    limpio = (valor or "").strip().lower()
+    if limpio in VERDADEROS:
+        return True
+    if limpio in FALSOS:
+        return False
+    raise ConfiguracionInvalida(f"Valor {valor!r} en .env: se esperaba true o false")
+
+
+class ConfiguracionInvalida(ValueError):
+    """Un valor del .env no se puede interpretar. El mensaje dice qué variable y qué valor."""
+
+
+def _numero(nombre: str, defecto: str, tipo=int):
+    """Número del entorno; vacío = valor por defecto; texto no numérico = error claro (no un traceback de int())."""
+    valor = (os.environ.get(nombre) or "").strip() or defecto
+    try:
+        return tipo(valor.replace(",", "."))
+    except ValueError as exc:
+        raise ConfiguracionInvalida(f"{nombre}={valor!r} en .env no es un número válido") from exc
 
 
 def _lista(valor: str, minusculas: bool = True) -> tuple[str, ...]:
@@ -107,7 +135,8 @@ def _buzones(valor: str) -> tuple[Buzon, ...]:
 
 def cargar(ruta_env: Path | None = None) -> Config:
     """Carga .env (o el fichero indicado) sobre las variables de entorno y construye Config."""
-    load_dotenv(ruta_env or RAIZ / ".env", override=False)
+    # IDM_ENV_FILE permite apuntar a otro fichero (los tests lo usan para no leer el .env del desarrollador)
+    load_dotenv(ruta_env or Path(os.environ.get("IDM_ENV_FILE") or RAIZ / ".env"), override=False)
     g = os.environ.get
     return Config(
         ruta_datos=_ruta(g("RUTA_DATOS", "datos")),
@@ -128,13 +157,13 @@ def cargar(ruta_env: Path | None = None) -> Config:
             "email_pedidos": g("EMPRESA_EMAIL_PEDIDOS", ""),
         },
         smtp_host=g("SMTP_HOST", ""),
-        smtp_puerto=int(g("SMTP_PUERTO", "587")),
+        smtp_puerto=_numero("SMTP_PUERTO", "587"),
         smtp_usuario=g("SMTP_USUARIO", ""),
         smtp_clave=g("SMTP_CLAVE", ""),
         smtp_remitente=g("SMTP_REMITENTE", ""),
         buzones=_buzones(g("IMAP_BUZONES", "")),
         bandeja_host=g("BANDEJA_HOST", "0.0.0.0"),
-        bandeja_puerto=int(g("BANDEJA_PUERTO", "8000")),
+        bandeja_puerto=_numero("BANDEJA_PUERTO", "8000"),
         ocr_motor=g("OCR_MOTOR", "ninguno").strip().lower(),
         ocr_tuberia=g("OCR_TUBERIA", "contraste_3200,recorte_3200").strip().lower(),
         ocr_lang=g("OCR_LANG", "spa+eng").strip(),
@@ -154,6 +183,8 @@ def cargar(ruta_env: Path | None = None) -> Config:
         mistral_annotation=_bool(g("MISTRAL_DOCUMENT_ANNOTATION", "false")),
         mistral_confidence=g("MISTRAL_OCR_CONFIDENCE", "word").strip().lower(),
         document_pricing_file=_ruta(g("DOCUMENT_PRICING_FILE")) if g("DOCUMENT_PRICING_FILE") else None,
-        document_provider_timeout_s=float(g("DOCUMENT_PROVIDER_TIMEOUT_S", "120")),
-        document_provider_max_retries=int(g("DOCUMENT_PROVIDER_MAX_RETRIES", "3")),
+        document_provider_timeout_s=_numero("DOCUMENT_PROVIDER_TIMEOUT_S", "120", float),
+        document_provider_max_retries=_numero("DOCUMENT_PROVIDER_MAX_RETRIES", "3"),
+        tesseract_cmd=(g("TESSERACT_CMD") or "").strip() or "tesseract",
+        azure_max_bytes=_numero("AZURE_DOCUMENT_INTELLIGENCE_MAX_BYTES", "4000000"),
     )

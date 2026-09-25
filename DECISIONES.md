@@ -246,3 +246,19 @@ con sus corridas y la tabla se ha rehecho desde los JSON guardados.
 ## 2026-09-24 · Coste: tarifas fechadas en un fichero, volumen como argumento
 `documental/tarifas.json` (o `DOCUMENT_PRICING_FILE`) con fecha y aviso de verificar. No se inventa el volumen mensual
 de IDM: `estimar_costes --documentos-mes N`. Cada llamada real guarda su coste estimado.
+
+## 2026-09-25 · Robustez para el Windows de IDM y para el uso real
+- **Texto siempre en UTF-8**: toda lectura/escritura de texto y todo subprocess en modo texto llevan `encoding` explícito
+  (en Windows Python usa cp1252 y rompe con acentos; la salida de Tesseract es UTF-8). Lo vigila
+  `tests/unit/test_calidad_codigo.py` analizando el código, porque ruff no lo detecta con rutas de pytest.
+- **Tests aislados del `.env` del desarrollador**: `IDM_ENV_FILE` permite apuntar a otro fichero y una fixture automática
+  borra las variables del programa en cada test. Antes, un test que llamaba a `config.cargar()` leía el `.env` real
+  (con la clave de Mistral), y con la bandera de envío activada podría haber hecho llamadas reales.
+- **SQLite con bandeja y tarea a la vez**: modo WAL, `busy_timeout` de 30 s y una sesión por hilo (`scoped_session`).
+  Antes la bandeja compartía una sesión entre hilos y dos escrituras simultáneas daban "database is locked".
+- **`.env` con errores**: número vacío = valor por defecto; número o booleano mal escrito = `ConfiguracionInvalida` con
+  el nombre de la variable. Un booleano con errata ya no se convierte en `false` en silencio.
+- **Tesseract en Windows**: `TESSERACT_CMD`, y si no está en el PATH se busca en la ruta del instalador de UB Mannheim.
+- **Límite de tamaño por proveedor**: la foto convertida supera los 4 MB del plan gratuito de Azure; la entrada se
+  recomprime hasta el límite (`AZURE_DOCUMENT_INTELLIGENCE_MAX_BYTES`, Mistral 50 MB) sin bajar de 1.500 px y lo anota.
+- **Mistral con un parámetro opcional no admitido** (confianza por palabra, formato de tablas): un reintento sin él, anotado.

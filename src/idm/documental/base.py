@@ -19,6 +19,7 @@ class DocumentoEntrada:
     sha256_original: str
     sha256_enviado: str
     nombre: str
+    nota: str | None = None  # p. ej. "recomprimida de 7,9 MB a 3,8 MB para el límite del proveedor"
 
     def __repr__(self) -> str:  # nunca volcar el contenido en logs
         return f"DocumentoEntrada({self.nombre!r}, {self.tipo_mime}, {len(self.contenido)} bytes)"

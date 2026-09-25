@@ -57,7 +57,9 @@ def test_inventario_y_duplicados(fixtures, tmp_path):
     assert por_nombre["copia_con_otro_nombre.jpg"].duplicado_de == "albaran_sintetico.jpg"
     assert por_nombre["corrupto.heic"].legible is False
     ruta_json, ruta_md = imagenes.escribir_inventario(tmp_path, inv)
-    assert len(json.loads(ruta_json.read_text())) == 4 and "duplicado" in ruta_md.read_text()
+    assert len(json.loads(ruta_json.read_text(encoding="utf-8"))) == 4 and "duplicado" in ruta_md.read_text(
+        encoding="utf-8"
+    )
 
 
 def test_derivado_jpeg_idempotente_y_registra_relacion(fixtures, tmp_path):
@@ -66,7 +68,7 @@ def test_derivado_jpeg_idempotente_y_registra_relacion(fixtures, tmp_path):
     d2 = imagenes.derivado_jpeg(original, tmp_path / "derivados", lado_maximo=900)
     assert d1 == d2 and d1.suffix == ".jpg" and d1.stem.startswith(imagenes.sha256_fichero(original)[:16])
     assert Image.open(d1).size[0] == 900  # orientación aplicada y reescalado
-    relacion = (tmp_path / "derivados" / imagenes.NOMBRE_RELACION).read_text().splitlines()
+    relacion = (tmp_path / "derivados" / imagenes.NOMBRE_RELACION).read_text(encoding="utf-8").splitlines()
     assert len(relacion) == 1 and json.loads(relacion[0])["sha256_original"] == imagenes.sha256_fichero(original)
     assert original.read_bytes()[:4] == (fixtures / IMG / "albaran_sintetico_exif6.heic").read_bytes()[:4]  # intacto
 

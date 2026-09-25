@@ -19,7 +19,15 @@ from idm.documental.modelo import Caja, MetadatosMotor, Pagina, Palabra, Resulta
 
 def _version(ejecutable: str) -> str:
     try:
-        salida = subprocess.run([ejecutable, "--version"], capture_output=True, text=True, timeout=10, check=False)
+        salida = subprocess.run(
+            [ejecutable, "--version"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=10,
+            check=False,
+        )
         return (salida.stdout or salida.stderr).split()[1]
     except (OSError, IndexError, subprocess.TimeoutExpired):
         return "desconocida"
@@ -36,8 +44,9 @@ class TesseractProvider:
         psms: tuple[int, ...] = (4, 6, 11),
         lang: str = "spa+eng",
         orientar: bool = True,
+        ejecutable: str = "tesseract",
     ) -> None:
-        self._motor = MotorTesseract(lang=lang)
+        self._motor = MotorTesseract(ejecutable=ejecutable, lang=lang)
         self._lector = LectorImagenOCR(self._motor, pasos, None, orientar, psms, pasos_extra)
         self.modelo = f"tesseract-{lang}"
 

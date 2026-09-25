@@ -87,7 +87,10 @@ class LectorDocumental:
         def entrada_para(proveedor):
             if proveedor.externo not in entradas:
                 entradas[proveedor.externo] = entrada.preparar(
-                    ruta, self.carpeta_derivados, convertir=proveedor.externo
+                    ruta,
+                    self.carpeta_derivados,
+                    convertir=proveedor.externo,
+                    max_bytes=getattr(proveedor, "max_bytes", None),
                 )
             return entradas[proveedor.externo]
 
@@ -109,7 +112,10 @@ class LectorDocumental:
         except ErrorProveedorDocumental as exc:
             return self._error(ruta, exc)
         self.ultimo = resultado
-        return a_documento_leido(resultado, ruta, documento.sha256_original, self.cifs_propios)
+        doc = a_documento_leido(resultado, ruta, documento.sha256_original, self.cifs_propios)
+        if documento.nota:
+            doc.avisos.append(f"Imagen enviada {documento.nota}")
+        return doc
 
     def _error(self, ruta: Path, exc: ErrorProveedorDocumental, previo: ErrorProveedorDocumental | None = None):
         resultado, codigo, recuperable = next(v for k, v in RESULTADO_POR_ERROR.items() if isinstance(exc, k))

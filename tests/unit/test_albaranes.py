@@ -102,7 +102,7 @@ def test_lector_fichero_inexistente(tmp_path):
 
 def test_lector_extension_no_soportada(tmp_path):
     f = tmp_path / "cosa.txt"
-    f.write_text("hola")
+    f.write_text("hola", encoding="utf-8")
     assert LectorAutomatico().leer(f).resultado == ResultadoLectura.NO_SOPORTADO
 
 

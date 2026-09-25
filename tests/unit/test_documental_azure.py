@@ -177,3 +177,26 @@ def test_prebuilt_invoice_completa_desde_campos(http_falso, respuestas_documenta
 def test_sin_credenciales_error_permanente():
     with pytest.raises(ErrorPermanente, match="AZURE_DOCUMENT_INTELLIGENCE"):
         AzureDocumentIntelligenceProvider("", "", POLITICA)
+
+
+def test_imagen_grande_se_recomprime_al_limite_del_proveedor(http_falso, respuestas_documentales, fixtures, tmp_path):
+    """Una foto de móvil convertida pesa más que los 4 MB del plan gratuito: se recomprime y se anota."""
+    from PIL import Image
+
+    grande = tmp_path / "grande.png"
+    Image.effect_noise((3000, 2200), 90).convert("RGB").save(grande)  # ruido: no comprime bien
+    _encolar_ok(http_falso, respuestas_documentales)
+    proveedor = _proveedor(http_falso, max_bytes=1_500_000)
+    doc = LectorDocumental(proveedor, carpeta_derivados=tmp_path / "d", registro=RegistroMemoria()).leer(grande)
+    enviado = base64.b64decode(json.loads(http_falso.peticiones[0]["cuerpo"])["base64Source"])
+    assert len(enviado) <= 1_500_000 and enviado[:2] == b"\xff\xd8"
+    assert any("recomprimida" in a for a in doc.avisos)
+
+
+def test_pdf_demasiado_grande_se_rechaza_sin_enviar(http_falso, fixtures, tmp_path):
+    proveedor = _proveedor(http_falso, max_bytes=1_000)
+    doc = LectorDocumental(proveedor, carpeta_derivados=tmp_path).leer(
+        fixtures / "documentos" / "albaran_vega_bruto_descuento.pdf"
+    )
+    assert doc.resultado == ResultadoLectura.NO_SOPORTADO and "admite" in doc.avisos[0]
+    assert http_falso.peticiones == []

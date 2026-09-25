@@ -33,14 +33,14 @@ def _carpeta(fixtures, tmp_path):
     carpeta = tmp_path / "bench"
     carpeta.mkdir()
     shutil.copy(fixtures / "imagenes" / "albaran_sintetico.jpg", carpeta / "a.jpg")
-    verdad = json.loads((fixtures / "imagenes" / "albaran_sintetico.json").read_text())
+    verdad = json.loads((fixtures / "imagenes" / "albaran_sintetico.json").read_text(encoding="utf-8"))
     verdad["proveedor"] = "FICT_VEGA"
-    (carpeta / "a.json").write_text(json.dumps(verdad))
+    (carpeta / "a.json").write_text(json.dumps(verdad), encoding="utf-8")
     return carpeta
 
 
 def test_metricas_con_proveedor_grabado(fixtures, respuestas_documentales, tmp_path):
-    respuesta = json.loads((respuestas_documentales / "azure_layout_albaran.json").read_text())
+    respuesta = json.loads((respuestas_documentales / "azure_layout_albaran.json").read_text(encoding="utf-8"))
     lector = LectorDocumental(_ProveedorGrabado(respuesta), {"B99999999"}, tmp_path / "d", RegistroMemoria())
     r = benchmark.ejecutar(_carpeta(fixtures, tmp_path), lector, "grabado")
     s = r.resumen()

@@ -123,3 +123,26 @@ def test_error_servidor_transitorio(http_falso, fixtures, tmp_path):
         http_falso.encolar(500, {"message": "internal"})
     with pytest.raises(ErrorTransitorio, match="500"):
         _proveedor(http_falso).analizar(preparar(fixtures / "imagenes" / "albaran_sintetico.jpg", tmp_path))
+
+
+def test_parametro_opcional_rechazado_se_reintenta_sin_el(http_falso, respuestas_documentales, fixtures, tmp_path):
+    http_falso.encolar(
+        422, {"detail": [{"loc": ["body", "confidence_scores_granularity"], "msg": "Extra inputs are not permitted"}]}
+    )
+    http_falso.encolar(200, _json(respuestas_documentales, "mistral_ocr_albaran.json"))
+    doc = LectorDocumental(_proveedor(http_falso), {"B99999999"}, tmp_path).leer(
+        fixtures / "imagenes" / "albaran_sintetico.jpg"
+    )
+    primero, segundo = (json.loads(p["cuerpo"]) for p in http_falso.peticiones)
+    assert "confidence_scores_granularity" in primero and "confidence_scores_granularity" not in segundo
+    assert doc.numero == "AC B26 0100009999"
+    assert any("no admitió confidence_scores_granularity" in a for a in doc.avisos)
+
+
+def test_error_422_sin_opcionales_no_se_reintenta(http_falso, fixtures, tmp_path):
+    from idm.documental.base import ErrorPermanente
+
+    http_falso.encolar(422, {"detail": [{"loc": ["body", "document"], "msg": "invalid"}]})
+    with pytest.raises(ErrorPermanente):
+        _proveedor(http_falso).analizar(preparar(fixtures / "imagenes" / "albaran_sintetico.jpg", tmp_path))
+    assert len(http_falso.peticiones) == 1

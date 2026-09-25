@@ -183,8 +183,12 @@ class AzureDocumentIntelligenceProvider(ProveedorExternoBase):
         timeout_s: float = 60.0,
         espera_max_s: float = 180.0,
         tarifas: Tarifas | None = None,
+        max_bytes: int = 4_000_000,
     ) -> None:
         super().__init__(politica)
+        self.max_bytes = (
+            max_bytes  # 4 MB = plan gratuito F0; el S0 admite 500 MB (AZURE_DOCUMENT_INTELLIGENCE_MAX_BYTES)
+        )
         if not endpoint or not clave:
             raise ErrorPermanente("Faltan AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT y/o AZURE_DOCUMENT_INTELLIGENCE_KEY")
         self._endpoint = endpoint.rstrip("/")

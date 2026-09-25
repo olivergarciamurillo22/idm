@@ -44,7 +44,7 @@ def crear_proveedor(nombre: str, cfg, http: ClienteHTTP | None = None) -> Docume
     try:
         if nombre == "tesseract":
             tuberias = tuberias_desde_texto(cfg.ocr_tuberia)
-            return TesseractProvider(tuberias[0], tuberias[1:], lang=cfg.ocr_lang)
+            return TesseractProvider(tuberias[0], tuberias[1:], lang=cfg.ocr_lang, ejecutable=cfg.tesseract_cmd)
         if nombre == "azure":
             return AzureDocumentIntelligenceProvider(
                 cfg.azure_endpoint,
@@ -57,6 +57,7 @@ def crear_proveedor(nombre: str, cfg, http: ClienteHTTP | None = None) -> Docume
                 intentos=cfg.document_provider_max_retries,
                 timeout_s=cfg.document_provider_timeout_s,
                 tarifas=_tarifas(cfg),
+                max_bytes=cfg.azure_max_bytes,
             )
         if nombre == "mistral":
             return MistralDocumentAIProvider(

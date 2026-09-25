@@ -40,6 +40,7 @@ def test_fichero_de_tarifas_propio(tmp_path):
                 "usd_a_eur": 1,
                 "proveedores": {"azure": {"modelos": {"*": {"usd_por_1000_paginas": 20}}}},
             }
-        )
+        ),
+        encoding="utf-8",
     )
     assert estimar(Tarifas.cargar(f), "azure", "x", 1000).eur == Decimal("20.0000")

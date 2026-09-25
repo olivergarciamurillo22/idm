@@ -48,7 +48,7 @@ def test_bandeja_muestra_motor_coste_dudosos_y_correcciones(fixtures, respuestas
     entrada = tmp_path / "entrada"
     entrada.mkdir()
     shutil.copy(fixtures / "imagenes" / "albaran_sintetico.jpg", entrada / "foto.jpg")
-    grabado = _Grabado(json.loads((respuestas_documentales / "azure_layout_albaran.json").read_text()))
+    grabado = _Grabado(json.loads((respuestas_documentales / "azure_layout_albaran.json").read_text(encoding="utf-8")))
     lector = LectorAutomatico(LectorTextoPDF(), LectorDocumental(grabado, {"B99999999"}, tmp_path / "d"))
     g = SiddexDesdeExcel(fixtures / "siddex")
     repo = RepositorioMemoria()

@@ -74,6 +74,22 @@ class MotorNulo:
         return False
 
 
+RUTAS_WINDOWS = (
+    r"C:\Program Files\Tesseract-OCR\tesseract.exe",
+    r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe",
+)
+
+
+def resolver_ejecutable(ejecutable: str, sistema: str | None = None) -> str:
+    """'tesseract' si está en el PATH; si no, en Windows prueba la ruta del instalador de UB Mannheim."""
+    import os
+
+    sistema = sistema or os.name
+    if shutil.which(ejecutable) or ejecutable != "tesseract" or sistema != "nt":
+        return ejecutable
+    return next((r for r in RUTAS_WINDOWS if Path(r).exists()), ejecutable)
+
+
 class MotorTesseract:
     """Tesseract instalado en la máquina (brew/apt, o instalador UB Mannheim en Windows). Se llama al binario.
     lang 'spa+eng' porque los documentos mezclan; psm 6 (bloque uniforme) o 4 (columnas) para albaranes; 11 disperso."""
@@ -83,7 +99,7 @@ class MotorTesseract:
     def __init__(
         self, ejecutable: str = "tesseract", lang: str = "spa+eng", psm: int = 6, timeout_s: int = 120
     ) -> None:
-        self.ejecutable, self.lang, self.psm, self.timeout_s = ejecutable, lang, psm, timeout_s
+        self.ejecutable, self.lang, self.psm, self.timeout_s = resolver_ejecutable(ejecutable), lang, psm, timeout_s
 
     def disponible(self) -> bool:
         return shutil.which(self.ejecutable) is not None
@@ -100,6 +116,8 @@ class MotorTesseract:
                     [self.ejecutable, str(ruta), "stdout", "--psm", "0"],
                     capture_output=True,
                     text=True,
+                    encoding="utf-8",
+                    errors="replace",
                     timeout=self.timeout_s,
                     check=False,
                 ).stdout
@@ -127,6 +145,8 @@ class MotorTesseract:
                     [self.ejecutable, str(ruta), "stdout", "-l", self.lang, "--psm", str(self.psm), "tsv"],
                     capture_output=True,
                     text=True,
+                    encoding="utf-8",
+                    errors="replace",
                     timeout=self.timeout_s,
                     check=False,
                 )

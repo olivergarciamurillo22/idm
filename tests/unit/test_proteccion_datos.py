@@ -71,10 +71,10 @@ def test_hook_pre_commit_bloquea_documento_real(raiz, tmp_path):
     (repo / "docs").mkdir()
     (repo / "docs" / "albaran_real.pdf").write_bytes(b"%PDF-1.4 ficticio")
     (repo / "docs" / "IMG_0001.HEIC").write_bytes(b"\x00\x00\x00\x18ftypheic")
-    (repo / "notas.md").write_text("ok")
+    (repo / "notas.md").write_text("ok", encoding="utf-8")
     subprocess.run([GIT, "add", "-f", "docs/albaran_real.pdf", "docs/IMG_0001.HEIC", "notas.md"], cwd=repo, check=True)
-    r = subprocess.run(["sh", str(hook)], cwd=repo, capture_output=True, text=True)
+    r = subprocess.run(["sh", str(hook)], cwd=repo, capture_output=True, text=True, encoding="utf-8")
     assert r.returncode == 1 and r.stdout.count("BLOQUEADO") == 2
     subprocess.run([GIT, "rm", "-q", "--cached", "docs/albaran_real.pdf", "docs/IMG_0001.HEIC"], cwd=repo, check=True)
-    r = subprocess.run(["sh", str(hook)], cwd=repo, capture_output=True, text=True)
+    r = subprocess.run(["sh", str(hook)], cwd=repo, capture_output=True, text=True, encoding="utf-8")
     assert r.returncode == 0

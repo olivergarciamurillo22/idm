@@ -54,6 +54,9 @@ ESQUEMA_ANOTACION = {
     },
 }
 
+# Parámetros que mejoran la lectura pero no son imprescindibles: si el modelo los rechaza, se reintenta sin ellos
+OPCIONALES = ("confidence_scores_granularity", "table_format")
+
 RE_MARCADOR_TABLA = re.compile(r"\[(tbl-\d+\.(?:md|html))\]\([^)]*\)")
 
 
@@ -185,8 +188,10 @@ class MistralDocumentAIProvider(ProveedorExternoBase):
         intentos: int = 3,
         timeout_s: float = 120.0,
         tarifas: Tarifas | None = None,
+        max_bytes: int = 50_000_000,
     ) -> None:
         super().__init__(politica)
+        self.max_bytes = max_bytes  # límite documentado de Mistral OCR: 50 MB
         if not clave:
             raise ErrorPermanente("Falta MISTRAL_API_KEY")
         self.__clave = clave  # nunca se registra ni se incluye en errores
@@ -206,6 +211,19 @@ class MistralDocumentAIProvider(ProveedorExternoBase):
 
     def disponible(self) -> bool:
         return bool(self.__clave)
+
+    def _enviar(self, cabeceras: dict, cuerpo: dict):
+        return llamar(
+            self._http,
+            "POST",
+            self._endpoint,
+            cabeceras,
+            json.dumps(cuerpo).encode(),
+            self._timeout_s,
+            self._intentos,
+            self._esperar,
+            esperados=(200,),
+        )
 
     def cuerpo(self, documento: DocumentoEntrada) -> dict:
         datos = base64.b64encode(documento.contenido).decode("ascii")
@@ -228,20 +246,22 @@ class MistralDocumentAIProvider(ProveedorExternoBase):
 
     def _analizar(self, documento: DocumentoEntrada) -> ResultadoDocumental:
         cabeceras = {"Authorization": f"Bearer {self.__clave}", "Content-Type": "application/json"}
-        cuerpo = json.dumps(self.cuerpo(documento)).encode()
-        r = llamar(
-            self._http,
-            "POST",
-            self._endpoint,
-            cabeceras,
-            cuerpo,
-            self._timeout_s,
-            self._intentos,
-            self._esperar,
-            esperados=(200,),
-        )
+        avisos: list[str] = []
+        cuerpo = self.cuerpo(documento)
+        try:
+            r = self._enviar(cabeceras, cuerpo)
+        except ErrorPermanente as exc:
+            opcionales = [k for k in OPCIONALES if k in cuerpo and k in str(exc)]
+            if exc.estado_http not in (400, 422) or not opcionales:
+                raise
+            # El modelo no admite un parámetro opcional: se repite una vez sin él y se deja anotado
+            for k in opcionales:
+                cuerpo.pop(k)
+            avisos.append(f"Mistral no admitió {', '.join(opcionales)} con {self.modelo}: leído sin ello")
+            r = self._enviar(cabeceras, cuerpo)
         metadatos = MetadatosMotor(proveedor=self.nombre, modelo=self.modelo, externo=True, request_id=request_id(r))
         resultado = convertir(r.json(), metadatos)
+        resultado.avisos += avisos
         if self._tarifas:
             extras = ("document_annotation",) if self.anotacion else ()
             modelo_tarifa = self.modelo  # la tarifa se busca por el alias configurado (p. ej. mistral-ocr-latest)

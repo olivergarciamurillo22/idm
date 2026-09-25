@@ -21,11 +21,11 @@ def test_segunda_instancia_rechazada(tmp_path):
 
 def test_bloqueo_caducado_se_sustituye(tmp_path):
     ruta = tmp_path / "x.lock"
-    ruta.write_text("999999 0")
+    ruta.write_text("999999 0", encoding="utf-8")
     viejo = time.time() - 10_000
     os.utime(ruta, (viejo, viejo))
     with Bloqueo(ruta, caducidad_segundos=3600):
-        assert ruta.read_text().split()[0] == str(os.getpid())
+        assert ruta.read_text(encoding="utf-8").split()[0] == str(os.getpid())
 
 
 def test_se_libera_aunque_falle(tmp_path):

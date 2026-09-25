@@ -9,6 +9,35 @@ import pytest
 RAIZ = Path(__file__).resolve().parent.parent
 FIXTURES = RAIZ / "fixtures"
 
+# Variables que el programa lee del .env. En los tests NO deben venir del .env del desarrollador (puede tener claves
+# reales de Mistral/Azure o la bandera de envío externo activada): cada test parte de la configuración por defecto.
+PREFIJOS_CONFIG = (
+    "RUTA_",
+    "DATABASE_URL",
+    "MODO_SIMULACION",
+    "EMPRESA_",
+    "SMTP_",
+    "IMAP_",
+    "BANDEJA_",
+    "OCR_",
+    "DOCUMENT_",
+    "ALLOW_EXTERNAL",
+    "EXTERNAL_DOCUMENT",
+    "AZURE_DOCUMENT",
+    "MISTRAL_",
+    "TESSERACT_",
+)
+
+
+@pytest.fixture(autouse=True)
+def _aislar_de_env_local(monkeypatch, tmp_path_factory):
+    import os
+
+    for nombre in list(os.environ):
+        if nombre.startswith(PREFIJOS_CONFIG):
+            monkeypatch.delenv(nombre, raising=False)
+    monkeypatch.setenv("IDM_ENV_FILE", str(tmp_path_factory.getbasetemp() / "sin_env_de_desarrollo.env"))
+
 
 @pytest.fixture
 def fixtures() -> Path:

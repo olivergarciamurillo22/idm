@@ -38,12 +38,12 @@ def test_pipeline_completo_e_idempotente(fixtures, tmp_path):
     assert [r.motivo for r in resultados] == [Motivo.PROCESADO] * 4 + [Motivo.REQUIERE_OCR]
     vega, recambios, electro, factura, foto = (r.documento for r in resultados)
 
-    assert vega.semaforo == Semaforo.VERDE and vega.pedido == "20261060" and vega.estado == EstadoDocumento.EN_REVISION
+    assert vega.semaforo == Semaforo.VERDE and vega.pedido == "20269060" and vega.estado == EstadoDocumento.EN_REVISION
     assert recambios.relacion == RelacionPedido.PEDIDO_PROPUESTO and recambios.pedido_propuesto is not None
     assert electro.semaforo == Semaforo.AMBAR and electro.numero == "2026/1234"
     assert factura.tipo == TipoDocumento.FACTURA
     cf = factura.cotejo_factura
-    assert cf["albaranes_encontrados"] == ["B26 0100005283"] and cf["albaranes_no_encontrados"] == ["B26 0100005301"]
+    assert cf["albaranes_encontrados"] == ["B26 0100008881"] and cf["albaranes_no_encontrados"] == ["B26 0100005301"]
     assert factura.semaforo == Semaforo.AMBAR
     assert foto.leido.metodo == "imagen_nulo" and foto.semaforo == Semaforo.AMBAR and foto.proveedor == "DESCONOCIDO"
     assert foto.estado == EstadoDocumento.EN_REVISION and foto.errores[0].codigo == CodigoError.LECTURA_REQUIERE_OCR

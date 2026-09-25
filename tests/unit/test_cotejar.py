@@ -12,19 +12,19 @@ from idm.dominio.reglas import ReglasCotejo
 
 def pedido_base() -> Pedido:
     return Pedido(
-        numero="20261060",
+        numero="20269060",
         proveedor="FICT_VEGA",
         lineas=[
             LineaPedido(
-                codigo_idm="134.000.842",
-                codigo_proveedor="PVCC550942",
+                codigo_idm="900.000.842",
+                codigo_proveedor="FXT9550942",
                 descripcion="TERMINAL FASTON H. 9,4 AMAR",
                 cantidad=Decimal("100"),
                 precio_bruto=Decimal("0.30"),
                 descuento_pct=Decimal("45"),
             ),
             LineaPedido(
-                codigo_idm="I33.000.786",
+                codigo_idm="Z33.000.786",
                 codigo_proveedor="ABR-6205",
                 descripcion="RODAMIENTO 6205 2RS",
                 cantidad=Decimal("5"),
@@ -38,8 +38,8 @@ def pedido_base() -> Pedido:
 def albaran_base(**cambios) -> Albaran:
     lineas = [
         LineaAlbaran(
-            codigo_proveedor="PVCC550942",
-            codigo_idm="134.000.842",
+            codigo_proveedor="FXT9550942",
+            codigo_idm="900.000.842",
             descripcion="TERMINAL FASTON H 9,4 AMARILLO",
             cantidad=Decimal("100"),
             precio_bruto=Decimal("0.30"),
@@ -47,7 +47,7 @@ def albaran_base(**cambios) -> Albaran:
         ),
         LineaAlbaran(
             codigo_proveedor="ABR-6205",
-            codigo_idm="I33.000.786",
+            codigo_idm="Z33.000.786",
             descripcion="RODAMIENTO 6205 2RS",
             cantidad=Decimal("5"),
             precio_bruto=Decimal("9.14"),
@@ -56,9 +56,9 @@ def albaran_base(**cambios) -> Albaran:
     ]
     datos = dict(
         proveedor="FICT_VEGA",
-        numero_original="AC B26 0100005283",
-        numero="B26 0100005283",
-        nuestro_pedido="20261060",
+        numero_original="AC B26 0100008881",
+        numero="B26 0100008881",
+        nuestro_pedido="20269060",
         lineas=lineas,
     )
     datos.update(cambios)

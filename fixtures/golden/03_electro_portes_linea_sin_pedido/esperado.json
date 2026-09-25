@@ -1,6 +1,6 @@
 {
   "lectura": {
-    "tipo": "ALBARAN", "cif": "B00000003", "numero": "ALB. 2026/1.234", "nuestro_pedido": "20261061",
+    "tipo": "ALBARAN", "cif": "B00000003", "numero": "ALB. 2026/1.234", "nuestro_pedido": "20269061",
     "base": "84.28", "total": "101.98",
     "lineas": [
       {"codigo_proveedor": "EL-CABLE-25", "cantidad": "100", "precio_bruto": "0.42", "descuento_pct": "10"},

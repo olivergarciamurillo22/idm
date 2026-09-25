@@ -1,12 +1,12 @@
 # Recambios La Cepa
 
 - **Clave en el programa:** `LA_CEPA`
-- **Código en Siddex (PROVEEDR):** 1411
+- **Código en Siddex (PROVEEDR):** en `datos/proveedores_conocidos.csv` (fuera de git)
 - **CIF:** PENDIENTE (Maestro de Proveedores)
 - **Correo de pedidos:** PENDIENTE (Maestro de Proveedores)
 
 ## Número de albarán
-Imprime `AC B26 0100005206`; en Siddex se teclea `B26 0100005206` (se quita el prefijo `AC`). Ejemplo real de línea: referencia PVCC550942, 100 uds, 0,30, dto 45 % ↔ artículo IDM 134.000.842.
+Imprime `AC B26 0100008882`; en Siddex se teclea `B26 0100008882` (se quita el prefijo `AC`). Ejemplo real de línea: referencia FXT9550942, 100 uds, 0,30, dto 45 % ↔ artículo IDM 900.000.842.
 
 ## Precio y descuento en el albarán
 Sí: bruto y descuento por línea.

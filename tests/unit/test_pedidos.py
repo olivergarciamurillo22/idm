@@ -60,7 +60,7 @@ def test_pdf_correo_y_hoja_siddex(fixtures, tmp_path):
     provs = {p.clave: p for p in g.proveedores()}
     r = generar.generar(
         [],
-        [Encargo(proveedor="FICT_VEGA", articulo="I33.000.786", cantidad=Decimal("5"))],
+        [Encargo(proveedor="FICT_VEGA", articulo="Z33.000.786", cantidad=Decimal("5"))],
         g.articulos(),
         g.proveedores(),
         date(2026, 9, 23),
@@ -80,4 +80,4 @@ def test_pdf_correo_y_hoja_siddex(fixtures, tmp_path):
     hoja = exportar_siddex.exportar(r.pedidos, provs, tmp_path / "siddex.xlsx")
     libro = openpyxl.load_workbook(hoja)
     filas = list(libro["P-20260923-01"].iter_rows(values_only=True))
-    assert filas[1][0] == "9001" and filas[1][3] == "I33.000.786" and filas[1][5] == 5
+    assert filas[1][0] == "9001" and filas[1][3] == "Z33.000.786" and filas[1][5] == 5

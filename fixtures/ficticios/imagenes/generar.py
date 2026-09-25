@@ -111,7 +111,7 @@ def albaran(ancho: int = 1800, alto: int = 1300) -> Image.Image:
         d.text((x, y), t, fill="black", font=fs)
     for x, t in ((120, "8,60"), (420, "0,00"), (720, "8,60"), (1020, "21,00"), (1200, "1,81"), (1500, "10,41")):
         d.text((x, y + 45), t, fill="black", font=f)
-    d.text((1500, 300), "2921", fill=(60, 60, 120), font=fuente(48))  # anotación manuscrita simulada
+    d.text((1500, 300), "9921", fill=(60, 60, 120), font=fuente(48))  # anotación manuscrita simulada
     return img
 
 

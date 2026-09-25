@@ -1,5 +1,5 @@
 """Normaliza el número de albarán/factura como lo teclea Fernando en Siddex: reglas por proveedor, no generales.
-RECACOR imprime 5526/2.063 y en Siddex va 5526/2063; La Cepa imprime AC B26 0100005206 y va B26 0100005206.
+RECACOR imprime 4410/3.172 y en Siddex va 4410/3172; La Cepa imprime AC B26 0100008882 y va B26 0100008882.
 No identifica al proveedor (eso es equivalencias/proveedores.py): recibe la clave y el número tal cual."""
 
 import re

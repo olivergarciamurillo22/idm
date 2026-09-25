@@ -46,16 +46,16 @@ def _cliente(fixtures, tmp_path):
 def test_lista_y_filtros(fixtures, tmp_path):
     c, repo, _ = _cliente(fixtures, tmp_path)
     r = c.get("/")
-    assert r.status_code == 200 and "B26 0100005283" in r.text and "5526/2063" in r.text
-    assert "5526/2063" not in c.get("/?semaforo=VERDE").text
-    assert "B26 0100005283" not in c.get("/?proveedor=FICT_RECAMBIOS").text
+    assert r.status_code == 200 and "B26 0100008881" in r.text and "4410/3172" in r.text
+    assert "4410/3172" not in c.get("/?semaforo=VERDE").text
+    assert "B26 0100008881" not in c.get("/?proveedor=FICT_RECAMBIOS").text
 
 
 def test_documento_aprobar_y_equivalencia(fixtures, tmp_path):
     c, repo, tabla = _cliente(fixtures, tmp_path)
     doc = next(d for d in repo.listar() if d.proveedor == "FICT_RECAMBIOS")
     r = c.get(f"/documentos/{doc.id}")
-    assert r.status_code == 200 and "PENDIENTE_FACTURA" in r.text and "PP-5526/2063" in r.text
+    assert r.status_code == 200 and "PENDIENTE_FACTURA" in r.text and "PP-4410/3172" in r.text
     assert c.get(f"/documentos/{doc.id}/fichero").headers["content-type"] == "application/pdf"
 
     r = c.post(
@@ -68,10 +68,10 @@ def test_documento_aprobar_y_equivalencia(fixtures, tmp_path):
 
     r = c.post(
         f"/documentos/{doc.id}/aprobar",
-        data={"numero_registro_siddex": "20262921", "quien": "Fernando"},
+        data={"numero_registro_siddex": "20269921", "quien": "Fernando"},
         follow_redirects=True,
     )
-    assert "20262921" in r.text and doc.estado == EstadoDocumento.APROBADO
+    assert "20269921" in r.text and doc.estado == EstadoDocumento.APROBADO
     assert repo.eventos(doc.id)[-1].tipo == "decision.tomada"
     assert "Aprobar" not in r.text.split("Decisión")[-1][:200]
 
@@ -79,11 +79,11 @@ def test_documento_aprobar_y_equivalencia(fixtures, tmp_path):
 def test_pedido_propuesto_confirmar(fixtures, tmp_path):
     c, repo, _ = _cliente(fixtures, tmp_path)
     doc = next(d for d in repo.listar() if d.pedido_propuesto is not None)
-    assert "PP-5526/2063" in c.get("/pedidos").text
+    assert "PP-4410/3172" in c.get("/pedidos").text
     r = c.post(f"/pedidos/{doc.id}/confirmar", data={"quien": "Fernandillo"}, follow_redirects=True)
-    assert r.status_code == 200 and doc.relacion == RelacionPedido.CON_PEDIDO and doc.pedido == "PP-5526/2063"
+    assert r.status_code == 200 and doc.relacion == RelacionPedido.CON_PEDIDO and doc.pedido == "PP-4410/3172"
     assert list((tmp_path / "salida").glob("pedido_propuesto_*.xlsx"))
-    assert "PP-5526/2063" not in c.get("/pedidos").text
+    assert "PP-4410/3172" not in c.get("/pedidos").text
 
 
 def test_encargos_web(fixtures, tmp_path):
@@ -91,10 +91,10 @@ def test_encargos_web(fixtures, tmp_path):
     assert c.get("/encargos").status_code == 200
     r = c.post(
         "/encargos",
-        data={"proveedor": "La Cepa", "articulo": "I33.000.786", "cantidad": "5", "quien": "F"},
+        data={"proveedor": "La Cepa", "articulo": "Z33.000.786", "cantidad": "5", "quien": "F"},
         follow_redirects=True,
     )
-    assert "I33.000.786" in r.text
+    assert "Z33.000.786" in r.text
     r = c.post("/encargos", data={"texto": "Meyras ; rele ; 12\nmal", "quien": "F"}, follow_redirects=True)
     assert "rele" in r.text and "Línea 2" in r.text
     r = c.post("/encargos", data={"proveedor": "", "articulo": "x", "cantidad": "1"}, follow_redirects=True)

@@ -2,17 +2,17 @@
 
 1. Llega el albarán físico con la mercancía. Formatos distintos por proveedor (Recambios La Cepa, Grupo Meyras, RECACOR…).
    No todos traen precio: RECACOR no.
-2. En Siddex: **Almacén → Introducción de Registros de Entrada**. Siddex genera un Nº Registro interno (p. ej. 20262921)
+2. En Siddex: **Almacén → Introducción de Registros de Entrada**. Siddex genera un Nº Registro interno (p. ej. 20269921)
    con fecha y hora.
-3. Se identifica el proveedor buscando en la tabla PROVEEDR (La Cepa = código 1411; RECACOR = 864). Siddex muestra razón
+3. Se identifica el proveedor buscando en la tabla PROVEEDR (cada proveedor tiene su código; los reales están en datos/proveedores_conocidos.csv). Siddex muestra razón
    social, CIF, dirección, forma de pago.
 4. **Con pedido**: opción *Importar Pedidos a Proveedor* (campos Proveedor, Almacén, Nuestro Pedido, Su Pedido, Su Albarán,
    Fecha Recepción, Hora, Orden, Cliente). Siddex recupera las líneas del pedido (artículo interno, descripción, cantidad,
-   unidad, precio, lote, fecha, estado) y la persona marca las recibidas. Ejemplo: pedido 20261060, albarán B26 0100005283,
-   artículo 134.000.842 TERMINAL FASTON H. 9,4 AMAR, 100 uds a 0,300; en el papel de La Cepa: referencia PVCC550942,
+   unidad, precio, lote, fecha, estado) y la persona marca las recibidas. Ejemplo: pedido 20269060, albarán B26 0100008881,
+   artículo 900.000.842 TERMINAL FASTON H. 9,4 AMAR, 100 uds a 0,300; en el papel de La Cepa: referencia FXT9550942,
    100 uds, 0,30, descuento 45 %.
 5. **Sin pedido**: se crea la entrada a mano. Se teclea la referencia del proveedor y, si el artículo está configurado en el
-   Maestro de Artículos, Siddex recupera el artículo interno (RECACOR MO01001 ↔ "SERVICIO TURISMO (CONTRATOS)").
+   Maestro de Artículos, Siddex recupera el artículo interno (RECACOR SV09001 ↔ "SERVICIO FICTICIO (CONTRATOS)").
    **El código alternativo por proveedor existe y funciona.**
 6. La descripción interna de IDM puede ser distinta de la del proveedor y la mantienen.
 7. Cantidad y unidad según el artículo (UD, M, LT).
@@ -22,10 +22,10 @@
    compra ha cambiado, lo actualizan en Enlaces → Maestro de Artículos. El precio de venta lleva un margen manual que varía
    por artículo (ejemplo 60 %). **Nuestro sistema no toca precios de venta ni el maestro: solo avisa.**
 10. Buscador histórico: *Buscar Registros de la Tabla ENTRADA* (NumeroRegistro, Fecha, NumeroAlbaran, CodigoProveedor, Nombre).
-11. Escriben a mano en el papel los últimos cuatro dígitos del Nº Registro (2921, 2922, 2923). Pendiente de confirmar, pero
+11. Escriben a mano en el papel los últimos cuatro dígitos del Nº Registro (9921, 9922, 9923). Pendiente de confirmar, pero
     muy consistente. Nuestro sistema devuelve ese número (campo "Nº registro Siddex" al aprobar en la bandeja).
-12. Normalizan a mano el número de albarán: RECACOR imprime 5526/2.063 y en Siddex va 5526/2063; La Cepa imprime
-    AC B26 0100005206 y en Siddex va B26 0100005206. **Reglas por proveedor, no generales.**
+12. Normalizan a mano el número de albarán: RECACOR imprime 4410/3.172 y en Siddex va 4410/3172; La Cepa imprime
+    AC B26 0100008882 y en Siddex va B26 0100008882. **Reglas por proveedor, no generales.**
 
 ## Dudas abiertas
 - Significado exacto de la anotación manuscrita.

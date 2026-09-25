@@ -10,7 +10,7 @@ from idm.encargos.registro import Encargo, EncargosJSONL
 
 def test_jsonl_guarda_lista_y_marca(tmp_path):
     repo = EncargosJSONL(tmp_path / "encargos.jsonl")
-    e1 = repo.guardar(Encargo(proveedor="La Cepa", articulo="I33.000.786", cantidad=Decimal("5"), quien="Fernandillo"))
+    e1 = repo.guardar(Encargo(proveedor="La Cepa", articulo="Z33.000.786", cantidad=Decimal("5"), quien="Fernandillo"))
     repo.guardar(Encargo(proveedor="Meyras", articulo="rele 24v", cantidad=Decimal("12")))
     assert len(repo.listar()) == 2
     assert repo.marcar([e1.id], EstadoEncargo.EN_PEDIDO, pedido="P-20260923-01") == 1
@@ -20,10 +20,10 @@ def test_jsonl_guarda_lista_y_marca(tmp_path):
 
 
 def test_mensaje_formato_fijo():
-    texto = "La Cepa ; I33.000.786 ; 5\nMeyras | rele 24v | 12 | ud\n# comentario\nsin separador\nX;Y;cero"
+    texto = "La Cepa ; Z33.000.786 ; 5\nMeyras | rele 24v | 12 | ud\n# comentario\nsin separador\nX;Y;cero"
     r = mensaje.interpretar(texto, quien="Fernandillo")
     assert [(e.proveedor, e.articulo, e.cantidad, e.unidad) for e in r.encargos] == [
-        ("La Cepa", "I33.000.786", Decimal("5"), "UD"),
+        ("La Cepa", "Z33.000.786", Decimal("5"), "UD"),
         ("Meyras", "rele 24v", Decimal("12"), "UD"),
     ]
     assert r.encargos[0].origen == OrigenEncargo.MENSAJE and r.encargos[0].quien == "Fernandillo"

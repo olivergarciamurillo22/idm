@@ -58,7 +58,7 @@ def test_migrar_procesar_y_bandeja_con_sql(tmp_path, fixtures):
     assert informe[1].startswith("duplicado_sha") and len(repo.listar()) == 2
     assert repo.ejecuciones()[0].n_duplicados == 1 and len(repo.ejecuciones()) == 2
 
-    encargos.guardar(Encargo(proveedor="FICT_VEGA", articulo="I33.000.786", cantidad=Decimal("5")))
+    encargos.guardar(Encargo(proveedor="FICT_VEGA", articulo="Z33.000.786", cantidad=Decimal("5")))
     informe = generar_pedidos.ejecutar(
         cfg,
         SiddexDesdeExcel(cfg.ruta_siddex),
@@ -75,12 +75,12 @@ def test_migrar_procesar_y_bandeja_con_sql(tmp_path, fixtures):
 
     app = crear_app(repo, encargos, cfg)
     c = TestClient(app)
-    assert "B26 0100005283" in c.get("/").text and "F26/000731" in c.get("/?tipo=FACTURA").text
+    assert "B26 0100008881" in c.get("/").text and "F26/000731" in c.get("/?tipo=FACTURA").text
     doc = repo.listar(tipo=None)[-1]
     r = c.post(
         f"/documentos/{doc.id}/aprobar",
-        data={"numero_registro_siddex": "20262921", "quien": "Fernando"},
+        data={"numero_registro_siddex": "20269921", "quien": "Fernando"},
         follow_redirects=True,
     )
-    assert "20262921" in r.text and repo.obtener(doc.id).numero_registro_siddex == "20262921"
+    assert "20269921" in r.text and repo.obtener(doc.id).numero_registro_siddex == "20269921"
     sesion.close()

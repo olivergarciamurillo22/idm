@@ -36,7 +36,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--planning", type=Path, default=cfg.ruta_planning)
     p.add_argument("--siddex", type=Path, default=cfg.ruta_siddex, help="carpeta con los exports de Siddex")
     p.add_argument("--salida", type=Path, default=None)
-    p.add_argument("--mapa", type=Path, default=mapa_mod.RUTA_MAPA_POR_DEFECTO)
+    p.add_argument("--mapa", type=Path, default=mapa_mod.ruta_mapa(cfg.ruta_datos))
     p.add_argument("--descontar-stock", action="store_true", help="descuenta stock y pendiente de recibir")
     args = p.parse_args(argv)
     if not args.planning.exists():
@@ -45,6 +45,11 @@ def main(argv: list[str] | None = None) -> int:
     if not args.hoja:
         print("Hojas disponibles:", ", ".join(hojas(args.planning)))
         return 0
+    if args.mapa == mapa_mod.RUTA_MAPA_POR_DEFECTO:
+        print(
+            f"AVISO: no existe {cfg.ruta_datos / mapa_mod.NOMBRE_MAPA_REAL}; "
+            "se usa el mapa de EJEMPLO (códigos inventados)"
+        )
     salida = args.salida or cfg.ruta_salida / f"necesidades_{args.hoja}.xlsx"
     ejecutar(args.hoja, args.planning, args.siddex, salida, args.mapa, args.descontar_stock)
     return 0

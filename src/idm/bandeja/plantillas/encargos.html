@@ -7,7 +7,7 @@
 <div class="dos">
   <form method="post" action="/encargos">
     <label>Proveedor <input name="proveedor" placeholder="La Cepa" required autofocus></label>
-    <label>Artículo (código IDM o texto) <input name="articulo" placeholder="I33.000.786 o 'rodamiento 6205'" required></label>
+    <label>Artículo (código IDM o texto) <input name="articulo" placeholder="Z33.000.786 o 'rodamiento 6205'" required></label>
     <label>Cantidad <input name="cantidad" inputmode="decimal" placeholder="5" required></label>
     <label>Unidad <input name="unidad" value="UD"></label>
     <label>Quién <input name="quien" placeholder="Fernandillo"></label>
@@ -15,7 +15,7 @@
   </form>
   <form method="post" action="/encargos">
     <p>O pega un mensaje entero (una línea por encargo):<br><small>{{ formato }}</small></p>
-    <textarea name="texto" rows="8" placeholder="La Cepa ; I33.000.786 ; 5&#10;Meyras ; rele 24v ; 12 ; UD"></textarea>
+    <textarea name="texto" rows="8" placeholder="La Cepa ; Z33.000.786 ; 5&#10;Meyras ; rele 24v ; 12 ; UD"></textarea>
     <label>Quién <input name="quien"></label>
     <button type="submit" class="gris">Registrar todas</button>
   </form>

@@ -4,7 +4,7 @@
   "cif": "B00000003",
   "numero": "ALB. 2026/1.234",
   "fecha": "2026-09-16",
-  "nuestro_pedido": "20261061",
+  "nuestro_pedido": "20269061",
   "lineas": [
     {"codigo_proveedor": "EL-CABLE-25", "descripcion": "CABLE 2,5MM NEGRO", "cantidad": "100", "unidad": "M", "precio_bruto": "0.42", "descuento_pct": "10", "importe": "37.80"},
     {"codigo_proveedor": "EL-REL-24", "descripcion": "RELE 24V 40A", "cantidad": "12", "unidad": "UD", "precio_bruto": "3.10", "descuento_pct": "10", "importe": "33.48"},

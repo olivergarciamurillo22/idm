@@ -53,9 +53,9 @@ def test_documentos_idempotencia_y_filtros(sesion):
     assert len(repo.listar()) == 2
     assert [x.proveedor for x in repo.listar(proveedor="FICT_ELECTRO")] == ["FICT_ELECTRO"]
     d.estado = EstadoDocumento.APROBADO
-    d.numero_registro_siddex = "20262921"
+    d.numero_registro_siddex = "20269921"
     repo.guardar(d)
-    assert repo.obtener(d.id).numero_registro_siddex == "20262921"
+    assert repo.obtener(d.id).numero_registro_siddex == "20269921"
     assert [x.id for x in repo.listar(estado=EstadoDocumento.APROBADO)] == [d.id]
 
 
@@ -70,7 +70,7 @@ def test_eventos_y_pedidos(sesion):
         numero="P-20260923-01",
         proveedor="FICT_VEGA",
         fecha=date(2026, 9, 23),
-        lineas=[LineaPedido(codigo_idm="I33.000.786", cantidad=Decimal("5"), precio_bruto=Decimal("9.14"))],
+        lineas=[LineaPedido(codigo_idm="Z33.000.786", cantidad=Decimal("5"), precio_bruto=Decimal("9.14"))],
     )
     repo.guardar_pedido(pedido)
     pedido.numero_siddex = "20261099"
@@ -92,7 +92,7 @@ def test_ejecuciones(sesion):
 
 def test_encargos_sql(sesion):
     repo = EncargosSQL(sesion)
-    e = repo.guardar(Encargo(proveedor="La Cepa", articulo="I33.000.786", cantidad=Decimal("5"), quien="F"))
+    e = repo.guardar(Encargo(proveedor="La Cepa", articulo="Z33.000.786", cantidad=Decimal("5"), quien="F"))
     repo.guardar(Encargo(proveedor="Meyras", articulo="rele", cantidad=Decimal("12.5")))
     assert len(repo.listar(EstadoEncargo.PENDIENTE)) == 2
     assert repo.marcar([e.id], EstadoEncargo.EN_PEDIDO, "P-1") == 1

@@ -227,16 +227,16 @@ def test_factura_parcial_regla_pendiente():
 
 def test_factura_sin_pedido_identificado_por_albaran_propuesto():
     """Un albarán que entró SIN_PEDIDO (pedido propuesto) se factura igual: la factura lo encuentra por su número."""
-    a1 = _albaran([_la("A", "1", "10")], numero="5526/2063", pedido=None)
+    a1 = _albaran([_la("A", "1", "10")], numero="4410/3172", pedido=None)
     factura = Factura(
         proveedor="PROV",
         numero="F",
-        albaranes=["5526/2.063"],
-        lineas=[LineaFactura(albaran="5526/2.063", descripcion="X", cantidad=D("1"), precio_bruto=D("10"))],
+        albaranes=["4410/3.172"],
+        lineas=[LineaFactura(albaran="4410/3.172", descripcion="X", cantidad=D("1"), precio_bruto=D("10"))],
     )
     a1.proveedor = factura.proveedor = "RECACOR"  # RECACOR quita los puntos al normalizar
     r = cotejar_factura(factura, [a1])
-    assert r.albaranes_encontrados == ["5526/2063"] and r.semaforo == Semaforo.VERDE
+    assert r.albaranes_encontrados == ["4410/3172"] and r.semaforo == Semaforo.VERDE
 
 
 def test_factura_sin_ningun_albaran_conocido():

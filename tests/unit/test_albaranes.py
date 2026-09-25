@@ -23,8 +23,8 @@ def test_extraer_pdf_con_texto_y_tablas(fixtures):
 
 
 def test_normalizar_numero_por_proveedor():
-    assert normalizar_numero("RECACOR", "5526/2.063") == "5526/2063"
-    assert normalizar_numero("LA_CEPA", "AC B26 0100005206") == "B26 0100005206"
+    assert normalizar_numero("RECACOR", "4410/3.172") == "4410/3172"
+    assert normalizar_numero("LA_CEPA", "AC B26 0100008882") == "B26 0100008882"
     assert normalizar_numero("FICT_ELECTRO", "ALB. 2026/1.234") == "2026/1234"
     assert normalizar_numero("OTRO", "  ab  12 ") == "AB 12"  # solo reglas comunes
     assert normalizar_numero(None, "x.1") == "X.1"
@@ -33,8 +33,8 @@ def test_normalizar_numero_por_proveedor():
 def test_lector_albaran_bruto_descuento(fixtures):
     doc = leer(fixtures / DOCS / "albaran_vega_bruto_descuento.pdf")
     assert doc.metodo == "pdf_texto" and doc.tipo == TipoDocumento.ALBARAN
-    assert doc.cif == "B00000001" and doc.numero == "AC B26 0100005283"
-    assert doc.fecha == date(2026, 9, 14) and doc.nuestro_pedido == "20261060"
+    assert doc.cif == "B00000001" and doc.numero == "AC B26 0100008881"
+    assert doc.fecha == date(2026, 9, 14) and doc.nuestro_pedido == "20269060"
     assert len(doc.lineas) == 3
     assert doc.lineas[1].codigo_proveedor == "ABR-6205"
     assert doc.lineas[1].precio_bruto == Decimal("9.14") and doc.lineas[1].descuento_pct == Decimal("45")
@@ -46,7 +46,7 @@ def test_lector_albaran_bruto_descuento(fixtures):
 
 def test_lector_albaran_sin_precio(fixtures):
     doc = leer(fixtures / DOCS / "albaran_recambios_sin_precio.pdf")
-    assert doc.numero == "5526/2.063" and doc.nuestro_pedido is None
+    assert doc.numero == "4410/3.172" and doc.nuestro_pedido is None
     assert [li.precio_bruto for li in doc.lineas] == [None, None]
     assert doc.base is None
 
@@ -60,7 +60,7 @@ def test_lector_albaran_prefijo_puntos_y_portes(fixtures):
 def test_lector_factura(fixtures):
     doc = leer(fixtures / DOCS / "factura_vega_agrupa.pdf")
     assert doc.tipo == TipoDocumento.FACTURA and doc.numero == "F26/000731"
-    assert doc.albaranes_referenciados == ["AC B26 0100005283", "AC B26 0100005301"]
+    assert doc.albaranes_referenciados == ["AC B26 0100008881", "AC B26 0100005301"]
     assert doc.lineas[3].albaran == "AC B26 0100005301" and doc.lineas[4].es_portes
 
 

@@ -9,7 +9,15 @@ from pathlib import Path
 
 from idm.equivalencias.proveedores import normalizar_nombre
 
-RUTA_MAPA_POR_DEFECTO = Path(__file__).with_name("mapa_productos.csv")
+# Versionado solo un EJEMPLO con códigos inventados; el mapa real (códigos internos de Siddex) vive en datos/.
+RUTA_MAPA_POR_DEFECTO = Path(__file__).with_name("mapa_productos.ejemplo.csv")
+NOMBRE_MAPA_REAL = "mapa_productos.csv"
+
+
+def ruta_mapa(ruta_datos: Path) -> Path:
+    """datos/mapa_productos.csv si existe; si no, el ejemplo (y las tareas lo avisan)."""
+    real = Path(ruta_datos) / NOMBRE_MAPA_REAL
+    return real if real.exists() else RUTA_MAPA_POR_DEFECTO
 
 
 @dataclass(frozen=True)

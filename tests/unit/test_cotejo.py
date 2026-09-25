@@ -24,8 +24,8 @@ def test_interpretar_albaran_resuelve_proveedor_numero_y_codigos(fixtures):
     r = interpretar_albaran(leer(fixtures / DOCS / "albaran_vega_bruto_descuento.pdf"), tabla, g.proveedores())
     a = r.albaran
     assert a.proveedor == "FICT_VEGA" and r.proveedor_metodo == "cif"
-    assert a.numero_original == "AC B26 0100005283" and a.numero == "B26 0100005283"
-    assert [li.codigo_idm for li in a.lineas] == ["134.000.842", "I33.000.786", "I37.000.012"]
+    assert a.numero_original == "AC B26 0100008881" and a.numero == "B26 0100008881"
+    assert [li.codigo_idm for li in a.lineas] == ["900.000.842", "Z33.000.786", "I37.000.012"]
     assert all(li.metodo_resolucion == "equivalencia" for li in a.lineas)
     assert [e.tipo for e in r.eventos][:2] == ["proveedor.resuelto", "articulo.resuelto"]
     assert r.avisos == []
@@ -44,10 +44,10 @@ def test_buscar_pedido_por_numero_y_por_lineas(fixtures):
     g, tabla = _entorno(fixtures)
     a = interpretar_albaran(leer(fixtures / DOCS / "albaran_vega_bruto_descuento.pdf"), tabla, g.proveedores()).albaran
     pedido, metodo = buscar_pedido(a, g)
-    assert pedido.numero == "20261060" and metodo == "nuestro_pedido"
+    assert pedido.numero == "20269060" and metodo == "nuestro_pedido"
     a.nuestro_pedido = None
     pedido, metodo = buscar_pedido(a, g)
-    assert pedido.numero == "20261060" and metodo == "pedido_abierto"
+    assert pedido.numero == "20269060" and metodo == "pedido_abierto"
     a.nuestro_pedido = "999999"
     assert buscar_pedido(a, g)[1] == "pedido_abierto"  # el número no existe: se busca por líneas
     a.lineas = []
@@ -68,9 +68,9 @@ def test_cotejar_documento_sin_pedido_propone(fixtures):
     assert r.pedido is None and r.metodo_pedido == "ninguno"
     assert r.cotejo.relacion == RelacionPedido.SIN_PEDIDO
     pp = r.pedido_propuesto
-    assert pp.relacion == RelacionPedido.PEDIDO_PROPUESTO and pp.numero == "PP-5526/2063"
-    assert [li.codigo_idm for li in pp.lineas] == ["MO01001", "FL-2240"]  # el no resuelto lleva la ref. del proveedor
-    assert pp.lineas[0].descripcion == "SERVICIO TURISMO (CONTRATOS)"
+    assert pp.relacion == RelacionPedido.PEDIDO_PROPUESTO and pp.numero == "PP-4410/3172"
+    assert [li.codigo_idm for li in pp.lineas] == ["SV09001", "FL-2240"]  # el no resuelto lleva la ref. del proveedor
+    assert pp.lineas[0].descripcion == "SERVICIO FICTICIO (CONTRATOS)"
     assert r.eventos[-1].tipo == "pedido.propuesto"
 
 
@@ -92,5 +92,5 @@ def test_interpretar_factura(fixtures):
     r = interpretar_factura(leer(fixtures / DOCS / "factura_vega_agrupa.pdf"), g.proveedores())
     f = r.factura
     assert f.proveedor == "FICT_VEGA" and f.numero == "F26/000731"
-    assert f.albaranes == ["AC B26 0100005283", "AC B26 0100005301"]
+    assert f.albaranes == ["AC B26 0100008881", "AC B26 0100005301"]
     assert len(f.lineas) == 5 and f.lineas[4].es_portes and f.base == Decimal("140.34")

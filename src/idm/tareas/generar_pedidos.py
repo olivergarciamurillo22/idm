@@ -114,7 +114,9 @@ def main(argv: list[str] | None = None) -> int:
         )
     else:
         correo = enviar.CorreoSimulado(cfg.ruta_salida / "correo", cfg.smtp_remitente or "pedidos@simulado.local")
-    for linea in ejecutar(cfg, gateway, repositorio, correo, args.hoja, almacen=almacen):
+    for linea in ejecutar(
+        cfg, gateway, repositorio, correo, args.hoja, almacen=almacen, mapa=mapa_mod.ruta_mapa(cfg.ruta_datos)
+    ):
         print(linea)
     return 0
 

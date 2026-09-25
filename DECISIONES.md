@@ -199,7 +199,7 @@ foto. Dos reparaciones deterministas se permiten porque la aritmética las confi
 cantidad × precio × dto lo da) y tipo ALBARAN si el número tiene la forma de albarán del proveedor.
 
 ## 2026-09-24 · Anotación manuscrita = últimos 4 dígitos del Nº Registro de Siddex (evidencia documental)
-Las fotos muestran "2921" escrito en el albarán que Siddex registró como 20262921. No lo ha confirmado Fernando en
+Las fotos muestran "9921" escrito en el albarán que Siddex registró como 20269921. No lo ha confirmado Fernando en
 palabras, pero la evidencia es directa. El programa devuelve ese número al aprobar (ya estaba) y no intenta leerlo del papel.
 
 ## 2026-09-24 · Cloud como motor principal, Tesseract congelado como respaldo y baseline
@@ -262,3 +262,13 @@ de IDM: `estimar_costes --documentos-mes N`. Cada llamada real guarda su coste e
 - **Límite de tamaño por proveedor**: la foto convertida supera los 4 MB del plan gratuito de Azure; la entrada se
   recomprime hasta el límite (`AZURE_DOCUMENT_INTELLIGENCE_MAX_BYTES`, Mistral 50 MB) sin bajar de 1.500 px y lo anota.
 - **Mistral con un parámetro opcional no admitido** (confianza por palabra, formato de tablas): un reintento sin él, anotado.
+
+## 2026-09-25 · Fixtures anonimizados: fuera los identificadores reales de la Fase 1
+Los documentos "ficticios" de la Fase 1 se construyeron con los ejemplos del contexto maestro y las fotos confirmaron
+que eran reales (nº de albarán, pedido, registro, códigos de artículo, referencias de proveedor, códigos de proveedor
+en Siddex). Se sustituyen por valores inventados con la misma forma en fixtures, tests y documentación; el mapa de
+productos versionado pasa a ser un ejemplo con códigos inventados (`necesidades/mapa_productos.ejemplo.csv`) y el real
+va a `datos/mapa_productos.csv`, que las tareas usan si existe. Los códigos de proveedor en Siddex solo viven en
+`datos/proveedores_conocidos.csv`. `tests/unit/test_sin_identificadores_reales.py` guarda solo huellas SHA-256 y falla
+si alguno vuelve. **El historial de git sigue conteniéndolos** (commits desde la Fase 1): borrarlos exige reescribir el
+historial y `push --force`, que solo se hará si Oliver lo decide.

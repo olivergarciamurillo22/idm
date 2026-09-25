@@ -29,8 +29,8 @@ class ProveedorConocido:
 # Reales (códigos y CIF se rellenan desde el Maestro de Proveedores; los nombres vienen del AS-IS).
 # Ficticios (FICT_*) solo para fixtures y tests.
 CONOCIDOS: tuple[ProveedorConocido, ...] = (
-    ProveedorConocido("LA_CEPA", "Recambios La Cepa", codigo_siddex="1411", patrones_nombre=(r"LA CEPA",)),
-    ProveedorConocido("RECACOR", "RECACOR", codigo_siddex="864", patrones_nombre=(r"RECACOR",)),
+    ProveedorConocido("LA_CEPA", "Recambios La Cepa", patrones_nombre=(r"LA CEPA",)),
+    ProveedorConocido("RECACOR", "RECACOR", patrones_nombre=(r"RECACOR",)),
     ProveedorConocido("CRUZ", "Complementos y Suministros Cruz", patrones_nombre=(r"SUMINISTROS CRUZ",)),
     ProveedorConocido("MEYRAS", "Grupo Electro Meyras", patrones_nombre=(r"MEYRAS",)),
     ProveedorConocido("BONDIOLI", "Bondioli", patrones_nombre=(r"BONDIOLI",)),

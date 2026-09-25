@@ -16,7 +16,7 @@ from idm.dominio.modelos import Pedido, Proveedor
 
 
 def nombre_seguro(texto: str) -> str:
-    """Quita lo que Windows no admite en un nombre de fichero (PP-5526/2063 → PP-5526-2063)."""
+    """Quita lo que Windows no admite en un nombre de fichero (PP-4410/3172 → PP-5526-2063)."""
     return re.sub(r'[\\/:*?"<>|]+', "-", texto).strip("-")
 
 

@@ -2,11 +2,11 @@
   "tipo": "ALBARAN",
   "proveedor_texto": "SUMINISTROS FICTICIOS LA VEGA S.L.",
   "cif": "B00000001",
-  "numero": "AC B26 0100005283",
+  "numero": "AC B26 0100008881",
   "fecha": "2026-09-14",
-  "nuestro_pedido": "20261060",
+  "nuestro_pedido": "20269060",
   "lineas": [
-    {"codigo_proveedor": "PVCC550942", "descripcion": "TERMINAL FASTON H 9,4 AMARILLO", "cantidad": "100", "unidad": "UD", "precio_bruto": "0.30", "descuento_pct": "45", "importe": "16.50"},
+    {"codigo_proveedor": "FXT9550942", "descripcion": "TERMINAL FASTON H 9,4 AMARILLO", "cantidad": "100", "unidad": "UD", "precio_bruto": "0.30", "descuento_pct": "45", "importe": "16.50"},
     {"codigo_proveedor": "ABR-6205", "descripcion": "RODAMIENTO 6205 2RS", "cantidad": "5", "unidad": "UD", "precio_bruto": "9.14", "descuento_pct": "45", "importe": "25.14"},
     {"codigo_proveedor": "MNG-12", "descripcion": "MANGUERA HIDRAULICA 1/2", "cantidad": "5", "unidad": "M", "precio_bruto": "6.40", "descuento_pct": "0", "importe": "32.00"}
   ],

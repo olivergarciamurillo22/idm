@@ -1,15 +1,15 @@
 # RECACOR
 
 - **Clave en el programa:** `RECACOR`
-- **Código en Siddex (PROVEEDR):** 864
+- **Código en Siddex (PROVEEDR):** en `datos/proveedores_conocidos.csv` (fuera de git)
 - **CIF:** PENDIENTE (Maestro de Proveedores)
 - **Correo de pedidos:** PENDIENTE (Maestro de Proveedores)
 
 ## Número de albarán
-Imprime `5526/2.063`; en Siddex va `5526/2063` (se quitan los puntos).
+Imprime `4410/3.172`; en Siddex va `4410/3172` (se quitan los puntos).
 
 ## Precio y descuento en el albarán
-No: el albarán llega sin precio; se completa con la factura (PENDIENTE_FACTURA). Código alternativo MO01001 ↔ SERVICIO TURISMO (CONTRATOS).
+No: el albarán llega sin precio; se completa con la factura (PENDIENTE_FACTURA). Código alternativo SV09001 ↔ SERVICIO FICTICIO (CONTRATOS).
 
 ## Portes
 No aparecen en el albarán (tabla de totales vacía). Pactados: PENDIENTE.

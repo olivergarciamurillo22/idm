@@ -1,6 +1,6 @@
 {
   "proveedor": "FICT_VEGA", "numero_original": "AC B26 0100005291", "numero": "B26 0100005291",
-  "fecha": "2026-09-17", "nuestro_pedido": "20261070",
+  "fecha": "2026-09-17", "nuestro_pedido": "20269070",
   "_total_impreso": "7.04",
   "lineas": [
     {"codigo_proveedor": "ARA-1", "codigo_idm": "I99.000.001", "descripcion": "ARANDELA A", "cantidad": "7", "precio_bruto": "0.335", "descuento_pct": "0"},

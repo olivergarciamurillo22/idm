@@ -73,26 +73,26 @@ def test_portes_aparte_y_pactados():
 
 
 def test_completa_precios_pendientes_y_avisa_precio_cambiado():
-    a1 = _albaran("5526/2063", [_lin("MO01001", "1"), _lin("FL-2240", "2")])
+    a1 = _albaran("4410/3172", [_lin("SV09001", "1"), _lin("FL-2240", "2")])
     a1.proveedor = "FICT_RECAMBIOS"
-    a1.lineas[0].codigo_idm = "MO01001"
+    a1.lineas[0].codigo_idm = "SV09001"
     f = Factura(
         proveedor="FICT_RECAMBIOS",
         numero="F2",
-        albaranes=["5526/2.063"],
+        albaranes=["4410/3.172"],
         base=Decimal("70.00"),
-        lineas=[_lf("5526/2.063", "MO01001", "1", "50"), _lf("5526/2.063", "FL-2240", "2", "10")],
+        lineas=[_lf("4410/3.172", "SV09001", "1", "50"), _lf("4410/3.172", "FL-2240", "2", "10")],
     )
-    articulos = {"MO01001": Articulo(codigo="MO01001", precio_compra=Decimal("45"))}
+    articulos = {"SV09001": Articulo(codigo="SV09001", precio_compra=Decimal("45"))}
     r = cotejar_factura(f, [a1], articulos)
     assert [(p.codigo_proveedor, p.precio_bruto) for p in r.precios_completados] == [
-        ("MO01001", Decimal("50")),
+        ("SV09001", Decimal("50")),
         ("FL-2240", Decimal("10")),
     ]
     assert r.total_albaranes == Decimal("70.00")
     assert [a.tipo for a in r.avisos] == [TipoAviso.PRECIO_CAMBIADO]
     assert r.precios_cambiados[0].precio_maestro == Decimal("45")
-    assert articulos["MO01001"].precio_compra == Decimal("45")  # no se toca el maestro
+    assert articulos["SV09001"].precio_compra == Decimal("45")  # no se toca el maestro
 
 
 def test_albaran_no_recibido_y_precio_distinto():

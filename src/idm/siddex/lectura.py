@@ -70,7 +70,7 @@ def nivel_desde_texto(texto: str) -> int | None:
 
 
 def normalizar_codigo(codigo: str) -> str:
-    """'i33.000.786' y 'I33.000.786' son el mismo artículo."""
+    """'z33.000.786' y 'Z33.000.786' son el mismo artículo."""
     return str(codigo).strip().upper()
 
 

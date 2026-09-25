@@ -43,7 +43,7 @@ def test_traza_albaran_con_pedido(fixtures, tmp_path):
     assert t.sha256 == d.sha256 and t.fichero.endswith("albaran_electro_puntos_prefijo.pdf") and t.origen == "carpeta"
     assert t.resultado_lectura == "PDF_TEXTO" and t.tipo == TipoDocumento.ALBARAN
     assert t.proveedor == "FICT_ELECTRO" and t.proveedor_metodo == "cif"
-    assert t.campos_extraidos["numero"] == "ALB. 2026/1.234" and t.campos_extraidos["nuestro_pedido"] == "20261061"
+    assert t.campos_extraidos["numero"] == "ALB. 2026/1.234" and t.campos_extraidos["nuestro_pedido"] == "20269061"
     assert t.normalizaciones == ["número: 'ALB. 2026/1.234' → '2026/1234'"]
     assert [(a.linea, a.codigo_idm, a.metodo) for a in t.articulos] == [
         (0, None, "no_resuelto"),
@@ -51,7 +51,7 @@ def test_traza_albaran_con_pedido(fixtures, tmp_path):
         (2, None, "no_resuelto"),
         (3, None, None),
     ]
-    assert t.pedido == "20261061" and t.pedido_metodo == "nuestro_pedido" and t.pedido_propuesto is None
+    assert t.pedido == "20269061" and t.pedido_metodo == "nuestro_pedido" and t.pedido_propuesto is None
     reglas = {(r.linea, r.regla): r.resultado for r in t.reglas}
     assert reglas[(0, "ARTICULO_EN_PEDIDO")] == "AVISO"
     assert reglas[(1, "ARTICULO_EN_PEDIDO")] == "OK" and reglas[(1, "PRECIO_BRUTO")] == "OK"
@@ -71,12 +71,12 @@ def test_traza_sin_precio_y_factura(fixtures, tmp_path):
         ["albaran_recambios_sin_precio.pdf", "albaran_vega_bruto_descuento.pdf", "factura_vega_agrupa.pdf"],
     )
     t = docs["albaran_recambios_sin_precio.pdf"].traza
-    assert t.pedido is None and t.pedido_metodo == "ninguno" and t.pedido_propuesto == "PP-5526/2063"
+    assert t.pedido is None and t.pedido_metodo == "ninguno" and t.pedido_propuesto == "PP-4410/3172"
     assert {r.regla for r in t.reglas} == {"ARTICULO_EN_PEDIDO"}
     tf = docs["factura_vega_agrupa.pdf"].traza
     assert tf.tipo == TipoDocumento.FACTURA and tf.factura == "F26/000731"
-    assert tf.albaranes_relacionados == ["B26 0100005283"] and tf.albaranes_no_encontrados == ["B26 0100005301"]
-    assert "albarán referenciado 'AC B26 0100005283' → 'B26 0100005283'" in tf.normalizaciones
+    assert tf.albaranes_relacionados == ["B26 0100008881"] and tf.albaranes_no_encontrados == ["B26 0100005301"]
+    assert "albarán referenciado 'AC B26 0100008881' → 'B26 0100008881'" in tf.normalizaciones
     reglas = {r.regla: r.resultado for r in tf.reglas}
     assert reglas["ALBARANES_RECIBIDOS"] == "AVISO" and reglas["PORTES_PACTADOS"] == "AVISO"
     # El rodamiento a 9,40 va en el albarán 5301, que no está recibido: no se compara con el maestro (queda en el aviso

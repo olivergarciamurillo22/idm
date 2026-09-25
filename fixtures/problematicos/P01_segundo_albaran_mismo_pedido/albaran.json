@@ -1,7 +1,7 @@
 {
   "proveedor": "FICT_VEGA", "numero_original": "AC B26 0100005290", "numero": "B26 0100005290",
-  "fecha": "2026-09-16", "nuestro_pedido": "20261060",
+  "fecha": "2026-09-16", "nuestro_pedido": "20269060",
   "lineas": [
-    {"codigo_proveedor": "ABR-6205", "codigo_idm": "I33.000.786", "descripcion": "RODAMIENTO 6205 2RS", "cantidad": "3", "precio_bruto": "9.14", "descuento_pct": "45"}
+    {"codigo_proveedor": "ABR-6205", "codigo_idm": "Z33.000.786", "descripcion": "RODAMIENTO 6205 2RS", "cantidad": "3", "precio_bruto": "9.14", "descuento_pct": "45"}
   ]
 }

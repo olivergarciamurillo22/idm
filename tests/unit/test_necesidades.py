@@ -35,14 +35,14 @@ def test_variante_desde_tokens():
     assert mapa_mod.variante_desde_tokens(["CON", "ESCALON"]) == "base"
 
 
-def test_resolver_mapa_real_a4r():
+def test_resolver_mapa_ejemplo_a4r():
     mapa = mapa_mod.cargar_mapa()
-    assert mapa_mod.resolver("A4R-2000-820", mapa).codigo == "I91.115.000"
-    assert mapa_mod.resolver("A4R 2250 CON ESCALÓN", mapa).codigo == "I91.115.000"
+    assert mapa_mod.resolver("A4R-2000-820", mapa).codigo == "X91.100.000"
+    assert mapa_mod.resolver("A4R 2250 CON ESCALÓN", mapa).codigo == "X91.100.000"
     r = mapa_mod.resolver("A4R L 2250", mapa)
     assert r.variante == "L" and r.codigo is None and r.metodo == "sin_codigo"
     assert mapa_mod.resolver("A4R ED", mapa).variante == "E"
-    assert mapa_mod.resolver("FUMIMATIC RUEDAS AGRICOLAS", mapa).codigo == "I91.640.000"
+    assert mapa_mod.resolver("FUMIMATIC RUEDAS AGRICOLAS", mapa).codigo == "X91.600.000"
     assert mapa_mod.resolver("COSA RARA", mapa).metodo == "no_mapeado"
 
 

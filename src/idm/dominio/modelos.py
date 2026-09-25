@@ -21,7 +21,7 @@ from idm.dominio.estados import (
 
 
 def _normalizar_codigo(codigo: str | None) -> str | None:
-    """Códigos de artículo: sin espacios alrededor y en mayúsculas ('i33.000.786' → 'I33.000.786')."""
+    """Códigos de artículo: sin espacios alrededor y en mayúsculas ('z33.000.786' → 'Z33.000.786')."""
     if codigo is None:
         return None
     limpio = codigo.strip().upper()

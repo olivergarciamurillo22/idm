@@ -1,8 +1,8 @@
 {
   "lectura": {
-    "tipo": "ALBARAN", "cif": "A00000002", "numero": "5526/2.063", "fecha": "2026-09-15", "nuestro_pedido": null,
+    "tipo": "ALBARAN", "cif": "A00000002", "numero": "4410/3.172", "fecha": "2026-09-15", "nuestro_pedido": null,
     "lineas": [
-      {"codigo_proveedor": "MO01001", "cantidad": "1", "precio_bruto": null},
+      {"codigo_proveedor": "SV09001", "cantidad": "1", "precio_bruto": null},
       {"codigo_proveedor": "FL-2240", "cantidad": "2", "precio_bruto": null}
     ]
   },

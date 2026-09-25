@@ -109,7 +109,7 @@
     {% if d.estado not in ("APROBADO", "RECHAZADO") %}
     <h3>Decisión</h3>
     <form method="post" action="/documentos/{{ d.id }}/aprobar">
-      <label>Nº registro Siddex (para anotarlo en el papel) <input name="numero_registro_siddex" placeholder="20262921"></label>
+      <label>Nº registro Siddex (para anotarlo en el papel) <input name="numero_registro_siddex" placeholder="20269921"></label>
       <label>Quién <input name="quien" placeholder="Fernando"></label>
       <label>Notas <input name="notas"></label>
       <button type="submit">Aprobar</button>

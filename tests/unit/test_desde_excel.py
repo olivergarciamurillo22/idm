@@ -20,15 +20,15 @@ def test_articulos(fixtures):
     arts = SiddexDesdeExcel(fixtures / "siddex").articulos()
     assert arts["T30.000.100"].multiplo_compra == Decimal("100")
     assert arts["T30.000.100"].proveedor_habitual == "FICT_ELECTRO"
-    assert arts["MO01001"].precio_compra is None
+    assert arts["SV09001"].precio_compra is None
 
 
 def test_equivalencias_y_resolucion(fixtures):
     tabla = TablaEquivalencias.desde(SiddexDesdeExcel(fixtures / "siddex").equivalencias())
-    assert tabla.resolver("FICT_VEGA", "PVCC550942").codigo_idm == "134.000.842"
-    assert tabla.resolver("FICT_VEGA", "pvcc 550942").metodo == "equivalencia_normalizada"
+    assert tabla.resolver("FICT_VEGA", "FXT9550942").codigo_idm == "900.000.842"
+    assert tabla.resolver("FICT_VEGA", "fxt9 550942").metodo == "equivalencia_normalizada"
     assert tabla.resolver("FICT_VEGA", "NOEXISTE").metodo == "no_resuelto"
-    assert tabla.resolver("FICT_ELECTRO", "PVCC550942").metodo == "no_resuelto"  # otro proveedor
+    assert tabla.resolver("FICT_ELECTRO", "FXT9550942").metodo == "no_resuelto"  # otro proveedor
 
 
 def test_aprender(fixtures, tmp_path):
@@ -41,11 +41,11 @@ def test_aprender(fixtures, tmp_path):
 def test_pedidos_abiertos_y_pendiente(fixtures):
     g = SiddexDesdeExcel(fixtures / "siddex")
     abiertos = {p.numero for p in g.pedidos_abiertos()}
-    assert abiertos == {"20261060", "20261061"}  # el 20261055 está recibido entero
-    assert [p.numero for p in g.pedidos_abiertos("FICT_VEGA")] == ["20261060"]
-    p = g.pedido("20261060")
+    assert abiertos == {"20269060", "20269061"}  # el 20269055 está recibido entero
+    assert [p.numero for p in g.pedidos_abiertos("FICT_VEGA")] == ["20269060"]
+    p = g.pedido("20269060")
     assert p.proveedor == "FICT_VEGA" and len(p.lineas) == 3
-    assert p.lineas[0].codigo_proveedor == "PVCC550942"
+    assert p.lineas[0].codigo_proveedor == "FXT9550942"
     assert g.pendiente_recibir()["T30.000.100"] == Decimal("100")
     assert g.stock()["T30.000.100"] == Decimal("500")
 

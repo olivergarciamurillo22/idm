@@ -1,0 +1,7 @@
+nombre_planning;codigo_siddex;variante;notas
+A4R-2000-820;X91.100.000;base;EJEMPLO con código inventado. El mapa real (códigos de Siddex) va en datos/mapa_productos.csv
+A4R;X91.100.000;base;cualquier A4R sin L ni E se compra igual que la base (alto/ancho solo cambian hierro, láser y torno)
+A4R L;;L;ruedas lisas. PENDIENTE: código del escandallo A4R con ruedas lisas (Fernandillo)
+A4R E;;E;dirección eléctrica. PENDIENTE: código del escandallo A4R-E (Fernandillo)
+A4R LE;;LE;ruedas lisas + dirección eléctrica. PENDIENTE: código (Fernandillo)
+FUMIMATIC RUEDAS AGRÍCOLAS;X91.600.000;base;EJEMPLO con código inventado

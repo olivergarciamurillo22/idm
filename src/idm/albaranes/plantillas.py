@@ -26,7 +26,7 @@ ETIQUETA_NUMERO = (
 @dataclass(frozen=True)
 class Plantilla:
     clave: str
-    # 1) Etiqueta y valor en la misma línea: "ALBARÁN Nº: AC B26 0100005283"
+    # 1) Etiqueta y valor en la misma línea: "ALBARÁN Nº: AC B26 0100008881"
     numero: tuple[str, ...] = (
         r"(?:ALBAR[AÁ]N|FACTURA|ALBARAN)\s*(?:N[ºo°.]*|NUM\.?|N[ÚU]MERO)?\s*:?\s*"
         r"(?P<numero>[A-Z0-9][A-Z0-9 ./\-]{2,}?)\s*$",
@@ -118,7 +118,7 @@ LAYOUT_B = Plantilla(
     ),
 )
 
-# Layout C: tabla "Fecha | Nº Albaranes Salida | SU DOC. | Nº PÁGINA" con valores debajo, número "5526/2.063";
+# Layout C: tabla "Fecha | Nº Albaranes Salida | SU DOC. | Nº PÁGINA" con valores debajo, número "4410/3.172";
 # columnas CÓDIGO | CONCEPTO | UDS. | PRECIO U. | DTO | PRECIO TOTAL, a menudo SIN precio.
 LAYOUT_C = Plantilla(
     "LAYOUT_C",
